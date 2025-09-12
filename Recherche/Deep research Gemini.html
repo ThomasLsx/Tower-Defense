@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide de Projet - Tower Defense C++/SFML</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: J'ai conçu cette page comme un tableau de bord de projet à défilement vertical. La structure est thématique et suit le cycle de vie du développement : Accueil (vue d'ensemble), Fondations (installation), Architecture (conception POO), Algorithme Clé (pathfinding), Ressources et Plan de travail. Cette approche non-linéaire, guidée par une barre de navigation fixe, permet aux étudiants de consulter facilement la section dont ils ont besoin à tout moment, ce qui est plus utilisable qu'une simple retranscription du PDF. L'interactivité se concentre sur la clarification d'informations complexes (diagramme de classes cliquable) et la visualisation de données clés (graphique de notation). -->
+    <!-- Visualization & Content Choices: 
+    - Notation du projet -> Objectif: Comparer -> Graphique en Donut (Chart.js) -> Interaction: Tooltip au survol -> Justification: Visualise clairement la pondération de chaque partie du projet.
+    - Échéances -> Objectif: Informer -> Ligne de temps (HTML/CSS Flexbox) -> Interaction: Aucune -> Justification: Présente les dates clés de manière simple et chronologique.
+    - Architecture POO -> Objectif: Organiser -> Diagramme de classes (HTML/CSS) -> Interaction: Clic pour afficher les détails -> Justification: Explique la structure du code de manière interactive sans utiliser de SVG, ce qui est une contrainte.
+    - Comparaison d'algos -> Objectif: Comparer -> Tableau (HTML) -> Interaction: Aucune -> Justification: Moyen le plus direct et clair pour comparer les caractéristiques de Dijkstra et A*.
+    - Ressources externes -> Objectif: Organiser -> Cartes (HTML/CSS Grid) -> Interaction: Liens cliquables -> Justification: Présentation visuellement plus agréable et organisée qu'une simple liste de liens.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #333;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        .class-box {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .class-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .class-details {
+            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .class-details.open {
+            display: block;
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF8] text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-orange-600">TD Guide</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#accueil" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Accueil</a>
+                        <a href="#fondations" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Fondations</a>
+                        <a href="#architecture" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Architecture</a>
+                        <a href="#pathfinding" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Pathfinding</a>
+                        <a href="#ressources" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Ressources</a>
+                        <a href="#plan" class="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Plan de travail</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <section id="accueil" class="pt-16 -mt-16 mb-24">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">Projet Tower Defense en C++/SFML</h1>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Votre feuille de route interactive pour réussir votre projet, de l'installation à la soutenance.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                 <p class="mb-8 text-gray-700 text-center">Cette page a pour but de synthétiser les exigences de votre projet et de vous fournir une structure et des ressources pour aborder le développement de manière sereine et organisée. Vous y trouverez un résumé des objectifs, une proposition d'architecture, des explications sur les points techniques clés et une sélection de tutoriels pour vous accompagner.</p>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Critères d'Évaluation</h3>
+                        <p class="mb-6 text-gray-600">La note finale est répartie comme suit. Une bonne gestion de projet et un code de qualité sont aussi importants que la soutenance.</p>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-center"><span class="h-3 w-3 rounded-full bg-blue-500 mr-3"></span>Qualité du projet (Code, idées, efficacité): 50%</li>
+                            <li class="flex items-center"><span class="h-3 w-3 rounded-full bg-orange-500 mr-3"></span>Soutenance et présentation: 25%</li>
+                            <li class="flex items-center"><span class="h-3 w-3 rounded-full bg-teal-500 mr-3"></span>Rapports bi-hebdomadaires et final: 25%</li>
+                        </ul>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="notationChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-16">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Échéances Clés</h3>
+                    <div class="flex flex-col md:flex-row justify-between items-center text-center text-sm text-gray-600 space-y-4 md:space-y-0">
+                        <div class="flex-1">
+                            <div class="bg-orange-100 text-orange-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2"><i data-lucide="play-circle"></i></div>
+                            <p class="font-semibold">Début du projet</p>
+                            <p>Maintenant</p>
+                        </div>
+                        <div class="flex-1 h-px md:h-auto md:w-full bg-gray-300"></div>
+                        <div class="flex-1">
+                            <div class="bg-blue-100 text-blue-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2"><i data-lucide="file-clock"></i></div>
+                            <p class="font-semibold">Rapports</p>
+                            <p>Toutes les 2 semaines</p>
+                        </div>
+                         <div class="flex-1 h-px md:h-auto md:w-full bg-gray-300"></div>
+                        <div class="flex-1">
+                             <div class="bg-teal-100 text-teal-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2"><i data-lucide="file-text"></i></div>
+                            <p class="font-semibold">Rapport Final</p>
+                            <p>15 Décembre</p>
+                        </div>
+                        <div class="flex-1 h-px md:h-auto md:w-full bg-gray-300"></div>
+                        <div class="flex-1">
+                            <div class="bg-red-100 text-red-800 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2"><i data-lucide="flag"></i></div>
+                            <p class="font-semibold">Soutenance</p>
+                            <p>16 Décembre</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fondations" class="pt-20 -mt-16 mb-24">
+            <h2 class="text-3xl font-bold text-center mb-2">Les Fondations</h2>
+            <p class="text-lg text-gray-600 text-center mb-12">Installation et concepts de base de SFML.</p>
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <p class="mb-8 text-gray-700">Avant de coder la logique du jeu, il est crucial de mettre en place un environnement de développement fonctionnel. Cette section vous guide pour installer SFML et comprendre le concept fondamental de la boucle de jeu, qui est le cœur de toute application interactive.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="border border-gray-200 p-6 rounded-lg">
+                        <div class="bg-orange-100 text-orange-800 rounded-full w-12 h-12 flex items-center justify-center mb-4"><i data-lucide="download"></i></div>
+                        <h3 class="font-bold text-lg mb-2">1. Installer SFML</h3>
+                        <p class="text-sm text-gray-600">Téléchargez la bonne version de SFML pour votre compilateur (ex: MinGW pour Code::Blocks, MSVC pour Visual Studio) et décompressez-la dans un dossier accessible.</p>
+                    </div>
+                    <div class="border border-gray-200 p-6 rounded-lg">
+                        <div class="bg-blue-100 text-blue-800 rounded-full w-12 h-12 flex items-center justify-center mb-4"><i data-lucide="settings"></i></div>
+                        <h3 class="font-bold text-lg mb-2">2. Configurer le Projet</h3>
+                        <p class="text-sm text-gray-600">Configurez les chemins d'accès aux fichiers d'en-tête (`include`) et aux bibliothèques (`lib`) de SFML dans les options de votre projet. Liez les bibliothèques nécessaires (graphics, window, system).</p>
+                    </div>
+                    <div class="border border-gray-200 p-6 rounded-lg md:col-span-2 lg:col-span-1">
+                        <div class="bg-teal-100 text-teal-800 rounded-full w-12 h-12 flex items-center justify-center mb-4"><i data-lucide="repeat"></i></div>
+                        <h3 class="font-bold text-lg mb-2">3. La Boucle de Jeu</h3>
+                        <p class="text-sm text-gray-600">Le cœur de votre application. C'est une boucle `while` qui s'exécute tant que la fenêtre est ouverte et qui gère les événements, met à jour la logique et affiche les graphismes à chaque tour.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" class="pt-20 -mt-16 mb-24">
+             <h2 class="text-3xl font-bold text-center mb-2">Architecture du Jeu</h2>
+            <p class="text-lg text-gray-600 text-center mb-12">Conception Orientée Objet (POO).</p>
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <p class="mb-8 text-gray-700">Une bonne architecture est la clé d'un projet maintenable et évolutif. Penser en termes d'objets (classes) avec des responsabilités claires simplifiera grandement le développement. Voici une proposition de structure de classes de base. Cliquez sur chaque classe pour voir ses responsabilités et attributs potentiels.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="col-span-1 md:col-start-2">
+                        <div id="class-Jeu" class="class-box bg-orange-100 border-2 border-orange-300 p-4 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-orange-800">Jeu</h4>
+                            <div class="class-details p-4 mt-2 bg-orange-50 rounded-md text-left text-sm">
+                                <strong class="text-orange-900">Responsabilités :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>Classe principale, gère la boucle de jeu.</li>
+                                    <li>Contient la fenêtre, la carte, les tours, les ennemis.</li>
+                                    <li>Gère l'état du jeu (en cours, gagné, perdu).</li>
+                                </ul>
+                                <strong class="text-orange-900 mt-2 block">Attributs :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>sf::RenderWindow window</li>
+                                    <li>Carte maCarte</li>
+                                    <li>std::vector&lt;Tour&gt; tours</li>
+                                    <li>std::vector&lt;Ennemi&gt; ennemis</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-start-1">
+                        <div id="class-Carte" class="class-box bg-blue-100 border-2 border-blue-300 p-4 rounded-lg shadow-sm">
+                             <h4 class="font-bold text-blue-800">Carte</h4>
+                            <div class="class-details p-4 mt-2 bg-blue-50 rounded-md text-left text-sm">
+                                <strong class="text-blue-900">Responsabilités :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>Charge et représente la carte du jeu (grille).</li>
+                                    <li>Définit les zones constructibles et le chemin.</li>
+                                    <li>Fournit les données pour le pathfinding.</li>
+                                </ul>
+                                <strong class="text-blue-900 mt-2 block">Attributs :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>std::vector&lt;std::vector&lt;int&gt;&gt; grille</li>
+                                    <li>sf::Vector2i pointDepart</li>
+                                    <li>sf::Vector2i pointArrivee</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-start-2">
+                        <div id="class-Entite" class="class-box bg-gray-100 border-2 border-gray-300 p-4 rounded-lg shadow-sm">
+                             <h4 class="font-bold text-gray-800">Entité (Abstraite)</h4>
+                            <div class="class-details p-4 mt-2 bg-gray-50 rounded-md text-left text-sm">
+                                <strong class="text-gray-900">Responsabilités :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>Classe de base pour tous les objets du jeu.</li>
+                                    <li>Possède une position, un sprite.</li>
+                                    <li>Définit des méthodes virtuelles (update, draw).</li>
+                                </ul>
+                                <strong class="text-gray-900 mt-2 block">Attributs :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>sf::Vector2f position</li>
+                                    <li>sf::Sprite sprite</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-start-3">
+                        <div id="class-Projectile" class="class-box bg-red-100 border-2 border-red-300 p-4 rounded-lg shadow-sm">
+                             <h4 class="font-bold text-red-800">Projectile</h4>
+                            <div class="class-details p-4 mt-2 bg-red-50 rounded-md text-left text-sm">
+                                <strong class="text-red-900">Responsabilités :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>Créé par une tour, se déplace vers un ennemi.</li>
+                                    <li>Inflige des dégâts à l'impact.</li>
+                                    <li>Est détruit après avoir touché sa cible.</li>
+                                </ul>
+                                <strong class="text-red-900 mt-2 block">Attributs :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>int degats</li>
+                                    <li>float vitesse</li>
+                                    <li>Ennemi* cible</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-start-1">
+                        <div id="class-Tour" class="class-box bg-teal-100 border-2 border-teal-300 p-4 rounded-lg shadow-sm">
+                             <h4 class="font-bold text-teal-800">Tour (hérite d'Entité)</h4>
+                            <div class="class-details p-4 mt-2 bg-teal-50 rounded-md text-left text-sm">
+                                <strong class="text-teal-900">Responsabilités :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>Peut être construite par le joueur.</li>
+                                    <li>Détecte et tire sur les ennemis à portée.</li>
+                                    <li>A un coût, une portée, une cadence de tir.</li>
+                                </ul>
+                                <strong class="text-teal-900 mt-2 block">Attributs :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>int cout</li>
+                                    <li>float portee</li>
+                                    <li>float cadenceDeTir</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-start-3">
+                        <div id="class-Ennemi" class="class-box bg-purple-100 border-2 border-purple-300 p-4 rounded-lg shadow-sm">
+                             <h4 class="font-bold text-purple-800">Ennemi (hérite d'Entité)</h4>
+                            <div class="class-details p-4 mt-2 bg-purple-50 rounded-md text-left text-sm">
+                                <strong class="text-purple-900">Responsabilités :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>Apparaît par vagues.</li>
+                                    <li>Suit le chemin défini par le pathfinding.</li>
+                                    <li>Possède des points de vie, une vitesse.</li>
+                                </ul>
+                                <strong class="text-purple-900 mt-2 block">Attributs :</strong>
+                                <ul class="list-disc list-inside text-gray-700 mt-1">
+                                    <li>int pointsDeVie</li>
+                                    <li>float vitesse</li>
+                                    <li>std::vector&lt;sf::Vector2i&gt; chemin</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pathfinding" class="pt-20 -mt-16 mb-24">
+            <h2 class="text-3xl font-bold text-center mb-2">L'Algorithme Clé : Le Pathfinding</h2>
+            <p class="text-lg text-gray-600 text-center mb-12">Comment les ennemis trouvent leur chemin.</p>
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <p class="mb-8 text-gray-700">Le cœur de l'IA de vos ennemis est leur capacité à trouver le chemin le plus court vers leur objectif. Cela se fait en modélisant votre carte comme un graphe (une grille de nœuds) et en utilisant un algorithme pour trouver le chemin optimal. Les deux algorithmes les plus courants pour cela sont Dijkstra et A* (A star).</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 rounded-l-lg">Critère</th>
+                                <th scope="col" class="px-6 py-3">Algorithme de Dijkstra</th>
+                                <th scope="col" class="px-6 py-3 rounded-r-lg">Algorithme A* (A Star)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-white border-b">
+                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Principe</th>
+                                <td class="px-6 py-4">Explore tous les chemins possibles à partir du point de départ, en s'étendant uniformément dans toutes les directions.</td>
+                                <td class="px-6 py-4">Similaire à Dijkstra, mais utilise une "heuristique" pour estimer la distance restante et prioriser les chemins qui semblent les plus prometteurs.</td>
+                            </tr>
+                            <tr class="bg-white border-b">
+                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Performance</th>
+                                <td class="px-6 py-4">Garanti de trouver le chemin le plus court, mais peut être lent car il explore de nombreuses zones inutiles.</td>
+                                <td class="px-6 py-4">Généralement beaucoup plus rapide que Dijkstra car il explore de manière plus ciblée. Trouve aussi le chemin le plus court si l'heuristique est bien choisie.</td>
+                            </tr>
+                            <tr class="bg-white">
+                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">Recommandation</th>
+                                <td class="px-6 py-4">Bon pour commencer et comprendre les bases de la recherche de chemin.</td>
+                                <td class="px-6 py-4"><strong class="text-orange-600">Fortement recommandé pour ce projet.</strong> C'est la norme dans le développement de jeux pour sa performance.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="ressources" class="pt-20 -mt-16 mb-24">
+            <h2 class="text-3xl font-bold text-center mb-2">Ressources et Tutoriels</h2>
+            <p class="text-lg text-gray-600 text-center mb-12">Une sélection de liens pour vous aider à progresser.</p>
+            <div class="space-y-12">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 flex items-center"><i data-lucide="video" class="mr-3 text-orange-500"></i>Tutoriels Vidéo</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <a href="https://www.youtube.com/playlist?list=PL1v1Rwp_7pRzmjGqrvj7umNz84EKfKmi0" target="_blank" class="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all">
+                            <h4 class="font-bold text-gray-800">Série Tower Defense (SDL2)</h4>
+                            <p class="text-sm text-gray-600 mt-2">Une excellente série complète (en anglais) sur la création d'un Tower Defense. Même si elle utilise SDL2, les concepts de logique de jeu, de pathfinding et d'architecture sont 100% transposables à SFML.</p>
+                        </a>
+                        <a href="https://www.youtube.com/watch?v=W1qvb86YOK0" target="_blank" class="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all">
+                            <h4 class="font-bold text-gray-800">Visualisation d'Algorithmes de Pathfinding</h4>
+                            <p class="text-sm text-gray-600 mt-2">Une vidéo (en anglais) qui explique et visualise parfaitement le fonctionnement de Dijkstra et A* avec C++ et SFML. Indispensable pour comprendre comment implémenter l'algorithme.</p>
+                        </a>
+                         <a href="https://www.youtube.com/playlist?list=PLpfOedZZax4yHv0Q7ufAbpXtAMqZljMmq" target="_blank" class="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all">
+                            <h4 class="font-bold text-gray-800">Tutoriels SFML en Français</h4>
+                            <p class="text-sm text-gray-600 mt-2">Une playlist de tutoriels en français pour bien prendre en main les bases de la SFML (fenêtres, formes, sprites, événements, etc.).</p>
+                        </a>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="text-2xl font-bold mb-6 flex items-center"><i data-lucide="github" class="mr-3 text-orange-500"></i>Dépôts GitHub (pour inspiration)</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <a href="https://github.com/topics/tower-defense?l=c%2B%2B" target="_blank" class="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all">
+                            <h4 class="font-bold text-gray-800">Topic "tower-defense" C++</h4>
+                            <p class="text-sm text-gray-600 mt-2">Une liste de nombreux projets de Tower Defense en C++ sur GitHub. Utile pour observer différentes approches d'architecture et de fonctionnalités.</p>
+                        </a>
+                        <a href="https://github.com/kabizzle/Tower-Defense" target="_blank" class="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all">
+                            <h4 class="font-bold text-gray-800">Exemple de projet étudiant</h4>
+                            <p class="text-sm text-gray-600 mt-2">Un projet de Tower Defense C++/SFML bien structuré, réalisé dans le cadre d'un cours. Le code est clair et peut servir de bonne référence pour votre propre architecture.</p>
+                        </a>
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="text-2xl font-bold mb-6 flex items-center"><i data-lucide="book-open" class="mr-3 text-orange-500"></i>Documentation Essentielle</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                         <a href="https://www.sfml-dev.org/tutorials/2.6/" target="_blank" class="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all">
+                            <h4 class="font-bold text-gray-800">Documentation Officielle SFML</h4>
+                            <p class="text-sm text-gray-600 mt-2">La référence absolue. Les tutoriels officiels sont clairs et couvrent tous les modules de la bibliothèque. Gardez ce lien à portée de main.</p>
+                        </a>
+                         <a href="https://en.cppreference.com/w/" target="_blank" class="block bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-300 transition-all">
+                            <h4 class="font-bold text-gray-800">cppreference.com</h4>
+                            <p class="text-sm text-gray-600 mt-2">La meilleure référence pour le langage C++ et sa bibliothèque standard (STL). Indispensable pour vérifier la syntaxe ou le fonctionnement d'un conteneur comme `std::vector` ou `std::map`.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="plan" class="pt-20 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-2">Plan de Travail Suggéré</h2>
+            <p class="text-lg text-gray-600 text-center mb-12">Une approche itérative pour construire votre jeu pas à pas.</p>
+            <div class="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+                <p class="mb-8 text-gray-700">Ne tentez pas de tout faire en même temps. Progressez par étapes, en vous assurant que chaque fonctionnalité est stable avant de passer à la suivante. Cela facilitera la rédaction de vos rapports bi-hebdomadaires et le débogage.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="border-t-4 border-orange-500 bg-gray-50 p-6 rounded-md">
+                        <h3 class="font-bold text-lg mb-4 text-orange-800">Phase 1 : Les Bases</h3>
+                        <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Créer le projet et configurer SFML.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Ouvrir une fenêtre et implémenter la boucle de jeu.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Dessiner la grille/carte de base à l'écran.</li>
+                        </ul>
+                    </div>
+                    <div class="border-t-4 border-blue-500 bg-gray-50 p-6 rounded-md">
+                        <h3 class="font-bold text-lg mb-4 text-blue-800">Phase 2 : Gameplay Initial</h3>
+                        <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Implémenter les classes `Tour` et `Ennemi`.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Permettre au joueur de placer des tours avec la souris.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Faire apparaître un ennemi qui se déplace en ligne droite.</li>
+                        </ul>
+                    </div>
+                    <div class="border-t-4 border-teal-500 bg-gray-50 p-6 rounded-md">
+                        <h3 class="font-bold text-lg mb-4 text-teal-800">Phase 3 : L'IA</h3>
+                         <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Implémenter l'algorithme de pathfinding A*.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Faire en sorte que l'ennemi suive le chemin trouvé.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Gérer le recalcul du chemin si le joueur place une tour.</li>
+                        </ul>
+                    </div>
+                     <div class="border-t-4 border-purple-500 bg-gray-50 p-6 rounded-md">
+                        <h3 class="font-bold text-lg mb-4 text-purple-800">Phase 4 : Interaction</h3>
+                         <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Les tours détectent les ennemis à portée et tirent.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Gérer les collisions projectiles/ennemis et les points de vie.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Implémenter les vagues d'ennemis.</li>
+                        </ul>
+                    </div>
+                     <div class="border-t-4 border-red-500 bg-gray-50 p-6 rounded-md">
+                        <h3 class="font-bold text-lg mb-4 text-red-800">Phase 5 : Finitions</h3>
+                         <ul class="space-y-3 text-sm text-gray-700">
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Ajouter une interface utilisateur (points de vie, argent...).</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Gérer les conditions de victoire et de défaite.</li>
+                            <li class="flex"><input type="checkbox" class="mr-3 mt-1" disabled>Nettoyer le code et ajouter des commentaires.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p>&copy; Guide de projet généré pour vous aider. Bon courage !</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        const ctx = document.getElementById('notationChart').getContext('2d');
+        const notationChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Qualité du projet', 'Soutenance', 'Rapports'],
+                datasets: [{
+                    label: 'Répartition de la note',
+                    data: [50, 25, 25],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(249, 115, 22, 0.8)',
+                        'rgba(20, 184, 166, 0.8)'
+                    ],
+                    borderColor: [
+                        '#ffffff'
+                    ],
+                    borderWidth: 4,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed !== null) {
+                                    label += context.parsed + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+        
+        document.querySelectorAll('.class-box').forEach(box => {
+            box.addEventListener('click', () => {
+                const details = box.querySelector('.class-details');
+                details.classList.toggle('open');
+            });
+        });
+
+    </script>
+</body>
+</html>
