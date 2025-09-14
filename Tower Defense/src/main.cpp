@@ -12,7 +12,7 @@
 #include <iostream>
 
 // Button callback function
-void onButtonClick()
+static void onButtonClick()
 {
     std::cout << "OK button pressed!" << std::endl;
 }
@@ -31,7 +31,7 @@ int main()
     button->onPress(onButtonClick); // assign callback
     gui.add(button); // add button to GUI
 
-    // --- Invisible detection zone ---
+     // --- Invisible detection zone ---
     sf::FloatRect detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200));
     // Rectangle from (200,150) with width 400, height 200
 

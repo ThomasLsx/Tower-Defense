@@ -1,0 +1,64 @@
+@startuml
+'Uniquement la partie algo pas d'affichage (SFML)
+
+' ========== CLASSES DE BASE ==========
+class Entity
+class Game
+
+' ========== ENTITÉS ==========
+class Minion
+class Tower
+class Projectile
+class Castle
+
+' ========== GESTION DU JEU ==========
+class Wave
+class Path
+class Map
+Class Time
+class Player
+class Spawner
+
+
+' ========== SYSTÈMES ==========
+class CollisionSystem
+class EconomySystem
+class ProjectileSystem
+class HealthSystem
+
+' ========== HÉRITAGE ==========
+Entity <|-- Minion
+Entity <|-- Tower
+Entity <|-- Projectile
+Entity <|-- Castle
+
+' ========== COMPOSITION ==========
+Game *-- Wave
+Game *-- Tower
+Game *-- Time
+Game *-- Player
+Wave *-- Spawner
+Map *-- Path
+ProjectileSystem o-- Projectile
+Wave o-- Minion
+
+'=========== AGRÉGATION ==========
+
+' ========== ASSOCIATIONS ==========
+Game --> Map : uses
+Game --> CollisionSystem : uses
+Game --> EconomySystem : uses
+Entity --> CollisionSystem : uses
+Game --> ProjectileSystem : uses
+Game --> HealthSystem : uses
+Player --> EconomySystem : manages
+HealthSystem --> Minion : HP
+HealthSystem --> Castle : HP
+HealthSystem --> Minion: damage
+HealthSystem --> Projectile : damage
+
+
+' ========== ASSOCIATIONS BIDIRECTIONNELLE ==========
+Minion --- Path : "1" follows
+Tower --> ProjectileSystem : uses
+@enduml
