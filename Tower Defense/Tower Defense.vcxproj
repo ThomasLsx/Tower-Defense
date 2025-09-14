@@ -19,7 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\castle.cpp" />
+    <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\minion.cpp" />
+    <ClCompile Include="src\projectile.cpp" />
+    <ClCompile Include="src\tower.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\castle.h" />
+    <ClInclude Include="include\entity.h" />
+    <ClInclude Include="include\minion.h" />
+    <ClInclude Include="include\projectile.h" />
+    <ClInclude Include="include\tower.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
