@@ -1,4 +1,4 @@
-// Entry point: creates and runs the game
+// main.cpp
 #include "Game.h"
 
 int main()
