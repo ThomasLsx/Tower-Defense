@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\UI.cpp" />
+    <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\castle.cpp" />
     <ClCompile Include="src\entity.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -32,6 +35,9 @@
     <ClInclude Include="include\minion.h" />
     <ClInclude Include="include\projectile.h" />
     <ClInclude Include="include\tower.h" />
+    <ClInclude Include="include\Game.h" />
+    <ClInclude Include="include\UI.h" />
+    <ClInclude Include="include\Window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
