@@ -33,6 +33,11 @@ private:
      */
     float cooldown;
 
+    /**
+     * @brief Vitesse d'attaque de la tour.
+     */
+    float attackSpeed;
+
 public:
     /**
      * @brief Constructeur de la tour.
@@ -46,7 +51,7 @@ public:
      * @param attackSpeed Vitesse d'attaque.
      * @param texture Texture SFML à utiliser.
      */
-    Tower(int x, int y, int damage, float txCritique, int prCritique, float portee, float cooldown, const sf::Texture& texture);
+    Tower(int x, int y, int damage, float txCritique, int prCritique, float portee, float cooldown, float attackSpeed, const sf::Texture& texture);
 
     /**
      * @brief Constructeur par défaut.

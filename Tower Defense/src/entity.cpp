@@ -2,24 +2,30 @@
 
 Entity::Entity(float x, float y, const sf::Texture& texture)
 {
-	position.x = x;
-	position.y = y;
-    sprite.setTexture(texture);
-    sprite.setPosition(position);
+    position.x = x;
+    position.y = y;
+    sprite = std::make_unique<sf::Sprite>(texture);
+    sprite->setPosition(position);
 }
 
-Entity::Entity() : position(0, 0)
+Entity::Entity() : position(0, 0), sprite(nullptr)
 {
+    // Le sprite doit être initialisé plus tard si utilisé
 }
 
 void Entity::setPosition(float x, float y)
 {
     position.x = x;
     position.y = y;
-	sprite.setPosition(position);
+    if (sprite) sprite->setPosition(position);
 }
 
 sf::Vector2f Entity::getPosition() const
 {
-	return position;
+    return position;
+}
+
+void Entity::draw(sf::RenderWindow& window)
+{
+    if (sprite) window.draw(*sprite);
 }

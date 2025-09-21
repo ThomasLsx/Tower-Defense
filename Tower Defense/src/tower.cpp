@@ -1,7 +1,7 @@
 #include "tower.h"
 
-Tower::Tower(int x, int y, int damage, float txCritique, int prCritique, float portee, float cooldown, const sf::Texture& texture)
-	: Entity(x, y, texture), Damage(damage), TxCritique(txCritique), prCritique(prCritique), Portee(portee), cooldown(cooldown)
+Tower::Tower(int x, int y, int damage, float txCritique, int prCritique, float portee, float cooldown, float attackSpeed, const sf::Texture& texture)
+	: Entity(x, y, texture), Damage(damage), TxCritique(txCritique), prCritique(prCritique), Portee(portee), cooldown(cooldown), attackSpeed(attackSpeed)
 {
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <memory>
 
 /**
  * @class Entity
@@ -16,7 +17,7 @@ protected:
     /**
      * @brief Sprite SFML représentant l'entité.
      */
-    sf::Sprite sprite;
+    std::unique_ptr<sf::Sprite> sprite; // Utilisation d'un pointeur intelligent
 
 public:
     /**
