@@ -1,24 +1,56 @@
 #include "tower.h"
+#include "projectilesystem.h"
 
-Tower::Tower(int x, int y, int damage, float txCritique, int prCritique, float portee, float cooldown, const sf::Texture& texture)
-	: Entity(x, y, texture), Damage(damage), TxCritique(txCritique), prCritique(prCritique), Portee(portee), cooldown(cooldown)
-{
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+
+Tower::Tower(int id, Vector2 pos, float range, float fireRate, int damage, int level)
+    : Entity(id, pos), range(range), fireRate(fireRate), damage(damage), level(level), fireAccumulator(0.0f) {
 }
 
-int Tower::getDamage() const { return Damage; }
-void Tower::setDamage(int damage) { Damage = damage; }
+void Tower::findTargets(const std::vector<Entity*>& minions) {
+    targetIds.clear();
+    for (Entity* minion : minions) {
+        float dx = minion->getPosition().x - position.x;
+        float dy = minion->getPosition().y - position.y;
+        float distSq = dx * dx + dy * dy;
+        if (distSq <= range * range) {
+            targetIds.push_back(minion->getID());
+        }
+    }
 
-float Tower::getTxCritique() const { return TxCritique; }
-void Tower::setTxCritique(float txCritique) { TxCritique = txCritique; }
+    /*
+    TODO : optimiser avec quadtree
+    */
+}
 
-int Tower::getPrCritique() const { return prCritique; }
-void Tower::setPrCritique(int prCritique) { prCritique = prCritique; }
+void Tower::tryFire(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) {
+    fireAccumulator += dt;
+    float fireInterval = 1.0f / fireRate;
 
-float Tower::getPortee() const { return Portee; }
-void Tower::setPortee(float portee) { Portee = portee; }
+    if (fireAccumulator >= fireInterval && !targetIds.empty()) {
+        fireAccumulator = 0.0f;
+        // Crée un projectile pour chaque cible
+        for (int targetId : targetIds) {
+            projectileSystem.createProjectile(id, targetId, damage, 10.0f); // 10.0f = vitesse du projectile
+            std::cout << "Tower " << id << " fires at minion " << targetId << std::endl;
+        }
+    }
+}
 
-float Tower::getCooldown() const { return cooldown; }
-void Tower::setCooldown(float cooldown) { cooldown = cooldown; }
+void Tower::upgrade() {
+    level++;
+    range *= 1.1f;
+    damage *= 1.2f;
+    std::cout << "Tower " << id << " upgraded to level " << level << " (Damage: " << damage << ")" << std::endl;
+}
 
-float Tower::getAttackSpeed() const { return attackSpeed; }
-void Tower::setAttackSpeed(float attackSpeed) { attackSpeed = attackSpeed; }
+void Tower::onDestroy() {
+    std::cout << "Tower " << id << " destroyed!" << std::endl;
+}
+
+void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) {
+    findTargets(minions);
+    tryFire(dt, minions, projectileSystem);
+}

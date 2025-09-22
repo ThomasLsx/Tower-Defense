@@ -1,64 +1,30 @@
 #pragma once
+#include <utility>
+#include <SFML/Graphics/Sprite.hpp>
 
-#include <SFML/Graphics.hpp>
+struct Vector2 {
+    float x, y;
+    Vector2(float x = 0, float y = 0) : x(x), y(y) {}
+};
 
-/**
- * @class Entity
- * @brief Classe de base pour tous les objets du jeu, gère la position et le sprite.
- */
 class Entity {
 protected:
-    /**
-     * @brief Position de l'entité dans le monde.
-     */
-    sf::Vector2f position;
-
-    /**
-     * @brief Sprite SFML représentant l'entité.
-     */
-    sf::Sprite sprite;
+    int id;
+    Vector2 position;
+    float rotation;
+	sf::Sprite sprite;
 
 public:
-    /**
-     * @brief Constructeur de l'entité.
-     * @param x Position X.
-     * @param y Position Y.
-     * @param texture Texture SFML à utiliser.
-     */
-    Entity(float x, float y, const sf::Texture& texture);
-
-    /**
-     * @brief Constructeur par défaut.
-     */
-    Entity();
-
-    /**
-     * @brief Destructeur virtuel.
-     */
+    Entity(void);
+    Entity(int id, Vector2 pos, float rotation = 0.0f);
     virtual ~Entity() = default;
 
-    /**
-     * @brief Met à jour l'entité.
-     * @param deltaTime Temps écoulé depuis la dernière mise à jour.
-     */
-    virtual void update(float deltaTime) = 0;
+    virtual void update(float dt) = 0;
 
-    /**
-     * @brief Dessine l'entité dans la fenêtre.
-     * @param window Fenêtre SFML où dessiner.
-     */
-    virtual void draw(sf::RenderWindow& window);
+	Vector2 getPosition() const { return position; }
+	void setPosition(const Vector2& p) { position = p; }
 
-    /**
-     * @brief Obtient la position de l'entité.
-     * @return Position sous forme de sf::Vector2f.
-     */
-    sf::Vector2f getPosition() const;
+    int getID() const { return id; }
 
-    /**
-     * @brief Définit la position de l'entité.
-     * @param x Nouvelle position X.
-     * @param y Nouvelle position Y.
-     */
-    void setPosition(float x, float y);
+    virtual void onDestroy() = 0;
 };

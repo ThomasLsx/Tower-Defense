@@ -1,132 +1,71 @@
 #pragma once
-
 #include "entity.h"
+#include "projectileSystem.h"
+#include <vector>
 
 /**
  * @class Tower
- * @brief Représente une tour dans le jeu, héritée de Entity.
+ * @brief Représente une tour dans un jeu de type Tower Defense.
+ *
+ * Une tour peut cibler des minions, tirer des projectiles et être améliorée.
  */
 class Tower : public Entity {
 private:
-    /**
-     * @brief Dégâts infligés par la tour.
-     */
-    int Damage;
-
-    /**
-     * @brief Taux de coup critique.
-     */
-    float TxCritique;
-
-    /**
-     * @brief Probabilité de coup critique.
-     */
-    int prCritique;
-
-    /**
-     * @brief Portée de la tour.
-     */
-    float Portee;
-
-    /**
-     * @brief Temps de recharge entre les attaques.
-     */
-    float cooldown;
+    float range;            ///< Portée de la tour
+    float fireRate;         ///< Fréquence de tir en tirs par seconde
+    int level;              ///< Niveau actuel de la tour
+    int damage;             ///< Dégâts infligés par projectile
+    float fireAccumulator;  ///< Accumulateur pour gérer la fréquence de tir
+    std::vector<int> targetIds; ///< Liste des IDs des cibles actuelles
 
 public:
     /**
-     * @brief Constructeur de la tour.
-     * @param x Position X.
-     * @param y Position Y.
-     * @param damage Dégâts.
-     * @param txCritique Taux de coup critique.
-     * @param prCritique Probabilité de coup critique.
-     * @param portee Portée.
-     * @param cooldown Temps de recharge.
-     * @param attackSpeed Vitesse d'attaque.
-     * @param texture Texture SFML à utiliser.
+     * @brief Constructeur de Tower.
+     * @param id Identifiant unique de la tour.
+     * @param pos Position initiale de la tour.
+     * @param range Portée de la tour.
+     * @param fireRate Fréquence de tir en tirs par seconde.
+     * @param damage Dégâts infligés par projectile.
+     * @param level Niveau initial de la tour (par défaut 1).
      */
-    Tower(int x, int y, int damage, float txCritique, int prCritique, float portee, float cooldown, const sf::Texture& texture);
+    Tower(int id, Vector2 pos, float range, float fireRate, int damage, int level = 1);
 
     /**
-     * @brief Constructeur par défaut.
+     * @brief Trouve les cibles à portée de la tour.
+     * @param minions Liste des minions à vérifier.
      */
-    Tower() = default;
+    void findTargets(const std::vector<Entity*>& minions);
 
     /**
-     * @brief Destructeur.
+     * @brief Tente de tirer sur les cibles si possible.
+     * @param dt Temps écoulé depuis la dernière frame.
+     * @param minions Liste des minions.
+     * @param projectileSystem Système de gestion des projectiles.
      */
-    ~Tower() override = default;
+    void tryFire(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem);
 
     /**
-     * @brief Obtient les dégâts de la tour.
-     * @return Dégâts.
+     * @brief Améliore la tour (augmente portée et dégâts).
      */
-    int getDamage() const;
+    void upgrade();
 
     /**
-     * @brief Définit les dégâts de la tour.
-     * @param damage Nouvelle valeur des dégâts.
+     * @brief Appelé quand la tour est détruite.
      */
-    void setDamage(int damage);
+    void onDestroy() override;
 
     /**
-     * @brief Obtient le taux de coup critique.
-     * @return Taux de coup critique.
+     * @brief Met à jour la tour (ciblage et tir).
+     * @param dt Temps écoulé depuis la dernière frame.
+     * @param minions Liste des minions.
+     * @param projectileSystem Système de gestion des projectiles.
      */
-    float getTxCritique() const;
+    void update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) override;
 
-    /**
-     * @brief Définit le taux de coup critique.
-     * @param txCritique Nouvelle valeur du taux.
-     */
-    void setTxCritique(float txCritique);
-
-    /**
-     * @brief Obtient la probabilité de coup critique.
-     * @return Probabilité de coup critique.
-     */
-    int getPrCritique() const;
-
-    /**
-     * @brief Définit la probabilité de coup critique.
-     * @param prCritique Nouvelle valeur de la probabilité.
-     */
-    void setPrCritique(int prCritique);
-
-    /**
-     * @brief Obtient la portée de la tour.
-     * @return Portée.
-     */
-    float getPortee() const;
-
-    /**
-     * @brief Définit la portée de la tour.
-     * @param portee Nouvelle valeur de la portée.
-     */
-    void setPortee(float portee);
-
-    /**
-     * @brief Obtient le temps de recharge.
-     * @return Temps de recharge.
-     */
-    float getCooldown() const;
-
-    /**
-     * @brief Définit le temps de recharge.
-     * @param cooldown Nouvelle valeur du temps de recharge.
-     */
-    void setCooldown(float cooldown);
-
-    /**
-     * @brief Obtient la vitesse d'attaque.
-     * @return Vitesse d'attaque.
-     */
-    float getAttackSpeed() const;
-
-    /**
-     * @brief Définit la vitesse d'attaque.
-     * @param attackSpeed Nouvelle valeur de la vitesse d'attaque.
-     */
-    void setAttackSpeed(float attackSpeed);
+    // Getters
+    float getRange() const { return range; }          ///< Retourne la portée de la tour.
+    float getFireRate() const { return fireRate; }    ///< Retourne la fréquence de tir.
+    int getLevel() const { return level; }            ///< Retourne le niveau de la tour.
+    int getDamage() const { return damage; }          ///< Retourne les dégâts infligés par projectile.
+    const std::vector<int>& getTargetIds() const { return targetIds; } ///< Retourne la liste des IDs des cibles.
 };
