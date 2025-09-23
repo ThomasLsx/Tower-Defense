@@ -2,7 +2,7 @@
 #include <iostream>
 
 Game::Game()
-    : window(800, 600, "Tower Defense")
+    : window(1920, 1056, "Tower Defense")
     , block(sf::Vector2f(50, 50))
     , blockPosition(100, 100)
     , detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200))
@@ -27,13 +27,14 @@ Game::Game()
         return;
     }
 
-    for (int x = 0; x < 4; ++x)
+    for (int y = 0; y < 2; ++y)
     {
-        for(int y = 0; y < 1; ++y)
+        for(int x = 0; x < 4; ++x)
         {
             auto tile = std::make_unique<sf::Sprite>(m_TileMapTexture);
             tile->setTextureRect(sf::IntRect(sf::Vector2i(x * 32, y * 32), sf::Vector2i(32, 32)));
             tile->setOrigin(sf::Vector2f(16, 16)); // Centrer l'origine de la tuile
+            tile->setScale(sf::Vector2f(3, 3));
             m_TileOptions.push_back(std::move(tile));
 		}
     }
@@ -165,6 +166,7 @@ void Game::Render()
 void Game::DrawLevelEditor()
 {
     sf::Vector2f vMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window.getRenderWindow()));
+    vMousePosition = window.getRenderWindow().mapPixelToCoords(sf::Mouse::getPosition(window.getRenderWindow()));
     auto& tileSprite = *m_TileOptions[m_TileOptionsIndex];
     tileSprite.setPosition(vMousePosition);
     window.getRenderWindow().draw(tileSprite);
@@ -246,8 +248,10 @@ void Game::HandleLevelEditorInput(const std::vector<sf::Event>& events)
         {
             auto mouse = event.getIf<sf::Event::MouseButtonPressed>();
             sf::Vector2f vMousePosition(static_cast<float>(mouse->position.x), static_cast<float>(mouse->position.y));
+            vMousePosition = window.getRenderWindow().mapPixelToCoords(mouse->position);
             if (mouse->button == sf::Mouse::Button::Left)
                 CreateTileAtPosition(vMousePosition);
+                std::cout << "vMouse :" << vMousePosition.x << ", " << vMousePosition.y << ")\n";
             if (mouse->button == sf::Mouse::Button::Right)
                 DeleteTileAtPosition(vMousePosition);
         }
