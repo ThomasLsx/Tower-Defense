@@ -1,65 +1,37 @@
 #pragma once
+#include <utility>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/System/Angle.inl>
 
 #include <SFML/Graphics.hpp>
-#include <memory>
 
-/**
- * @class Entity
- * @brief Classe de base pour tous les objets du jeu, gère la position et le sprite.
- */
 class Entity {
-protected:
-    /**
-     * @brief Position de l'entité dans le monde.
-     */
-    sf::Vector2f position;
-
-    /**
-     * @brief Sprite SFML représentant l'entité.
-     */
-    std::unique_ptr<sf::Sprite> sprite; // Utilisation d'un pointeur intelligent
+private:
+    int id;
+	sf::Sprite sprite;
+	bool isAlive;
 
 public:
-    /**
-     * @brief Constructeur de l'entité.
-     * @param x Position X.
-     * @param y Position Y.
-     * @param texture Texture SFML à utiliser.
-     */
-    Entity(float x, float y, const sf::Texture& texture);
-
-    /**
-     * @brief Constructeur par défaut.
-     */
-    Entity();
-
-    /**
-     * @brief Destructeur virtuel.
-     */
+    Entity(int id, sf::Vector2f pos = sf::Vector2f(0.0f,0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
     virtual ~Entity() = default;
 
-    /**
-     * @brief Met à jour l'entité.
-     * @param deltaTime Temps écoulé depuis la dernière mise à jour.
-     */
-    virtual void update(float deltaTime) = 0;
+	sf::Vector2f getPosition() const { return sprite.getPosition(); }
+	void setPosition(const sf::Vector2f& p) { sprite.setPosition(p); }
+	sf::FloatRect getGlobalBounds() const { return sprite.getGlobalBounds(); }
 
-    /**
-     * @brief Dessine l'entité dans la fenêtre.
-     * @param window Fenêtre SFML où dessiner.
-     */
-    virtual void draw(sf::RenderWindow& window);
+	sf::Angle getRotation() const { return sprite.getRotation(); }
+	void setRotation(const sf::Angle& a) { sprite.setRotation(a); }
+	void setRotation(const float angle) { sprite.setRotation(sf::Angle(sf::degrees(angle))); }
 
-    /**
-     * @brief Obtient la position de l'entité.
-     * @return Position sous forme de sf::Vector2f.
-     */
-    sf::Vector2f getPosition() const;
+    int getID() const { return id; }
 
-    /**
-     * @brief Définit la position de l'entité.
-     * @param x Nouvelle position X.
-     * @param y Nouvelle position Y.
-     */
-    void setPosition(float x, float y);
+	bool getisAlive(void) const { return isAlive; }
+	void setisAlive(bool val) { isAlive = val; }
+
+  void draw(sf::RenderWindow& window);
+    
+  virtual void onDestroy() = 0;
+	virtual void update(float dt) = 0;
 };

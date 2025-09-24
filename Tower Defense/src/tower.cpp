@@ -1,24 +1,41 @@
 #include "tower.h"
+#include "projectilesystem.h"
 
-Tower::Tower(int x, int y, int damage, float txCritique, int prCritique, float portee, float cooldown, float attackSpeed, const sf::Texture& texture)
-	: Entity(x, y, texture), Damage(damage), TxCritique(txCritique), prCritique(prCritique), Portee(portee), cooldown(cooldown), attackSpeed(attackSpeed)
+Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage, sf::Vector2f pos, float rotation, sf::Color color, sf::IntRect textureRect, const sf::Texture& texture)
+    : Entity(id, pos, rotation, color, textureRect, texture),
+      range(range),
+      fireRate(fireRate),
+      level(level),
+      damage(damage) 
 {
 }
 
-int Tower::getDamage() const { return Damage; }
-void Tower::setDamage(int damage) { Damage = damage; }
+void Tower::tryFire(const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) {
+    for (int targetId : targetIds) {
+        projectileSystem.createProjectile(id, targetId, damage, 10.0f);
+        std::cout << "Tower " << id << " fires at minion " << targetId << std::endl;
+    }
+}
 
-float Tower::getTxCritique() const { return TxCritique; }
-void Tower::setTxCritique(float txCritique) { TxCritique = txCritique; }
+void Tower::upgrade() {
+    level++;
+    range *= 1.1f;
+    damage *= 1.2f;
+    std::cout << "Tower " << Entity::getID() << " upgraded to level " << level << " (Damage: " << damage << ")" << std::endl;
+}
 
-int Tower::getPrCritique() const { return prCritique; }
-void Tower::setPrCritique(int prCritique) { prCritique = prCritique; }
+void Tower::onDestroy() {
+    std::cout << "Tower " << Entity::getID() << " destroyed!" << std::endl;
+	Entity::setisAlive(false);
+}
 
-float Tower::getPortee() const { return Portee; }
-void Tower::setPortee(float portee) { Portee = portee; }
+void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) 
+{
+	tryFire(minions, projectileSystem); 
+}
 
-float Tower::getCooldown() const { return cooldown; }
-void Tower::setCooldown(float cooldown) { cooldown = cooldown; }
-
-float Tower::getAttackSpeed() const { return attackSpeed; }
-void Tower::setAttackSpeed(float attackSpeed) { attackSpeed = attackSpeed; }
+std::vector<int> Tower::SearchTargets(unsigned int maxTargets)
+{
+	//use projsys pour get targets
+    return std::vector<int>();
+}

@@ -1,29 +1,15 @@
 #include "entity.h"
 
-Entity::Entity(float x, float y, const sf::Texture& texture)
-{
-    position.x = x;
-    position.y = y;
-    sprite = std::make_unique<sf::Sprite>(texture);
-    sprite->setPosition(position);
-}
 
-Entity::Entity() : position(0, 0), sprite(nullptr)
+Entity::Entity(int id, sf::Vector2f pos, float rotation, sf::Color color, sf::IntRect textureRect, const sf::Texture& texture)
+    : id(id), sprite(texture), isAlive(true)
 {
-    // Le sprite doit être initialisé plus tard si utilisé
-}
-
-void Entity::setPosition(float x, float y)
-{
-    position.x = x;
-    position.y = y;
-    if (sprite) sprite->setPosition(position);
-}
-
-sf::Vector2f Entity::getPosition() const
-{
-    return position;
-}
+    sprite.setPosition(pos);
+    sprite.setRotation(sf::Angle(sf::degrees(rotation)));
+    sprite.setColor(color);
+    if (textureRect != sf::IntRect())
+        sprite.setTextureRect(textureRect);
+ }
 
 void Entity::draw(sf::RenderWindow& window)
 {

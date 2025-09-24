@@ -1,83 +1,92 @@
 #pragma once
-
 #include "entity.h"
+
+class Path;
 
 /**
  * @class Minion
- * @brief Représente un sbire (minion) dans le jeu, hérite de Entity.
+ * @brief Représente un minion dans un jeu de type Tower Defense.
+ *
+ * Un minion suit un chemin prédéfini, peut subir des dégâts et récompense le joueur à sa mort.
  */
 class Minion : public Entity {
 private:
-    /**
-     * @brief Dégâts infligés par le minion.
-     */
-    float damage;
-
-    /**
-     * @brief Direction du déplacement du minion.
-     */
-    sf::Vector2f direction;
-
-    /**
-     * @brief Vitesse de déplacement du minion.
-     */
-    float speed;
+    unsigned int health;          ///< Points de vie actuels du minion.
+    sf::Vector2f velocity;    ///< Vitesse et direction actuelle du minion.
+    float pathProgress;  ///< Progression le long du chemin (0.0 à 1.0).
+    Path* targetPath;    ///< Chemin que le minion doit suivre.
+    unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
 
 public:
     /**
-     * @brief Constructeur du minion.
-     * @param x Position X.
-     * @param y Position Y.
-     * @param damage Dégâts.
-     * @param speed Vitesse.
-     * @param direction Direction du déplacement.
-     * @param texture Texture SFML à utiliser.
+     * @brief Constructeur de Minion.
+     * @param id Identifiant unique du minion.
+     * @param pos Position initiale du minion.
+     * @param path Chemin que le minion doit suivre.
+     * @param health Points de vie initiaux du minion.
+     * @param velocity Vitesse initiale du minion.
+     * @param reward Récompense accordée à la mort du minion.
      */
-    Minion(int x, int y, float damage, float speed, sf::Vector2f direction, const sf::Texture& texture);
+    Minion(int id, Path* path, unsigned int healt = 100, sf::Vector2f velocity = sf::Vector2f(0.0f,0.0f), unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
 
     /**
-     * @brief Constructeur par défaut.
+     * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
+     * @param dt Temps écoulé depuis la dernière frame (en secondes).
      */
-    Minion(void) = default;
+    void move(float dt);
 
     /**
-     * @brief Destructeur.
+     * @brief Met à jour la position du minion pour qu'il suive son chemin.
      */
-    ~Minion(void) override = default;
+    void followPath(void);
 
     /**
-     * @brief Obtient les dégâts du minion.
-     * @return Dégâts.
+     * @brief Inflige des dégâts au minion.
+     * @param amount Montant des dégâts infligés.
+     * @param sourceId ID de l'entité source des dégâts (ex: ID de la tour).
      */
-    float getDamage(void);
+    void takeDamage(int amount);
+
+    void makeDamage(int amount);
 
     /**
-     * @brief Définit les dégâts du minion.
-     * @param damage Nouvelle valeur des dégâts.
+     * @brief Retourne la vitesse actuelle du minion.
+     * @return Vecteur de vitesse du minion.
      */
-    void setDamage(float damage);
+    sf::Vector2f getVelocity(void) const { return velocity; }
 
     /**
-     * @brief Obtient la direction du minion.
-     * @return Direction.
+     * @brief Retourne la progression du minion le long de son chemin.
+     * @return Valeur entre 0.0 et 1.0 représentant la progression.
      */
-    sf::Vector2f getDirection(void);
+    float getPathProgress(void) const { return pathProgress; }
 
     /**
-     * @brief Définit la direction du minion.
-     * @param direction Nouvelle direction.
+     * @brief Retourne les points de vie actuels du minion.
+     * @return Points de vie restants.
      */
-    void setDirection(sf::Vector2f direction);
+    int getHealth(void) const { return health; }
 
     /**
-     * @brief Obtient la vitesse du minion.
-     * @return Vitesse.
+     * @brief Retourne la récompense accordée à la mort du minion.
+     * @return Récompense en points ou monnaie.
      */
-    float getSpeed(void);
+    int getRewardOnDeath(void) const { return rewardOnDeath; }
 
     /**
-     * @brief Définit la vitesse du minion.
-     * @param speed Nouvelle valeur de la vitesse.
+     * @brief Retourne le chemin suivi par le minion.
+     * @return Pointeur vers le chemin suivi.
      */
-    void setSpeed(float speed);
+	Path* getTargetPath(void) const { return targetPath; }
+
+    /**
+     * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).
+     */
+    void onDestroy(void) override;
+
+    /**
+     * @brief Met à jour le minion (déplacement, suivi de chemin, etc.).
+     * @param dt Temps écoulé depuis la dernière frame (en secondes).
+     */
+    void update(float dt) override;
 };

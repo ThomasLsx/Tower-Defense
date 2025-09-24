@@ -1,34 +1,32 @@
 #include "projectile.h"
+#include <iostream>
 
-Projectile::Projectile(int x, int y, float damage, float speed, sf::Vector2f direction, const sf::Texture& texture)
-	:Entity(x, y, texture), damage(damage), speed(speed), direction(direction)
+Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity, unsigned int damage, float lifetime, sf::Vector2f pos, float rotation, sf::Color color, sf::IntRect textureRect, const sf::Texture& texture)
+	:Entity(id, pos, rotation, color, textureRect, texture), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId), targetEntityId(targetEntityId)
 {
 }
 
+void Projectile::update(float dt) {
+    // Met à jour la position du projectile en fonction de sa vitesse
+    sf::Vector2f position;
+	Entity::setPosition(position += velocity * dt);
 
-float Projectile::getDamage(void) 
-{ 
-	return damage; 
-}
-void Projectile::setDamage(float damage) 
-{ 
-	this->damage = damage; 
-}
+    // Décrémente la durée de vie
+    lifetime -= dt;
 
-sf::Vector2f Projectile::getDirection(void) 
-{ 
-	return direction; 
-}
-void Projectile::setDirection(sf::Vector2f direction) 
-{ 
-	this->direction = direction; 
+    if (lifetime <= 0.0f) {
+        onDestroy();
+    }
 }
 
-float Projectile::getSpeed(void) 
-{ 
-	return speed; 
+void Projectile::onHit()
+{
+	onDestroy();
 }
-void Projectile::setSpeed(float speed) 
-{ 
-	this->speed = speed; 
+
+void Projectile::onDestroy() {
+    // Logique de destruction du projectile
+    std::cout << "Projectile " << Entity::getID() << " détruit (fin de vie ou collision)." << std::endl;
+    // Marquer le projectile comme inactif ou le supprimer de la liste des projectiles actifs
+    // (cette partie est généralement gérée par le ProjectileSystem)
 }
