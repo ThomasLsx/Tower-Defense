@@ -1,19 +1,24 @@
 #include "minion.h"
+#include "path.h"
+
 #include <iostream>
 
-Minion::Minion(int id, Vector2 pos, Path* path, int health, Vector2 velocity, int reward)
-    : Entity(id, pos), health(health), velocity(velocity), pathProgress(0.0f),
-    targetPath(path), rewardOnDeath(reward), alive(true) {
+Minion::Minion(int id, Path* path, unsigned int health, sf::Vector2f velocity, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color, sf::IntRect textureRect, const sf::Texture& texture)
+    : Entity(id, pos, rotation, color, textureRect, texture), health(health), velocity(velocity), pathProgress(0.0f),
+    targetPath(path), rewardOnDeath(reward)
+{
 }
 
 void Minion::move(float dt) {
-    position += velocity * dt;
+	sf::Vector2f foo = Entity::getPosition();
+    Entity::setPosition( foo += velocity * dt);
 }
 
+/* TODO : faire followpath des que class path créer */
 void Minion::followPath() {
     if (targetPath && pathProgress < 1.0f) {
-        Vector2 targetPos = targetPath->getPointAt(pathProgress);
-        Vector2 direction = targetPos - position;
+        sf::Vector2f targetPos = targetPath->getPointAt(pathProgress);
+        sf::Vector2f direction = targetPos - getPosition();
         if (direction.lengthSquared() < 0.1f) {
             pathProgress += 0.01f;
             if (pathProgress >= 1.0f) {
@@ -22,7 +27,7 @@ void Minion::followPath() {
                 return;
             }
             targetPos = targetPath->getPointAt(pathProgress);
-            direction = targetPos - position;
+            direction = targetPos - getPosition();
         }
         /*TODO : créer fonction normalize*/
         direction.normalize();
@@ -30,25 +35,24 @@ void Minion::followPath() {
     }
 }
 
-void Minion::takeDamage(int amount, int sourceId) {
-    health -= amount;
-    if (health <= 0) {
+void Minion::takeDamage(int amount) {
+    if (amount < health) {
+        health -= amount;
+    } else {
         health = 0;
-        alive = false;
         onDestroy();
-    }
-}
-
-bool Minion::isAlive() const {
-    return alive;
+	}
 }
 
 void Minion::onDestroy() {
-    alive = false;
+    Entity::setisAlive(false);
+    /*
+    TODO : appelé fct affichage du BOOM et la thune
+    */
 }
 
 void Minion::update(float dt) {
-    if (alive) {
+    if (Entity::getisAlive()) {
         followPath();
         move(dt);
     }

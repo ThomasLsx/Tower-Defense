@@ -1,7 +1,9 @@
 #pragma once
 #include "entity.h"
-#include "projectileSystem.h"
+
 #include <vector>
+
+class ProjectileSystem;
 
 /**
  * @class Tower
@@ -13,10 +15,9 @@ class Tower : public Entity {
 private:
     float range;            ///< Portée de la tour
     float fireRate;         ///< Fréquence de tir en tirs par seconde
-    int level;              ///< Niveau actuel de la tour
-    int damage;             ///< Dégâts infligés par projectile
-    float fireAccumulator;  ///< Accumulateur pour gérer la fréquence de tir
-    std::vector<int> targetIds; ///< Liste des IDs des cibles actuelles
+    unsigned int level;              ///< Niveau actuel de la tour
+    unsigned int damage;  ///< Dégâts infligés par projectile
+	std::vector<int> targetIds; ///< Liste des IDs des cibles actuellement visées
 
 public:
     /**
@@ -28,21 +29,14 @@ public:
      * @param damage Dégâts infligés par projectile.
      * @param level Niveau initial de la tour (par défaut 1).
      */
-    Tower(int id, Vector2 pos, float range, float fireRate, int damage, int level = 1);
-
-    /**
-     * @brief Trouve les cibles à portée de la tour.
-     * @param minions Liste des minions à vérifier.
-     */
-    void findTargets(const std::vector<Entity*>& minions);
+    Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());  
 
     /**
      * @brief Tente de tirer sur les cibles si possible.
-     * @param dt Temps écoulé depuis la dernière frame.
-     * @param minions Liste des minions.
+	 * @param minions Liste des minions. opti avec quadtree plus tard
      * @param projectileSystem Système de gestion des projectiles.
      */
-    void tryFire(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem);
+    void tryFire(const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem);
 
     /**
      * @brief Améliore la tour (augmente portée et dégâts).
@@ -62,10 +56,12 @@ public:
      */
     void update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) override;
 
+	std::vector<int>  SearchTargets(unsigned int maxTargets); ///< Recherche des cibles dans la portée de la tour
+
     // Getters
     float getRange() const { return range; }          ///< Retourne la portée de la tour.
     float getFireRate() const { return fireRate; }    ///< Retourne la fréquence de tir.
     int getLevel() const { return level; }            ///< Retourne le niveau de la tour.
     int getDamage() const { return damage; }          ///< Retourne les dégâts infligés par projectile.
-    const std::vector<int>& getTargetIds() const { return targetIds; } ///< Retourne la liste des IDs des cibles.
+    const std::vector<int>& getTargetIds() { return targetIds; } ///< Retourne la liste des IDs des cibles.
 };

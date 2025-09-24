@@ -3,17 +3,18 @@
 
 class Castle : public Entity {
 private:
-    int health;
-    int maxHealth;
+    unsigned int health;
+    unsigned int maxHealth;
 
 public:
-    Castle(int id, Vector2 pos, int maxHealth);
-    void takeDamage(int amount);
-    void repair(int amount);
+    Castle(int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture(), unsigned int maxHealth=100);
+    
+    void takeDamage(unsigned int amount);
+    void repair(unsigned int amount);
     void update(float dt) override;
      
-	int getHealth() const { return health; }
-    int getMaxHealth() const { return maxHealth; }
+	unsigned int getHealth() const { return health; }
+    unsigned int getMaxHealth() const { return maxHealth; }
 
     void onDestroy() override;
 };

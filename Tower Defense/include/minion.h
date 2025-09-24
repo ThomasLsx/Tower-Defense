@@ -1,6 +1,7 @@
 #pragma once
 #include "entity.h"
-#include "path.h"
+
+class Path;
 
 /**
  * @class Minion
@@ -10,12 +11,11 @@
  */
 class Minion : public Entity {
 private:
-    int health;          ///< Points de vie actuels du minion.
-    Vector2 velocity;    ///< Vitesse et direction actuelle du minion.
+    unsigned int health;          ///< Points de vie actuels du minion.
+    sf::Vector2f velocity;    ///< Vitesse et direction actuelle du minion.
     float pathProgress;  ///< Progression le long du chemin (0.0 à 1.0).
     Path* targetPath;    ///< Chemin que le minion doit suivre.
-    int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
-    bool alive;          ///< État de vie du minion.
+    unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
 
 public:
     /**
@@ -27,7 +27,7 @@ public:
      * @param velocity Vitesse initiale du minion.
      * @param reward Récompense accordée à la mort du minion.
      */
-    Minion(int id, Vector2 pos, Path* path, int health, Vector2 velocity, int reward);
+    Minion(int id, Path* path, unsigned int healt = 100, sf::Vector2f velocity = sf::Vector2f(0.0f,0.0f), unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
 
     /**
      * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
@@ -45,19 +45,15 @@ public:
      * @param amount Montant des dégâts infligés.
      * @param sourceId ID de l'entité source des dégâts (ex: ID de la tour).
      */
-    void takeDamage(int amount, int sourceId);
+    void takeDamage(int amount);
 
-    /**
-     * @brief Vérifie si le minion est en vie.
-     * @return true si le minion est en vie, false sinon.
-     */
-    bool isAlive(void) const;
+    void makeDamage(int amount);
 
     /**
      * @brief Retourne la vitesse actuelle du minion.
      * @return Vecteur de vitesse du minion.
      */
-    Vector2 getVelocity(void) const { return velocity; }
+    sf::Vector2f getVelocity(void) const { return velocity; }
 
     /**
      * @brief Retourne la progression du minion le long de son chemin.
@@ -81,7 +77,7 @@ public:
      * @brief Retourne le chemin suivi par le minion.
      * @return Pointeur vers le chemin suivi.
      */
-    Path* getTargetPath(void) const;
+	Path* getTargetPath(void) const { return targetPath; }
 
     /**
      * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).

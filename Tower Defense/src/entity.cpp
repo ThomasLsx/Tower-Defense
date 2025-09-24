@@ -1,16 +1,11 @@
 #include "entity.h"
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/System/Vector2.hpp>
 
-Entity::Entity(float x, float y, const sf::Texture& texture)
+Entity::Entity(int id, sf::Vector2f pos, float rotation, sf::Color color, sf::IntRect textureRect, const sf::Texture& texture)
+    : id(id), sprite(texture), isAlive(true)
 {
-    position.x = x;
-    position.y = y;
-    sprite.setTexture(texture);
-    sprite.setPosition(position);
-}
-
-Entity::Entity() : position(0, 0)
-{
+    sprite.setPosition(pos);
+    sprite.setRotation(sf::Angle(sf::degrees(rotation)));
+    sprite.setColor(color);
+    if (textureRect != sf::IntRect())
+        sprite.setTextureRect(textureRect);
 }

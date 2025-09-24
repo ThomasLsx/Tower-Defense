@@ -7,11 +7,11 @@
  */
 class Projectile : public Entity {
 private:
-    Vector2 velocity;      ///< Vitesse et direction du projectile.
-    int damage;            ///< Dégâts infligés à la cible.
+    sf::Vector2f velocity;      ///< Vitesse et direction du projectile.
+    unsigned int damage;            ///< Dégâts infligés à la cible.
     float lifetime;        ///< Durée de vie restante du projectile (en secondes).
-    int sourceTowerId;     ///< ID de la tour source du projectile.
-    int targetEntityId;    ///< ID de l'entité cible du projectile.
+    unsigned int sourceTowerId;     ///< ID de la tour source du projectile.
+    unsigned int targetEntityId;    ///< ID de l'entité cible du projectile.
 
 public:
     /**
@@ -24,7 +24,7 @@ public:
      * @param sourceTowerId ID de la tour source.
      * @param targetEntityId ID de l'entité cible.
      */
-    Projectile(int id, Vector2 pos, Vector2 velocity, int damage, float lifetime, int sourceTowerId, int targetEntityId);
+    Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f),unsigned int damage = 10, float lifetime = 20, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
 
     /**
      * @brief Met à jour la position du projectile et vérifie les collisions ou la fin de vie.
@@ -34,9 +34,8 @@ public:
 
     /**
      * @brief Appelé quand le projectile touche une cible.
-     * @param targetId ID de la cible touchée.
      */
-    void onHit(int targetId);
+    void onHit();
 
     /**
      * @brief Appelé quand le projectile est détruit.
@@ -45,7 +44,7 @@ public:
 
     // Getters
     float getLifetime() const { return lifetime; }          ///< Retourne la durée de vie restante du projectile.
-    Vector2 getVelocity() const { return velocity; }        ///< Retourne la vitesse et la direction du projectile.
+    sf::Vector2f getVelocity() const { return velocity; }        ///< Retourne la vitesse et la direction du projectile.
     int getDamage() const { return damage; }                ///< Retourne les dégâts infligés par le projectile.
     int getSourceTowerId() const { return sourceTowerId; }  ///< Retourne l'ID de la tour source.
     int getTargetEntityId() const { return targetEntityId; }///< Retourne l'ID de l'entité cible.

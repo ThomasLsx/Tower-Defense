@@ -1,30 +1,35 @@
 #pragma once
 #include <utility>
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/System/Angle.inl>
 
-struct Vector2 {
-    float x, y;
-    Vector2(float x = 0, float y = 0) : x(x), y(y) {}
-};
+#include <iostream>
 
 class Entity {
-protected:
+private:
     int id;
-    Vector2 position;
-    float rotation;
 	sf::Sprite sprite;
+	bool isAlive;
 
 public:
-    Entity(void);
-    Entity(int id, Vector2 pos, float rotation = 0.0f);
+    Entity(int id, sf::Vector2f pos = sf::Vector2f(0.0f,0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
     virtual ~Entity() = default;
 
-    virtual void update(float dt) = 0;
+	sf::Vector2f getPosition() const { return sprite.getPosition(); }
+	void setPosition(const sf::Vector2f& p) { sprite.setPosition(p); }
+	sf::FloatRect getGlobalBounds() const { return sprite.getGlobalBounds(); }
 
-	Vector2 getPosition() const { return position; }
-	void setPosition(const Vector2& p) { position = p; }
+	sf::Angle getRotation() const { return sprite.getRotation(); }
+	void setRotation(const sf::Angle& a) { sprite.setRotation(a); }
+	void setRotation(const float angle) { sprite.setRotation(sf::Angle(sf::degrees(angle))); }
 
     int getID() const { return id; }
 
+	bool getisAlive(void) const { return isAlive; }
+	void setisAlive(bool val) { isAlive = val; }
+
     virtual void onDestroy() = 0;
+	virtual void update(float dt) = 0;
 };
