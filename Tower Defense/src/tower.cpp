@@ -1,12 +1,6 @@
 #include "tower.h"
 #include "projectilesystem.h"
 
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-
-
-
 Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage, sf::Vector2f pos, float rotation, sf::Color color, sf::IntRect textureRect, const sf::Texture& texture)
     : Entity(id, pos, rotation, color, textureRect, texture),
       range(range),

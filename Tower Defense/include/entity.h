@@ -5,7 +5,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Angle.inl>
 
-#include <iostream>
+#include <SFML/Graphics.hpp>
 
 class Entity {
 private:
@@ -30,6 +30,8 @@ public:
 	bool getisAlive(void) const { return isAlive; }
 	void setisAlive(bool val) { isAlive = val; }
 
-    virtual void onDestroy() = 0;
+  void draw(sf::RenderWindow& window);
+    
+  virtual void onDestroy() = 0;
 	virtual void update(float dt) = 0;
 };
