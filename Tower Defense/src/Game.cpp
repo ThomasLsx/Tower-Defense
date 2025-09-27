@@ -1,43 +1,27 @@
+// Game.cpp
 #include "Game.h"
 #include <iostream>
 
 Game::Game()
-    : window(1920, 1056, "Tower Defense")
-    , block(sf::Vector2f(50, 50))
+    : block(sf::Vector2f(50, 50))
     , blockPosition(100, 100)
     , detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200))
 	, m_eGameMode(Play)
-	, m_TileOptionsIndex(0)
 
 {
-    window.create();
-    window.getRenderWindow().setFramerateLimit(60);
-    ui = new UI(window.getRenderWindow());
+    window = new Window();
+    window->create();
+    window->getRenderWindow().setFramerateLimit(60);
 
-
+    ui = new UI(window->getRenderWindow());
+    map = new Map(window->getRenderWindow(), ui);
+    
+    
     block.setFillColor(sf::Color::Blue);
     block.setPosition(blockPosition);
     // Initialise le label mode au démarrage
     ui->setMode("Play");
 
-	m_TileMapTexture.loadFromFile("assets/TileMap.png");
-    if (!m_TileMapTexture.loadFromFile("assets/TileMap.png"))
-    {
-        std::cerr << "Texture non chargée !" << std::endl;
-        return;
-    }
-
-    for (int y = 0; y < 2; ++y)
-    {
-        for(int x = 0; x < 4; ++x)
-        {
-            auto tile = std::make_unique<sf::Sprite>(m_TileMapTexture);
-            tile->setTextureRect(sf::IntRect(sf::Vector2i(x * 32, y * 32), sf::Vector2i(32, 32)));
-            tile->setOrigin(sf::Vector2f(16, 16)); // Centrer l'origine de la tuile
-            tile->setScale(sf::Vector2f(3, 3));
-            m_TileOptions.push_back(std::move(tile));
-		}
-    }
 }
 
 Game::~Game()
@@ -46,23 +30,23 @@ Game::~Game()
 
 void Game::run()
 {
-    while (window.isOpen())
+    while (window->isOpen())
     {
         std::vector<sf::Event> events;
-        while (const std::optional<sf::Event> event = window.pollEvent())
+        while (const std::optional<sf::Event> event = window->pollEvent())
         {
             if (event->is<sf::Event::Closed>())
             {
-                window.close();
+                window->close();
             }
             else if (const auto* mouseWheelScrolled = event->getIf<sf::Event::MouseWheelScrolled>())
             {
-                if (!m_TileOptions.empty()) {
+                if (!map->GetTileOptions().empty()) {
                     if (mouseWheelScrolled->wheel == sf::Mouse::Wheel::Vertical ||
                         mouseWheelScrolled->wheel == sf::Mouse::Wheel::Horizontal)
                     {
                         int delta = static_cast<int>(mouseWheelScrolled->delta);
-                        m_TileOptionsIndex = (m_TileOptionsIndex + delta + m_TileOptions.size()) % m_TileOptions.size();
+                        map->SetTileOptionsIndex() = (map->GetTileOptionsIndex() + delta + map->GetTileOptions().size()) % map->GetTileOptions().size();
                     }
                 }
                 events.push_back(*event);
@@ -70,11 +54,11 @@ void Game::run()
             else if (event->is<sf::Event::KeyPressed>())
             {
                 auto key = event->getIf<sf::Event::KeyPressed>();
-                if (!m_TileOptions.empty()) {
+                if (!map->GetTileOptions().empty()) {
                     if (key->code == sf::Keyboard::Key::Up)
-                        m_TileOptionsIndex = (m_TileOptionsIndex + 1) % m_TileOptions.size();
+                        map->SetTileOptionsIndex() = (map->GetTileOptionsIndex() + 1) % map->GetTileOptions().size();
                     else if (key->code == sf::Keyboard::Key::Down)
-                        m_TileOptionsIndex = (m_TileOptionsIndex - 1 + m_TileOptions.size()) % m_TileOptions.size();
+                        map->SetTileOptionsIndex() = (map->GetTileOptionsIndex() - 1 + map->GetTileOptions().size()) % map->GetTileOptions().size();
                 }
                 events.push_back(*event);
             }
@@ -91,7 +75,7 @@ void Game::run()
             UpdatePlay(events);
             break;
         case LevelEditor:
-            UpdateLevelEditor(events);
+            map->UpdateLevelEditor(events);
             break;
         }
 
@@ -128,48 +112,36 @@ void Game::UpdatePlay(const std::vector<sf::Event>& events)
         block.rotate(sf::degrees(2.f));
     if (blockPosition.x < 0) blockPosition.x = 0;
     if (blockPosition.y < 0) blockPosition.y = 0;
-    if (blockPosition.x > 800 - 50) blockPosition.x = 800 - 50;
-    if (blockPosition.y > 600 - 50) blockPosition.y = 600 - 50;
+    if (blockPosition.x > window->getWidth()) blockPosition.x = window->getWidth();
+    if (blockPosition.y > window->getHeight()) blockPosition.y = window->getHeight();
 
     block.setPosition(blockPosition);
     ui->setSpeed(currentSpeed);
 
 }
 
-void Game::UpdateLevelEditor(const std::vector<sf::Event>& events)
-{
 
-}
 
 void Game::Render()
 {
-    window.clear(sf::Color(50, 50, 50));
+    window->clear(sf::Color(50, 50, 50));
 
     // Dessine toutes les tuiles placées
-    for(const auto& tile : m_Tiles)
+    for(const auto& tile : map->GetTiles())
     {
-        window.getRenderWindow().draw(*tile);
+        window->getRenderWindow().draw(*tile);
     }
 
-    window.getRenderWindow().draw(block);
+    window->getRenderWindow().draw(block);
     ui->draw();
 
     // Affiche la tile sélectionnée sous la souris uniquement en mode LevelEditor
-    if (m_eGameMode == LevelEditor && !m_TileOptions.empty())
+    if (m_eGameMode == LevelEditor && !map->GetTileOptions().empty())
     {
-        DrawLevelEditor();
+        map->DrawLevelEditor();
     }
 
-    window.display(); // doit être le dernier appel
-}
-
-void Game::DrawLevelEditor()
-{
-    sf::Vector2f vMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window.getRenderWindow()));
-    vMousePosition = window.getRenderWindow().mapPixelToCoords(sf::Mouse::getPosition(window.getRenderWindow()));
-    auto& tileSprite = *m_TileOptions[m_TileOptionsIndex];
-    tileSprite.setPosition(vMousePosition);
-    window.getRenderWindow().draw(tileSprite);
+    window->display(); // doit être le dernier appel
 }
 
 void Game::HandleInput(const std::vector<sf::Event>& events)
@@ -196,7 +168,7 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
 
     // N'appeler HandlePlayInput() que dans UpdatePlay()
     if (m_eGameMode == LevelEditor)
-        HandleLevelEditorInput(events);
+        map->HandleLevelEditorInput(events);
 }
 
 void Game::HandlePlayInput(const std::vector<sf::Event>& events)
@@ -239,72 +211,3 @@ void Game::HandlePlayInput(const std::vector<sf::Event>& events)
     }
 }
 
-void Game::HandleLevelEditorInput(const std::vector<sf::Event>& events)
-{
-    for (const auto& event : events)
-    {
-        ui->handleEvent(event);
-        if (event.is<sf::Event::MouseButtonPressed>())
-        {
-            auto mouse = event.getIf<sf::Event::MouseButtonPressed>();
-            sf::Vector2f vMousePosition(static_cast<float>(mouse->position.x), static_cast<float>(mouse->position.y));
-            vMousePosition = window.getRenderWindow().mapPixelToCoords(mouse->position);
-            if (mouse->button == sf::Mouse::Button::Left)
-                CreateTileAtPosition(vMousePosition);
-                std::cout << "vMouse :" << vMousePosition.x << ", " << vMousePosition.y << ")\n";
-            if (mouse->button == sf::Mouse::Button::Right)
-                DeleteTileAtPosition(vMousePosition);
-        }
-    }
-}
-
-void Game::CreateTileAtPosition(const sf::Vector2f& position)
-{
-    // Supprime d'abord la tuile existante à la position
-    DeleteTileAtPosition(position);
-
-    // Récupère la taille de la tuile sélectionnée
-    auto& refTile = *m_TileOptions[m_TileOptionsIndex];
-    auto rect = refTile.getTextureRect();
-    float tileWidth = static_cast<float>(rect.size.x) * refTile.getScale().x;
-    float tileHeight = static_cast<float>(rect.size.y) * refTile.getScale().y;
-    sf::Vector2f tileSize(tileWidth, tileHeight);
-
-    // Calcule la position alignée sur la grille
-    sf::Vector2f gridPos;
-    gridPos.x = std::floor(position.x / tileSize.x) * tileSize.x + tileSize.x / 2.f;
-    gridPos.y = std::floor(position.y / tileSize.y) * tileSize.y + tileSize.y / 2.f;
-
-    auto tile = std::make_unique<sf::Sprite>(m_TileMapTexture);
-    tile->setTextureRect(rect);
-    tile->setScale(refTile.getScale());
-    tile->setOrigin(refTile.getOrigin());
-    tile->setPosition(gridPos); // Place à la position alignée sur la grille
-    m_Tiles.push_back(std::move(tile));
-    std::cout << "Tile created at (" << gridPos.x << ", " << gridPos.y << ")" << std::endl;
-}
-
-void Game::DeleteTileAtPosition(const sf::Vector2f& position)
-{
-    // Récupère la taille de la tuile sélectionnée
-    auto& refTile = *m_TileOptions[m_TileOptionsIndex];
-    auto rect = refTile.getTextureRect();
-    float tileWidth = static_cast<float>(rect.size.x) * refTile.getScale().x;
-    float tileHeight = static_cast<float>(rect.size.y) * refTile.getScale().y;
-    sf::Vector2f tileSize(tileWidth, tileHeight);
-
-    // Calcule la position alignée sur la grille
-    sf::Vector2f gridPos;
-    gridPos.x = std::floor(position.x / tileSize.x) * tileSize.x + tileSize.x / 2.f;
-    gridPos.y = std::floor(position.y / tileSize.y) * tileSize.y + tileSize.y / 2.f;
-
-    // Supprime la tuile à cette position si elle existe
-    for (auto it = m_Tiles.begin(); it != m_Tiles.end(); ++it) {
-        sf::Vector2f existingPos = (*it)->getPosition();
-        if (std::abs(existingPos.x - gridPos.x) < 0.1f && std::abs(existingPos.y - gridPos.y) < 0.1f) {
-            m_Tiles.erase(it);
-            std::cout << "Tile deleted at (" << gridPos.x << ", " << gridPos.y << ")" << std::endl;
-            break;
-        }
-    }
-}
