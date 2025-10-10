@@ -45,6 +45,9 @@
     <Image Include="assets\TileMap.png" />
     <Image Include="assets\Tiles.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\map1.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

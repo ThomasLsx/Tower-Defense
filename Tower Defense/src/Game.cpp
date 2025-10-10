@@ -14,9 +14,12 @@ Game::Game()
     window->getRenderWindow().setFramerateLimit(60);
 
     ui = new UI(window->getRenderWindow());
-    map = new Map(window->getRenderWindow(), ui);
-    
-    
+    map = new TileMap(window->getRenderWindow(), ui);
+
+    map->loadLevel("assets/map1.txt");
+    map->loadTile("assets/TileMap.png", map->getLevel().data());
+    map->printTiles();
+
     block.setFillColor(sf::Color::Blue);
     block.setPosition(blockPosition);
     // Initialise le label mode au démarrage
@@ -39,29 +42,6 @@ void Game::run()
             {
                 window->close();
             }
-            else if (const auto* mouseWheelScrolled = event->getIf<sf::Event::MouseWheelScrolled>())
-            {
-                if (!map->GetTileOptions().empty()) {
-                    if (mouseWheelScrolled->wheel == sf::Mouse::Wheel::Vertical ||
-                        mouseWheelScrolled->wheel == sf::Mouse::Wheel::Horizontal)
-                    {
-                        int delta = static_cast<int>(mouseWheelScrolled->delta);
-                        map->SetTileOptionsIndex() = (map->GetTileOptionsIndex() + delta + map->GetTileOptions().size()) % map->GetTileOptions().size();
-                    }
-                }
-                events.push_back(*event);
-            }
-            else if (event->is<sf::Event::KeyPressed>())
-            {
-                auto key = event->getIf<sf::Event::KeyPressed>();
-                if (!map->GetTileOptions().empty()) {
-                    if (key->code == sf::Keyboard::Key::Up)
-                        map->SetTileOptionsIndex() = (map->GetTileOptionsIndex() + 1) % map->GetTileOptions().size();
-                    else if (key->code == sf::Keyboard::Key::Down)
-                        map->SetTileOptionsIndex() = (map->GetTileOptionsIndex() - 1 + map->GetTileOptions().size()) % map->GetTileOptions().size();
-                }
-                events.push_back(*event);
-            }
             else
             {
                 events.push_back(*event);
@@ -74,8 +54,8 @@ void Game::run()
         case Play:
             UpdatePlay(events);
             break;
-        case LevelEditor:
-            map->UpdateLevelEditor(events);
+        case Editor:
+            //map->UpdateLevelEditor(events);
             break;
         }
 
@@ -125,23 +105,15 @@ void Game::UpdatePlay(const std::vector<sf::Event>& events)
 void Game::Render()
 {
     window->clear(sf::Color(50, 50, 50));
-
-    // Dessine toutes les tuiles placées
-    for(const auto& tile : map->GetTiles())
-    {
-        window->getRenderWindow().draw(*tile);
-    }
-
+    map->draw(window->getRenderWindow(), sf::RenderStates::Default);
     window->getRenderWindow().draw(block);
     ui->draw();
 
-    // Affiche la tile sélectionnée sous la souris uniquement en mode LevelEditor
-    if (m_eGameMode == LevelEditor && !map->GetTileOptions().empty())
-    {
-        map->DrawLevelEditor();
-    }
+    // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
+    if (m_eGameMode == Editor)
+        map->DrawMouseHover();
 
-    window->display(); // doit être le dernier appel
+    window->display();
 }
 
 void Game::HandleInput(const std::vector<sf::Event>& events)
@@ -152,8 +124,8 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
         if(!bTWasPressedLastUpdate)
         {
             if (m_eGameMode == Play) {
-                m_eGameMode = LevelEditor;
-                ui->setMode("LevelEditor");
+                m_eGameMode = Editor;
+                ui->setMode("Editor");
             } else {
                 m_eGameMode = Play;
                 ui->setMode("Play");
@@ -167,7 +139,7 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
     }
 
     // N'appeler HandlePlayInput() que dans UpdatePlay()
-    if (m_eGameMode == LevelEditor)
+    if (m_eGameMode == Editor)
         map->HandleLevelEditorInput(events);
 }
 

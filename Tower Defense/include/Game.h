@@ -26,7 +26,7 @@ public:
     enum GameMode
     {
         Play,
-		LevelEditor
+		Editor
     };
 
 private:
@@ -39,7 +39,7 @@ private:
 
     Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
-    Map* map; // Utilisation de la classe Map
+    TileMap* map; // Utilisation de la classe Map
     GameMode m_eGameMode;
 
     sf::RectangleShape block; // Movable block

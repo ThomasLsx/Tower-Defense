@@ -3,41 +3,69 @@
 #include "Window.h"
 #include "UI.h"
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include <vector>
+#include <string>
+#include <fstream>
 
-// Main map class
-class Map
+// TileMap class
+class TileMap : public sf::Drawable, public sf::Transformable
 {
 public:
-	Map(sf::RenderWindow& window, UI* ui);
-	~Map();
+	TileMap(sf::RenderWindow& window, UI* ui);
+	~TileMap() {};
+
+	bool loadTile(const std::filesystem::path& tileset, const int* tiles);
+	bool loadLevel(const std::filesystem::path& levelFilePath);
+	bool saveLevel(const std::filesystem::path& levelFilePath);
+	void updateTile(int x, int y, int newTile, sf::Vector2u tileSize);
+
+	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 	// Getters
-	const int& GetTileOptionsIndex() const { return m_TileOptionsIndex; }
-	const sf::Texture& GetTileMapTexture() const { return m_TileMapTexture; }
-	const std::vector<std::unique_ptr<sf::Sprite>>& GetTiles() { return m_Tiles; }
-	const std::vector<std::unique_ptr<sf::Sprite>>& GetTileOptions() const { return m_TileOptions; }
+	unsigned int getWidth() const { return width; }
+	unsigned int getHeight() const { return height; }
+	float getScale() const { return scale; }
+	sf::Vector2u getTileSize() const { return tileSize; }
+	const std::vector<int>& getLevel() const { return m_level; }
 
 	// Setters
-	int& SetTileOptionsIndex() { return m_TileOptionsIndex; }
+	void setLevel(const std::vector<int>& newLevel) { m_level = newLevel;  }
+
+	// Debug
+	void printTiles() const;
+
+private:
+	unsigned int width;
+	unsigned int height;
+	float scale;
+	sf::Vector2u tileSize;
+    sf::VertexArray m_vertices;
+    sf::Texture     m_tileset;
+	std::vector<int> m_level;
+
+// LevelEditor
+
+public:
+	// Getters
+	const int& GetTileIndex() const { return m_TileIndex; }
+	const int& GetTileOptions() const { return m_TileOptions; }
+
+	// Setters
+	int& SetTileIndex() { return m_TileIndex; }
 
 	// Level Editor methods
-	void UpdateLevelEditor(const std::vector<sf::Event>& events);
-	void DrawLevelEditor();
+	void DrawMouseHover();
 	void HandleLevelEditorInput(const std::vector<sf::Event>& events);
 
 private:
 	sf::RenderWindow& window;
 	UI* ui;
 
-	void LoadTileMap();
-
 	void CreateTileAtPosition(const sf::Vector2f& position);
 	void DeleteTileAtPosition(const sf::Vector2f& position);
 
 	// Level Editor members
-	int m_TileOptionsIndex; // Index of the selected tile option
-	sf::Texture m_TileMapTexture; // Tileset texture
-	std::vector<std::unique_ptr<sf::Sprite>> m_TileOptions; // Tile option for the level editor
-	std::vector<std::unique_ptr<sf::Sprite>> m_Tiles; // Tiles for the level
+	int m_TileIndex; // Index of the selected tile option
+	int m_TileOptions; // Tile option for the level editor
 };
