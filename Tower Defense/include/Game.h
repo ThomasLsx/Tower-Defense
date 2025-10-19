@@ -1,7 +1,11 @@
 #pragma once
 #include "Window.h"
 #include "UI.h"
+
 #include <SFML/Graphics.hpp>
+#include <optional>
+
+class Entity; // Forward declaration
 
 // Structure to hold the state of keys
 struct KeyState {
@@ -16,19 +20,20 @@ struct KeyState {
 // Main game class: handles window, GUI, and game logic
 class Game {
 public:
-    Game(); // Setup game objects
-    void run(); // Main loop
+    Game();
+    void run();
+    void processEvents();
+    void update();
+    void render();
 private:
-    void processEvents(); // Handle input/events
-    void update();        // Update game state
-    void render();        // Draw everything
 
     Window window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
-    sf::RectangleShape block; // Movable block
-    sf::Vector2f blockPosition; // Block position
-    sf::FloatRect detectionZone; // Mouse detection zone
-    bool isRunning;              // Main loop flag
+    Entity* entity;
+	Entity* entity2;
+    sf::Vector2f entityPosition;
+    sf::FloatRect detectionZone;
+    bool isRunning;
 
     KeyState keyState;           // Touches
     float currentSpeed = 0.f;    // Vitesse du bloc

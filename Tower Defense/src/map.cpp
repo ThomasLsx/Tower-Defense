@@ -4,7 +4,7 @@
 Map::Map(int w, int h) : width(w), height(h) {}
 
 Map::~Map() {
-    for (auto p : paths) {
+    for (auto* p : paths) {
         delete p;
     }
 }

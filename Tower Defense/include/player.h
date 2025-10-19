@@ -11,7 +11,7 @@ public:
     Player(int startMoney = 500, int startLives = 20);
 
 	void addMoney(int amount) { money += amount; }
-    bool spendMoney(int amount) {
+    bool spendMoney(unsigned int amount) {
         if (amount > money) return false;
         money -= amount;
         return true;

@@ -1,3 +1,5 @@
+///projectile.h
+
 #pragma once
 #include "entity.h"
 
@@ -24,7 +26,7 @@ public:
      * @param sourceTowerId ID de la tour source.
      * @param targetEntityId ID de l'entité cible.
      */
-    Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f),unsigned int damage = 10, float lifetime = 20, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
+    Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f),unsigned int damage = 10, float lifetime = 20, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
      * @brief Met à jour la position du projectile et vérifie les collisions ou la fin de vie.
@@ -48,4 +50,7 @@ public:
     int getDamage() const { return damage; }                ///< Retourne les dégâts infligés par le projectile.
     int getSourceTowerId() const { return sourceTowerId; }  ///< Retourne l'ID de la tour source.
     int getTargetEntityId() const { return targetEntityId; }///< Retourne l'ID de l'entité cible.
+    int getId() const { return Entity::getId(); } // Ajout pour compatibilité avec ProjectileSystem
+    bool hasReachedTarget() const { return false; } // Stub à implémenter
+    bool isExpired() const { return lifetime <= 0; } // Simple expiration
 };

@@ -1,3 +1,5 @@
+///tower.h
+
 #pragma once
 #include "entity.h"
 
@@ -35,7 +37,7 @@ public:
      * @param level Niveau initial de la tour (par défaut 1).
      */
 
-    Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());  
+    Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);  
 
 
     /**
@@ -61,7 +63,13 @@ public:
      * @param minions Liste des minions.
      * @param projectileSystem Système de gestion des projectiles.
      */
-    void update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) override;
+    void update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem); // Surcharge, pas override
+
+	/**
+	 * @brief Met à jour la tour (sans cibles).
+	 * @param dt Temps écoulé depuis la dernière frame.
+	 */
+    void update(float dt) override; // Cette version override bien Entity
 
 	std::vector<int>  SearchTargets(unsigned int maxTargets); ///< Recherche des cibles dans la portée de la tour
 

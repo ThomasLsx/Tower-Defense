@@ -1,3 +1,5 @@
+/// minion.h
+
 #pragma once
 #include "entity.h"
 
@@ -12,9 +14,8 @@ class Path;
 class Minion : public Entity {
 private:
     unsigned int health;          ///< Points de vie actuels du minion.
-    sf::Vector2f velocity;    ///< Vitesse et direction actuelle du minion.
     float pathProgress;  ///< Progression le long du chemin (0.0 à 1.0).
-    Path* targetPath;    ///< Chemin que le minion doit suivre.
+    // Path* targetPath;    ///< Chemin que le minion doit suivre.
     unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
 
 public:
@@ -27,7 +28,7 @@ public:
      * @param velocity Vitesse initiale du minion.
      * @param reward Récompense accordée à la mort du minion.
      */
-    Minion(int id, Path* path, unsigned int healt = 100, sf::Vector2f velocity = sf::Vector2f(0.0f,0.0f), unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
+    Minion(int id, /*Path* path, */ unsigned int healt = 100, sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f), unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
      * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
@@ -48,12 +49,6 @@ public:
     void takeDamage(int amount);
 
     void makeDamage(int amount);
-
-    /**
-     * @brief Retourne la vitesse actuelle du minion.
-     * @return Vecteur de vitesse du minion.
-     */
-    sf::Vector2f getVelocity(void) const { return velocity; }
 
     /**
      * @brief Retourne la progression du minion le long de son chemin.
@@ -77,7 +72,7 @@ public:
      * @brief Retourne le chemin suivi par le minion.
      * @return Pointeur vers le chemin suivi.
      */
-	Path* getTargetPath(void) const { return targetPath; }
+	// Path* getTargetPath(void) const { return targetPath; }
 
     /**
      * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).

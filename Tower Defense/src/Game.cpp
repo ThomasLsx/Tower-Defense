@@ -1,18 +1,22 @@
-#include "Game.h"
+#include "game.h"
 #include <iostream>
+#include <cmath>
+#include "Window.h"
+#include <SFML/Graphics.hpp>
+
+#include "entity.h"
+#include "minion.h"
 
 Game::Game()
     : window(800, 600, "SFML + TGUI Example"),
-      block(sf::Vector2f(50, 50)),
-      blockPosition(100, 100),
-      detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200)),
-      isRunning(true)
+    detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200)),
+    isRunning(true)
 {
+	this->entity = new Minion(1, 100, sf::Vector2f(0.0f, 0.0f), 10, sf::Vector2f(100.0f, 100.0f), 0.0f, sf::Color::White);
+	this->entity2 = new Minion(2, 100, sf::Vector2f(0.0f, 0.0f), 10, sf::Vector2f(300.0f, 300.0f), 0.0f, sf::Color::Red);
     window.create();
     window.getRenderWindow().setFramerateLimit(60);
     ui = new UI(window.getRenderWindow());
-    block.setFillColor(sf::Color::Blue);
-    block.setPosition(blockPosition);
 }
 
 void Game::run()
@@ -65,6 +69,7 @@ void Game::processEvents()
             if (key->code == sf::Keyboard::Key::E) keyState.e = false;
         }
     }
+
     float moveAmount = 1.5f;
     float dx = 0.f, dy = 0.f;
     if (keyState.up)
@@ -80,30 +85,38 @@ void Game::processEvents()
         float length = std::sqrt(dx * dx + dy * dy);
         dx /= length;
         dy /= length;
-        blockPosition.x += dx * moveAmount;
-        blockPosition.y += dy * moveAmount;
+        sf::Vector2f newPos = entity->getPosition() + sf::Vector2f(dx * moveAmount, dy * moveAmount);
+        entity->setPosition(newPos);
         currentSpeed = moveAmount;
     }
+    /*
     if (keyState.a)
-        block.rotate(sf::degrees(-2.f));
+        entity->setRotation(entity->getRotation() - sf::degrees(2.f));
     if (keyState.e)
-        block.rotate(sf::degrees(2.f));
-    if (blockPosition.x < 0) blockPosition.x = 0;
-    if (blockPosition.y < 0) blockPosition.y = 0;
-    if (blockPosition.x > 800 - 50) blockPosition.x = 800 - 50;
-    if (blockPosition.y > 600 - 50) blockPosition.y = 600 - 50;
+        entity->setRotation(entity->getRotation() + sf::degrees(2.f));
+     */
+
+    // Gestion des limites de l'écran
+    sf::Vector2f pos = entity->getPosition();
+    sf::FloatRect bounds = entity->getGlobalBounds();
+    if (pos.x < 0) pos.x = 0;
+    if (pos.y < 0) pos.y = 0;
+    if (pos.x > 800 - bounds.size.x) pos.x = 800 - bounds.size.x;
+    if (pos.y > 600 - bounds.size.y) pos.y = 600 - bounds.size.y;
+    entity->setPosition(pos);
 }
 
 void Game::update()
 {
-    block.setPosition(blockPosition);
     ui->setSpeed(currentSpeed);
 }
 
 void Game::render()
 {
     window.clear(sf::Color(50, 50, 50));
-    window.getRenderWindow().draw(block);
+    entity->draw(window.getRenderWindow());
+	entity2->draw(window.getRenderWindow());
     ui->draw();
     window.display();
 }
+
