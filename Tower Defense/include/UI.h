@@ -11,17 +11,16 @@
 class UI {
   public:
     UI(sf::RenderWindow& window);
+    tgui::Gui gui;
 	tgui::Label::Ptr createLabel(const std::string& text, int x, int y);
     tgui::Button::Ptr createButton(const std::string& text, int x, int y, int width, int height);
     
     void handleEvent(const sf::Event& event);
     void draw();
-    void setSpeed(float speed);
     void setMode(const std::string& mode);
+    
+	void createMenu();
 
   private:
-    tgui::Gui gui;
-    tgui::Label::Ptr speedLabel;
     tgui::Label::Ptr modeLabel;
-    tgui::Button::Ptr button;
 };

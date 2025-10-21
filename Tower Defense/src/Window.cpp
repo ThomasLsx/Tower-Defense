@@ -33,12 +33,12 @@ const sf::Vector2u& Window::getWindowSize() const
 
 const int& Window::getWidth() const
 {
-	return window.getDefaultView().getSize().x;
+	return window.getSize().x;
 }
 
 const int& Window::getHeight() const
 {
-	return window.getDefaultView().getSize().y;
+	return window.getSize().y;
 }
 
 std::optional<sf::Event> Window::pollEvent() {

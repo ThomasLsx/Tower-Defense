@@ -2,24 +2,12 @@
 #include "UI.h"
 #include <iostream>
 
-static void onButtonClick()
-{
-    std::cout << "OK button pressed!" << std::endl;
-}
-
 UI::UI(sf::RenderWindow& window)
 {
     gui.setTarget(window);
 
-    modeLabel = createLabel("Mode: Play", 10, 10);
+    modeLabel = createLabel("Mode: ", 10, 10);
 	gui.add(modeLabel, "modeLabel");
-
-    speedLabel = createLabel("Vitesse: 0", 10, 40);
-    gui.add(speedLabel, "speedLabel");
-
-    button = createButton("OK", 350, 500, 100, 40);
-    button->onPress(onButtonClick);
-    gui.add(button);
 }
 
 tgui::Label::Ptr UI::createLabel(const std::string& text, int x, int y)
@@ -50,14 +38,38 @@ void UI::draw()
     gui.draw();
 }
 
-void UI::setSpeed(float speed)
-{
-    if (speedLabel)
-        speedLabel->setText("Vitesse: " + std::to_string(speed));
-}
-
 void UI::setMode(const std::string& mode)
 {
     if (modeLabel)
         modeLabel->setText("Mode: " + mode);
+}
+
+void UI::createMenu()
+{
+    if (!menuInitialized) {
+        auto menu_ui = tgui::Group::create();
+        // Bouton Play
+        auto boutonPlay = ui->createButton("Play", window->getWidth() / 2 - 100, window->getHeight() / 2 - 25, 200, 50);
+        boutonPlay->onPress([this]() {
+            std::cout << "Play button pressed!" << std::endl;
+            m_eGameMode = Play;
+            ui->setMode("Play");
+            });
+        // Bouton Level Editor
+        auto boutonEditor = ui->createButton("Level Editor", window->getWidth() / 2 - 100, window->getHeight() / 2 + 25, 200, 50);
+        boutonEditor->onPress([this]() {
+            std::cout << "Level Editor button pressed!" << std::endl;
+            m_eGameMode = Editor;
+            ui->setMode("Level Editor");
+            });
+
+        menu_ui->add(boutonPlay);
+        menu_ui->add(boutonEditor);
+
+        ui->gui.add(menu_ui);
+
+        menu_ui->setVisible(true);
+
+        menuInitialized = true;
+    }
 }

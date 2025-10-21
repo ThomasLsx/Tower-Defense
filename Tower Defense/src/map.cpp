@@ -1,7 +1,7 @@
 // map.cpp
 #include "map.h"
 
-TileMap::TileMap(sf::RenderWindow& window, UI* ui) : window(window), ui(ui)
+TileMap::TileMap(sf::RenderWindow& window) : window(window)
 {
     width = 20;
     height = 11;
@@ -87,10 +87,9 @@ bool TileMap::saveLevel(const std::filesystem::path& levelFilePath)
         std::cerr << "Failed to open level file for writing: " << levelFilePath << std::endl;
         return false;
     }
-    unsigned int width = 20; // Assuming a fixed width, adjust as necessary
     for (size_t i = 0; i < m_level.size(); ++i) {
         file << m_level[i];
-        if ((i + 1) % width == 0) {
+        if ((i + 1) % getWidth() == 0) {
             file << '\n';
         } else {
             file << ' ';

@@ -12,7 +12,7 @@
 class TileMap : public sf::Drawable, public sf::Transformable
 {
 public:
-	TileMap(sf::RenderWindow& window, UI* ui);
+	TileMap(sf::RenderWindow& window);
 	~TileMap() {};
 
 	bool loadTile(const std::filesystem::path& tileset, const int* tiles);
@@ -60,7 +60,6 @@ public:
 
 private:
 	sf::RenderWindow& window;
-	UI* ui;
 
 	void CreateTileAtPosition(const sf::Vector2f& position);
 	void DeleteTileAtPosition(const sf::Vector2f& position);

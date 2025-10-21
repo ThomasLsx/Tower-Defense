@@ -3,10 +3,7 @@
 #include <iostream>
 
 Game::Game()
-    : block(sf::Vector2f(50, 50))
-    , blockPosition(100, 100)
-    , detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200))
-	, m_eGameMode(Play)
+    : m_eGameMode(Menu)
 
 {
     window = new Window();
@@ -14,17 +11,14 @@ Game::Game()
     window->getRenderWindow().setFramerateLimit(60);
 
     ui = new UI(window->getRenderWindow());
-    map = new TileMap(window->getRenderWindow(), ui);
+    map = new TileMap(window->getRenderWindow());
 
     map->loadLevel("assets/map1.txt");
     map->loadTile("assets/TileMap.png", map->getLevel().data());
     map->printTiles();
 
-    block.setFillColor(sf::Color::Blue);
-    block.setPosition(blockPosition);
     // Initialise le label mode au démarrage
-    ui->setMode("Play");
-
+    ui->setMode("Menu");
 }
 
 Game::~Game()
@@ -45,21 +39,29 @@ void Game::run()
             else
             {
                 events.push_back(*event);
+                ui->handleEvent(*event);
             }
         }
 
         HandleInput(events);
+        //ui->gui.removeAllWidgets();
 
         switch (m_eGameMode) {
+		case Menu:
+            showMenu();
+			break;
         case Play:
+            menuInitialized = false;
             UpdatePlay(events);
             break;
         case Editor:
+            menuInitialized = false;
             //map->UpdateLevelEditor(events);
             break;
         }
 
         Render();
+
     }
 }
 
@@ -67,37 +69,6 @@ void Game::run()
 void Game::UpdatePlay(const std::vector<sf::Event>& events)
 {
     HandlePlayInput(events);
-    float moveAmount = 1.5f;
-    float dx = 0.f, dy = 0.f;
-    if (keyState.z)
-        dy -= 1.f;
-    if (keyState.s)
-        dy += 1.f;
-    if (keyState.q)
-        dx -= 1.f;
-    if (keyState.d)
-        dx += 1.f;
-    currentSpeed = 0.f;
-    if (dx != 0.f || dy != 0.f) {
-        float length = std::sqrt(dx * dx + dy * dy);
-        dx /= length;
-        dy /= length;
-        blockPosition.x += dx * moveAmount;
-        blockPosition.y += dy * moveAmount;
-        currentSpeed = moveAmount;
-    }
-    if (keyState.a)
-        block.rotate(sf::degrees(-2.f));
-    if (keyState.e)
-        block.rotate(sf::degrees(2.f));
-    if (blockPosition.x < 0) blockPosition.x = 0;
-    if (blockPosition.y < 0) blockPosition.y = 0;
-    if (blockPosition.x > window->getWidth()) blockPosition.x = window->getWidth();
-    if (blockPosition.y > window->getHeight()) blockPosition.y = window->getHeight();
-
-    block.setPosition(blockPosition);
-    ui->setSpeed(currentSpeed);
-
 }
 
 
@@ -105,14 +76,27 @@ void Game::UpdatePlay(const std::vector<sf::Event>& events)
 void Game::Render()
 {
     window->clear(sf::Color(50, 50, 50));
-    map->draw(window->getRenderWindow(), sf::RenderStates::Default);
-    window->getRenderWindow().draw(block);
-    ui->draw();
+
+    // Affiche le menu
+    if (m_eGameMode == Menu)
+    {
+		//window->clear(sf::Color(100, 100, 100));
+	}
+
+    // Affiche la map de jeux
+    if (m_eGameMode == Play)
+    {
+        map->draw(window->getRenderWindow(), sf::RenderStates::Default);
+	}
 
     // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
     if (m_eGameMode == Editor)
+    {
+        map->draw(window->getRenderWindow(), sf::RenderStates::Default);
         map->DrawMouseHover();
+    }
 
+    ui->draw();
     window->display();
 }
 
@@ -123,10 +107,15 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
     {
         if(!bTWasPressedLastUpdate)
         {
-            if (m_eGameMode == Play) {
+            if (m_eGameMode == Editor) {
+                m_eGameMode = Menu;
+                ui->setMode("Menu");
+            }
+            else if (m_eGameMode == Play) {
                 m_eGameMode = Editor;
                 ui->setMode("Editor");
-            } else {
+            } 
+            else {
                 m_eGameMode = Play;
                 ui->setMode("Play");
             }
@@ -148,38 +137,36 @@ void Game::HandlePlayInput(const std::vector<sf::Event>& events)
     for (const auto& event : events)
     {
         ui->handleEvent(event);
-        if (event.is<sf::Event::MouseButtonPressed>())
-        {
-            auto mouse = event.getIf<sf::Event::MouseButtonPressed>();
-            sf::Vector2f pos(static_cast<float>(mouse->position.x), static_cast<float>(mouse->position.y));
-            if (detectionZone.contains(pos))
-            {
-                if (mouse->button == sf::Mouse::Button::Left)
-                    std::cout << "Left click at (" << mouse->position.x << ", " << mouse->position.y << ")\n";
-                if (mouse->button == sf::Mouse::Button::Right)
-                    std::cout << "Right click at (" << mouse->position.x << ", " << mouse->position.y << ")\n";
-            }
-        }
-        if (event.is<sf::Event::KeyPressed>())
-        {
-            auto key = event.getIf<sf::Event::KeyPressed>();
-            if (key->code == sf::Keyboard::Key::Z) keyState.z = true;
-            if (key->code == sf::Keyboard::Key::S) keyState.s = true;
-            if (key->code == sf::Keyboard::Key::Q) keyState.q = true;
-            if (key->code == sf::Keyboard::Key::D) keyState.d = true;
-            if (key->code == sf::Keyboard::Key::A) keyState.a = true;
-            if (key->code == sf::Keyboard::Key::E) keyState.e = true;
-        }
-        if (event.is<sf::Event::KeyReleased>())
-        {
-            auto key = event.getIf<sf::Event::KeyReleased>();
-            if (key->code == sf::Keyboard::Key::Z) keyState.z = false;
-            if (key->code == sf::Keyboard::Key::S) keyState.s = false;
-            if (key->code == sf::Keyboard::Key::Q) keyState.q = false;
-            if (key->code == sf::Keyboard::Key::D) keyState.d = false;
-            if (key->code == sf::Keyboard::Key::A) keyState.a = false;
-            if (key->code == sf::Keyboard::Key::E) keyState.e = false;
-        }
+    }
+}
+
+void Game::showMenu()
+{
+    if (!menuInitialized) {
+        auto menu_ui = tgui::Group::create();
+		// Bouton Play
+        auto boutonPlay = ui->createButton("Play", window->getWidth()/2 - 100, window->getHeight()/2 -25, 200, 50);
+        boutonPlay->onPress([this]() {
+            std::cout << "Play button pressed!" << std::endl;
+            m_eGameMode = Play;
+            ui->setMode("Play");
+        });
+		// Bouton Level Editor
+        auto boutonEditor = ui->createButton("Level Editor", window->getWidth()/2 - 100, window->getHeight()/2 + 25, 200, 50);
+        boutonEditor->onPress([this]() {
+            std::cout << "Level Editor button pressed!" << std::endl;
+            m_eGameMode = Editor;
+            ui->setMode("Level Editor");
+            });
+
+		menu_ui->add(boutonPlay);
+		menu_ui->add(boutonEditor);
+
+        ui->gui.add(menu_ui);
+
+		menu_ui->setVisible(true);
+
+        menuInitialized = true;
     }
 }
 
