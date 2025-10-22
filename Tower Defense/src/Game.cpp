@@ -1,109 +1,168 @@
+// Game.cpp
 #include "Game.h"
 #include <iostream>
 
 Game::Game()
-    : window(800, 600, "SFML + TGUI Example"),
-      block(sf::Vector2f(50, 50)),
-      blockPosition(100, 100),
-      detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200)),
-      isRunning(true)
+    : m_eGameMode(Menu)
+
 {
-    window.create();
-    window.getRenderWindow().setFramerateLimit(60);
-    ui = new UI(window.getRenderWindow());
-    block.setFillColor(sf::Color::Blue);
-    block.setPosition(blockPosition);
+    window = new Window();
+    window->create();
+    window->getRenderWindow().setFramerateLimit(60);
+
+    ui = new UI(window->getRenderWindow());
+    map = new TileMap(window->getRenderWindow());
+
+    map->loadLevel("assets/map1.txt");
+    map->loadTile("assets/TileMap.png", map->getLevel().data());
+    map->printTiles();
+
+    // Initialise le label mode au démarrage
+    ui->setMode("Menu");
+}
+
+Game::~Game()
+{
 }
 
 void Game::run()
 {
-    while (window.isOpen() && isRunning)
+    while (window->isOpen())
     {
-        processEvents();
-        update();
-        render();
-    }
-}
-
-void Game::processEvents()
-{
-    while (const std::optional<sf::Event> event = window.pollEvent())
-    {
-        if (event->is<sf::Event::Closed>())
-            window.close();
-        ui->handleEvent(*event);
-        if (event->is<sf::Event::MouseButtonPressed>())
+        std::vector<sf::Event> events;
+        while (const std::optional<sf::Event> event = window->pollEvent())
         {
-            auto mouse = event->getIf<sf::Event::MouseButtonPressed>();
-            sf::Vector2f pos(static_cast<float>(mouse->position.x), static_cast<float>(mouse->position.y));
-            if (detectionZone.contains(pos))
+            if (event->is<sf::Event::Closed>())
             {
-                if (mouse->button == sf::Mouse::Button::Left)
-                    std::cout << "Left click at (" << mouse->position.x << ", " << mouse->position.y << ")\n";
-                if (mouse->button == sf::Mouse::Button::Right)
-                    std::cout << "Right click at (" << mouse->position.x << ", " << mouse->position.y << ")\n";
+                window->close();
+            }
+            else
+            {
+                events.push_back(*event);
+                ui->handleEvent(*event);
             }
         }
-        if (event->is<sf::Event::KeyPressed>())
-        {
-            auto key = event->getIf<sf::Event::KeyPressed>();
-            if (key->code == sf::Keyboard::Key::Up) keyState.up = true;
-            if (key->code == sf::Keyboard::Key::Down) keyState.down = true;
-            if (key->code == sf::Keyboard::Key::Left) keyState.left = true;
-            if (key->code == sf::Keyboard::Key::Right) keyState.right = true;
-            if (key->code == sf::Keyboard::Key::A) keyState.a = true;
-            if (key->code == sf::Keyboard::Key::E) keyState.e = true;
+
+        HandleInput(events);
+
+        switch (m_eGameMode) {
+		case Menu:
+            showMenu();
+			break;
+        case Play:
+            ui->gui.removeAllWidgets();
+            menuInitialized = false;
+            UpdatePlay(events);
+            break;
+        case Editor:
+            ui->gui.removeAllWidgets();
+            menuInitialized = false;
+            //map->UpdateLevelEditor(events);
+            break;
         }
-        if (event->is<sf::Event::KeyReleased>())
-        {
-            auto key = event->getIf<sf::Event::KeyReleased>();
-            if (key->code == sf::Keyboard::Key::Up) keyState.up = false;
-            if (key->code == sf::Keyboard::Key::Down) keyState.down = false;
-            if (key->code == sf::Keyboard::Key::Left) keyState.left = false;
-            if (key->code == sf::Keyboard::Key::Right) keyState.right = false;
-            if (key->code == sf::Keyboard::Key::A) keyState.a = false;
-            if (key->code == sf::Keyboard::Key::E) keyState.e = false;
-        }
+
+        Render();
+
     }
-    float moveAmount = 1.5f;
-    float dx = 0.f, dy = 0.f;
-    if (keyState.up)
-        dy -= 1.f;
-    if (keyState.down)
-        dy += 1.f;
-    if (keyState.left)
-        dx -= 1.f;
-    if (keyState.right)
-        dx += 1.f;
-    currentSpeed = 0.f;
-    if (dx != 0.f || dy != 0.f) {
-        float length = std::sqrt(dx * dx + dy * dy);
-        dx /= length;
-        dy /= length;
-        blockPosition.x += dx * moveAmount;
-        blockPosition.y += dy * moveAmount;
-        currentSpeed = moveAmount;
-    }
-    if (keyState.a)
-        block.rotate(sf::degrees(-2.f));
-    if (keyState.e)
-        block.rotate(sf::degrees(2.f));
-    if (blockPosition.x < 0) blockPosition.x = 0;
-    if (blockPosition.y < 0) blockPosition.y = 0;
-    if (blockPosition.x > 800 - 50) blockPosition.x = 800 - 50;
-    if (blockPosition.y > 600 - 50) blockPosition.y = 600 - 50;
 }
 
-void Game::update()
+
+void Game::UpdatePlay(const std::vector<sf::Event>& events)
 {
-    block.setPosition(blockPosition);
-    ui->setSpeed(currentSpeed);
+    HandlePlayInput(events);
 }
 
-void Game::render()
+
+
+void Game::Render()
 {
-    window.clear(sf::Color(50, 50, 50));
-    window.getRenderWindow().draw(block);
+    window->clear(sf::Color(50, 50, 50));
+
+    // Affiche le menu
+    if (m_eGameMode == Menu)
+    {
+		//window->clear(sf::Color(100, 100, 100));
+	}
+
+    // Affiche la map de jeux
+    if (m_eGameMode == Play)
+    {
+        map->draw(window->getRenderWindow(), sf::RenderStates::Default);
+	}
+
+    // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
+    if (m_eGameMode == Editor)
+    {
+        map->draw(window->getRenderWindow(), sf::RenderStates::Default);
+        map->DrawMouseHover();
+    }
+
     ui->draw();
-    window.display();
+    window->display();
 }
+
+void Game::HandleInput(const std::vector<sf::Event>& events)
+{
+    static bool bTWasPressedLastUpdate = false;
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T))
+    {
+        if(!bTWasPressedLastUpdate)
+        {
+            if (m_eGameMode == Editor) {
+                m_eGameMode = Menu;
+                ui->setMode("Menu");
+            }
+            else if (m_eGameMode == Play) {
+                m_eGameMode = Editor;
+                ui->setMode("Editor");
+            } 
+            else {
+                m_eGameMode = Play;
+                ui->setMode("Play");
+            }
+		}
+        bTWasPressedLastUpdate = true;
+	}
+    else
+    {
+		bTWasPressedLastUpdate = false;
+    }
+
+    // N'appeler HandlePlayInput() que dans UpdatePlay()
+    if (m_eGameMode == Editor)
+        map->HandleLevelEditorInput(events);
+}
+
+void Game::HandlePlayInput(const std::vector<sf::Event>& events)
+{
+    for (const auto& event : events)
+    {
+        ui->handleEvent(event);
+    }
+}
+
+void Game::showMenu()
+{
+    if (!menuInitialized) {
+		// Bouton Play
+        auto boutonPlay = ui->createButton("Play", window->getWidth()/2 - 100, window->getHeight()/2 -25, 200, 50);
+        boutonPlay->onPress([this]() {
+            std::cout << "Play button pressed!" << std::endl;
+            m_eGameMode = Play;
+            ui->setMode("Play");
+        });
+        ui->gui.add(boutonPlay);
+
+		// Bouton Level Editor
+        auto boutonEditor = ui->createButton("Level Editor", window->getWidth()/2 - 100, window->getHeight()/2 + 25, 200, 50);
+        boutonEditor->onPress([this]() {
+            std::cout << "Level Editor button pressed!" << std::endl;
+            m_eGameMode = Editor;
+            ui->setMode("Level Editor");
+            });
+		ui->gui.add(boutonEditor);
+
+        menuInitialized = true;
+    }
+}
+

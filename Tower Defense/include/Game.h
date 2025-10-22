@@ -1,40 +1,39 @@
+// Game.h
 #pragma once
 #include "Window.h"
 #include "UI.h"
+#include "map.h"
 #include <SFML/Graphics.hpp>
-
-// Structure to hold the state of keys
-struct KeyState {
-    bool up = false;
-    bool down = false;
-    bool left = false;
-    bool right = false;
-    bool a = false;
-    bool e = false;
-};
+#include <vector>
 
 // Main game class: handles window, GUI, and game logic
 class Game {
 public:
     Game(); // Setup game objects
-    void run(); // Main loop
+	~Game(); // Cleanup
+	void run(); // Main loop
+
+    enum GameMode
+    {
+        Menu,
+        Play,
+		Editor
+    };
+
 private:
-    void processEvents(); // Handle input/events
-    void update();        // Update game state
-    void render();        // Draw everything
+    void UpdatePlay(const std::vector<sf::Event>& events);
 
-    Window window; // Utilisation de la classe Window
+	void Render();
+
+	void HandleInput(const std::vector<sf::Event>& events);
+	void HandlePlayInput(const std::vector<sf::Event>& events);
+
+	void showMenu();
+
+    Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
-    sf::RectangleShape block; // Movable block
-    sf::Vector2f blockPosition; // Block position
-    sf::FloatRect detectionZone; // Mouse detection zone
-    bool isRunning;              // Main loop flag
+    TileMap* map; // Utilisation de la classe Map
+    GameMode m_eGameMode;
 
-    KeyState keyState;           // Touches
-    float currentSpeed = 0.f;    // Vitesse du bloc
-
-    // Variables de configuration chargées depuis config.json
-    int playerHealth = 100;
-    float enemySpeed = 1.5f;
-    int towerCost = 50;
+    bool menuInitialized = false;
 };

@@ -8,13 +8,13 @@ ProjectileSystem::ProjectileSystem() = default;
 ProjectileSystem::~ProjectileSystem() = default;
 
 void ProjectileSystem::createProjectile(int sourceId, int targetId, int dmg, float speed) {
-    projectiles.emplace_back(std::make_unique<Projectile>(projectiles.size(), sourceId, targetId, dmg, speed));
+    projectiles.emplace_back(std::make_unique<Projectile>(projectiles.size(), sourceId, targetId, sf::Vector2f(speed, 0.0f), dmg, 20.0f));
 }
 
 void ProjectileSystem::update(float dt, const std::vector<Entity*>& entities) {
     for (auto it = projectiles.begin(); it != projectiles.end(); ) {
         Projectile& projectile = **it;
-        projectile.update(dt, entities);
+        projectile.update(dt); // Corrige l'appel, ne passe qu'un seul argument
 
         // Supprime le projectile s'il a atteint sa cible ou est hors d'usage
         if (projectile.hasReachedTarget() || projectile.isExpired()) {

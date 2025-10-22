@@ -1,3 +1,5 @@
+/// minion.h
+
 #pragma once
 #include "entity.h"
 
@@ -5,17 +7,16 @@ class Path;
 
 /**
  * @class Minion
- * @brief Représente un minion dans un jeu de type Tower Defense.
+ * @brief ReprÃ©sente un minion dans un jeu de type Tower Defense.
  *
- * Un minion suit un chemin prédéfini, peut subir des dégâts et récompense le joueur à sa mort.
+ * Un minion suit un chemin prÃ©dÃ©fini, peut subir des dÃ©gÃ¢ts et rÃ©compense le joueur Ã  sa mort.
  */
 class Minion : public Entity {
 private:
     unsigned int health;          ///< Points de vie actuels du minion.
-    sf::Vector2f velocity;    ///< Vitesse et direction actuelle du minion.
-    float pathProgress;  ///< Progression le long du chemin (0.0 à 1.0).
-    Path* targetPath;    ///< Chemin que le minion doit suivre.
-    unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
+    float pathProgress;  ///< Progression le long du chemin (0.0 Ã  1.0).
+    // Path* targetPath;    ///< Chemin que le minion doit suivre.
+    unsigned int rewardOnDeath;   ///< RÃ©compense accordÃ©e Ã  la mort du minion.
 
 public:
     /**
@@ -25,39 +26,33 @@ public:
      * @param path Chemin que le minion doit suivre.
      * @param health Points de vie initiaux du minion.
      * @param velocity Vitesse initiale du minion.
-     * @param reward Récompense accordée à la mort du minion.
+     * @param reward RÃ©compense accordÃ©e Ã  la mort du minion.
      */
-    Minion(int id, Path* path, unsigned int healt = 100, sf::Vector2f velocity = sf::Vector2f(0.0f,0.0f), unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture());
+    Minion(int id, /*Path* path, */ unsigned int healt = 100, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
-     * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
-     * @param dt Temps écoulé depuis la dernière frame (en secondes).
+     * @brief DÃ©place le minion en fonction de sa vitesse et du temps Ã©coulÃ©.
+     * @param dt Temps Ã©coulÃ© depuis la derniÃ¨re frame (en secondes).
      */
     void move(float dt);
 
     /**
-     * @brief Met à jour la position du minion pour qu'il suive son chemin.
+     * @brief Met Ã  jour la position du minion pour qu'il suive son chemin.
      */
     void followPath(void);
 
     /**
-     * @brief Inflige des dégâts au minion.
-     * @param amount Montant des dégâts infligés.
-     * @param sourceId ID de l'entité source des dégâts (ex: ID de la tour).
+     * @brief Inflige des dÃ©gÃ¢ts au minion.
+     * @param amount Montant des dÃ©gÃ¢ts infligÃ©s.
+     * @param sourceId ID de l'entitÃ© source des dÃ©gÃ¢ts (ex: ID de la tour).
      */
     void takeDamage(int amount);
 
     void makeDamage(int amount);
 
     /**
-     * @brief Retourne la vitesse actuelle du minion.
-     * @return Vecteur de vitesse du minion.
-     */
-    sf::Vector2f getVelocity(void) const { return velocity; }
-
-    /**
      * @brief Retourne la progression du minion le long de son chemin.
-     * @return Valeur entre 0.0 et 1.0 représentant la progression.
+     * @return Valeur entre 0.0 et 1.0 reprÃ©sentant la progression.
      */
     float getPathProgress(void) const { return pathProgress; }
 
@@ -68,8 +63,8 @@ public:
     int getHealth(void) const { return health; }
 
     /**
-     * @brief Retourne la récompense accordée à la mort du minion.
-     * @return Récompense en points ou monnaie.
+     * @brief Retourne la rÃ©compense accordÃ©e Ã  la mort du minion.
+     * @return RÃ©compense en points ou monnaie.
      */
     int getRewardOnDeath(void) const { return rewardOnDeath; }
 
@@ -77,16 +72,16 @@ public:
      * @brief Retourne le chemin suivi par le minion.
      * @return Pointeur vers le chemin suivi.
      */
-	Path* getTargetPath(void) const { return targetPath; }
+     // Path* getTargetPath(void) const { return targetPath; }
 
-    /**
-     * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).
-     */
+     /**
+      * @brief AppelÃ© quand le minion est dÃ©truit (mort ou arrivÃ©e Ã  destination).
+      */
     void onDestroy(void) override;
 
     /**
-     * @brief Met à jour le minion (déplacement, suivi de chemin, etc.).
-     * @param dt Temps écoulé depuis la dernière frame (en secondes).
+     * @brief Met Ã  jour le minion (dÃ©placement, suivi de chemin, etc.).
+     * @param dt Temps Ã©coulÃ© depuis la derniÃ¨re frame (en secondes).
      */
     void update(float dt) override;
 };

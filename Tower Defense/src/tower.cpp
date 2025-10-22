@@ -1,41 +1,52 @@
+
 #include "tower.h"
 #include "projectilesystem.h"
+#include <iostream>
 
-Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage, sf::Vector2f pos, float rotation, sf::Color color, sf::IntRect textureRect, const sf::Texture& texture)
-    : Entity(id, pos, rotation, color, textureRect, texture),
-      range(range),
-      fireRate(fireRate),
-      level(level),
-      damage(damage) 
+Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage, sf::Vector2f pos, float rotation, sf::Color color)
+    : Entity(id),
+    range(range),
+    fireRate(fireRate),
+    level(level),
+    damage(damage)
 {
+    Entity::init();
 }
 
 void Tower::tryFire(const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) {
     for (int targetId : targetIds) {
-        projectileSystem.createProjectile(id, targetId, damage, 10.0f);
-        std::cout << "Tower " << id << " fires at minion " << targetId << std::endl;
+        projectileSystem.createProjectile(Entity::getId(), targetId, damage, 10.0f);
+        std::cout << "Tower " << Entity::getId() << " fires at minion " << targetId << std::endl;
     }
 }
 
 void Tower::upgrade() {
     level++;
     range *= 1.1f;
-    damage *= 1.2f;
-    std::cout << "Tower " << Entity::getID() << " upgraded to level " << level << " (Damage: " << damage << ")" << std::endl;
+    damage = static_cast<unsigned int>(damage * 1.2f);
+    std::cout << "Tower " << Entity::getId() << " upgraded to level " << level << " (Damage: " << damage << ")" << std::endl;
 }
 
 void Tower::onDestroy() {
-    std::cout << "Tower " << Entity::getID() << " destroyed!" << std::endl;
-	Entity::setisAlive(false);
+    std::cout << "Tower " << Entity::getId() << " destroyed!" << std::endl;
+    Entity::setIsAlive(false);
 }
 
-void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) 
+// La m�thode update de la base Entity ne correspond pas � celle de Tower
+// On ajoute une surcharge non override pour la version Tower
+void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem)
 {
-	tryFire(minions, projectileSystem); 
+    tryFire(minions, projectileSystem);
 }
 
 std::vector<int> Tower::SearchTargets(unsigned int maxTargets)
 {
-	//use projsys pour get targets
+    //use projsys pour get targets
     return std::vector<int>();
+}
+
+// Ajout d'une version override de update pour la base
+void Tower::update(float dt)
+{
+    // Optionnel : logique de base si besoin
 }

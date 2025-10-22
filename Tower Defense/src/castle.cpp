@@ -1,8 +1,11 @@
-#include "castle.h"
 
-Castle::Castle(int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, sf::IntRect textureRect = sf::IntRect(), const sf::Texture& texture = sf::Texture(), unsigned int maxHealth = 100)
-	:Entity(id, pos, rotation, color, textureRect, texture), health(maxHealth), maxHealth(maxHealth)
+#include "castle.h"
+#include <iostream>
+
+Castle::Castle(unsigned int id, sf::Vector2f pos, float rotation, sf::Color color, unsigned int maxHealth)
+	:Entity(id), health(maxHealth), maxHealth(maxHealth)
 {
+	Entity::init();
 }
 
 void Castle::takeDamage(unsigned int amount)
@@ -16,7 +19,7 @@ void Castle::takeDamage(unsigned int amount)
 
 void Castle::repair(unsigned int amount)
 {
-	if (isAlive())
+	if (Entity::getIsAlive())
 	{
 		health += amount;
 		if (health > maxHealth) health = maxHealth;
@@ -25,7 +28,12 @@ void Castle::repair(unsigned int amount)
 
 void Castle::onDestroy()
 {
-	setisAlive(false);
+	Entity::setIsAlive(false);
 	std::cout << "GAME OVER" << std::endl;
-	std::cout << "Castle " << getID() << " destroyed!" << std::endl;
+	std::cout << "Castle " << Entity::getId() << " destroyed!" << std::endl;
+}
+
+void Castle::update(float dt)
+{
+	// Ajoute ici la logique d'update du ch�teau si besoin
 }
