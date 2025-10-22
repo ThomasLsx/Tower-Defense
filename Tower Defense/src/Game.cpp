@@ -44,17 +44,18 @@ void Game::run()
         }
 
         HandleInput(events);
-        //ui->gui.removeAllWidgets();
 
         switch (m_eGameMode) {
 		case Menu:
             showMenu();
 			break;
         case Play:
+            ui->gui.removeAllWidgets();
             menuInitialized = false;
             UpdatePlay(events);
             break;
         case Editor:
+            ui->gui.removeAllWidgets();
             menuInitialized = false;
             //map->UpdateLevelEditor(events);
             break;
@@ -143,7 +144,6 @@ void Game::HandlePlayInput(const std::vector<sf::Event>& events)
 void Game::showMenu()
 {
     if (!menuInitialized) {
-        auto menu_ui = tgui::Group::create();
 		// Bouton Play
         auto boutonPlay = ui->createButton("Play", window->getWidth()/2 - 100, window->getHeight()/2 -25, 200, 50);
         boutonPlay->onPress([this]() {
@@ -151,6 +151,8 @@ void Game::showMenu()
             m_eGameMode = Play;
             ui->setMode("Play");
         });
+        ui->gui.add(boutonPlay);
+
 		// Bouton Level Editor
         auto boutonEditor = ui->createButton("Level Editor", window->getWidth()/2 - 100, window->getHeight()/2 + 25, 200, 50);
         boutonEditor->onPress([this]() {
@@ -158,13 +160,7 @@ void Game::showMenu()
             m_eGameMode = Editor;
             ui->setMode("Level Editor");
             });
-
-		menu_ui->add(boutonPlay);
-		menu_ui->add(boutonEditor);
-
-        ui->gui.add(menu_ui);
-
-		menu_ui->setVisible(true);
+		ui->gui.add(boutonEditor);
 
         menuInitialized = true;
     }

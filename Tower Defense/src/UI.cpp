@@ -44,32 +44,32 @@ void UI::setMode(const std::string& mode)
         modeLabel->setText("Mode: " + mode);
 }
 
-void UI::createMenu()
-{
-    if (!menuInitialized) {
-        auto menu_ui = tgui::Group::create();
-        // Bouton Play
-        auto boutonPlay = ui->createButton("Play", window->getWidth() / 2 - 100, window->getHeight() / 2 - 25, 200, 50);
-        boutonPlay->onPress([this]() {
-            std::cout << "Play button pressed!" << std::endl;
-            m_eGameMode = Play;
-            ui->setMode("Play");
-            });
-        // Bouton Level Editor
-        auto boutonEditor = ui->createButton("Level Editor", window->getWidth() / 2 - 100, window->getHeight() / 2 + 25, 200, 50);
-        boutonEditor->onPress([this]() {
-            std::cout << "Level Editor button pressed!" << std::endl;
-            m_eGameMode = Editor;
-            ui->setMode("Level Editor");
-            });
-
-        menu_ui->add(boutonPlay);
-        menu_ui->add(boutonEditor);
-
-        ui->gui.add(menu_ui);
-
-        menu_ui->setVisible(true);
-
-        menuInitialized = true;
-    }
-}
+//void UI::createMenu()
+//{
+//    if (!menuInitialized) {
+//        auto menu_ui = tgui::Group::create();
+//        // Bouton Play
+//        auto boutonPlay = ui->createButton("Play", window->getWidth() / 2 - 100, window->getHeight() / 2 - 25, 200, 50);
+//        boutonPlay->onPress([this]() {
+//            std::cout << "Play button pressed!" << std::endl;
+//            m_eGameMode = Play;
+//            ui->setMode("Play");
+//            });
+//        // Bouton Level Editor
+//        auto boutonEditor = ui->createButton("Level Editor", window->getWidth() / 2 - 100, window->getHeight() / 2 + 25, 200, 50);
+//        boutonEditor->onPress([this]() {
+//            std::cout << "Level Editor button pressed!" << std::endl;
+//            m_eGameMode = Editor;
+//            ui->setMode("Level Editor");
+//            });
+//
+//        menu_ui->add(boutonPlay);
+//        menu_ui->add(boutonEditor);
+//
+//        ui->gui.add(menu_ui);
+//
+//        menu_ui->setVisible(true);
+//
+//        menuInitialized = true;
+//    }
+//}

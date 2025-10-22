@@ -19,7 +19,7 @@ class UI {
     void draw();
     void setMode(const std::string& mode);
     
-	void createMenu();
+	//void createMenu();
 
   private:
     tgui::Label::Ptr modeLabel;
