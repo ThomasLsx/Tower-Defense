@@ -38,7 +38,7 @@ void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, 
 }
 
 void Entity::update(float dt) {
-    // Mise à jour de la position en fonction de la vélocité
+    // Mise ï¿½ jour de la position en fonction de la vï¿½locitï¿½
     _position += _velocity * dt;
     _shape.setPosition(_position);
 
