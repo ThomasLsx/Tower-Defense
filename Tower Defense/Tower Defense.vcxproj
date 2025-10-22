@@ -19,8 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\economySystem.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\map.cpp" />
+    <ClCompile Include="src\player.cpp" />
+    <ClCompile Include="src\projectileSystem.cpp" />
+    <ClCompile Include="src\wave.cpp" />
     <ClCompile Include="src\UI.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\castle.cpp" />
@@ -32,13 +36,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\castle.h" />
+    <ClInclude Include="include\constants.h" />
+    <ClInclude Include="include\economySystem.h" />
     <ClInclude Include="include\entity.h" />
     <ClInclude Include="include\map.h" />
     <ClInclude Include="include\minion.h" />
+    <ClInclude Include="include\path.h" />
+    <ClInclude Include="include\player.h" />
     <ClInclude Include="include\projectile.h" />
+    <ClInclude Include="include\projectileSystem.h" />
     <ClInclude Include="include\tower.h" />
     <ClInclude Include="include\Game.h" />
     <ClInclude Include="include\UI.h" />
+    <ClInclude Include="include\utils.h" />
+    <ClInclude Include="include\wave.h" />
     <ClInclude Include="include\Window.h" />
   </ItemGroup>
   <ItemGroup>

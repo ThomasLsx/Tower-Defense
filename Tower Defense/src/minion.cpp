@@ -1,34 +1,52 @@
 #include "minion.h"
+#include "path.h"
 
-Minion::Minion(int x, int y, float damage, float speed, sf::Vector2f direction, const sf::Texture& texture)
-	:Entity(x, y, texture), damage(damage), speed(speed), direction(direction)
-{
-}
+#include <iostream>
 
-
-float Minion::getDamage(void)
+Minion::Minion(int id,/*Path* path, */ unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
+    : Entity(id), health(health), pathProgress(0.0f),
+    /*targetPath(path),*/ rewardOnDeath(reward)
 {
-	return damage;
-}
-void Minion::setDamage(float damage)
-{
-	this->damage = damage;
+    Entity::init();
 }
 
-sf::Vector2f Minion::getDirection(void)
-{
-	return direction;
-}
-void Minion::setDirection(sf::Vector2f direction)
-{
-	this->direction = direction;
+void Minion::move(float dt) {
+    sf::Vector2f foo = Entity::getPosition();
+    Entity::setPosition(foo += _velocity * dt);
 }
 
-float Minion::getSpeed(void)
-{
-	return speed;
+/* TODO : faire followpath des que class path créer */
+
+void Minion::followPath() {
+    // Implémentation temporaire : avance le pathProgress
+    // TODO: Remplacer par une vraie logique de suivi de chemin quand Path sera implémenté
+    pathProgress += 0.01f;
+    if (pathProgress >= 1.0f) {
+        pathProgress = 1.0f;
+        onDestroy();
+    }
 }
-void Minion::setSpeed(float speed)
-{
-	this->speed = speed;
+
+void Minion::takeDamage(int amount) {
+    if (amount < health) {
+        health -= amount;
+    }
+    else {
+        health = 0;
+        onDestroy();
+    }
+}
+
+void Minion::onDestroy() {
+    Entity::setIsAlive(false);
+    /*
+    TODO : appelé fct affichage du BOOM et la thune
+    */
+}
+
+void Minion::update(float dt) {
+    if (Entity::getIsAlive()) {
+        followPath();
+        move(dt);
+    }
 }
