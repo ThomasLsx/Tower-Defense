@@ -32,7 +32,7 @@ void Tower::onDestroy() {
     Entity::setIsAlive(false);
 }
 
-// La mï¿½thode update de la base Entity ne correspond pas ï¿½ celle de Tower
+// La méthode update de la base Entity ne correspond pas à celle de Tower
 // On ajoute une surcharge non override pour la version Tower
 void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem)
 {

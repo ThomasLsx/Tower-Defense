@@ -11,9 +11,9 @@ private:
     int waveNumber;
     bool finished;
     std::vector<std::unique_ptr<Minion>> minions;
-    float spawnTimer;       // Timer pour gï¿½rer le dï¿½lai entre chaque spawn
-    float spawnDelay;       // Dï¿½lai entre chaque spawn (en secondes)
-    size_t minionsSpawned;  // Nombre de Minions dï¿½jï¿½ spawnï¿½s
+    float spawnTimer;       // Timer pour gérer le délai entre chaque spawn
+    float spawnDelay;       // Délai entre chaque spawn (en secondes)
+    size_t minionsSpawned;  // Nombre de Minions déjà spawnés
 
 public:
     Wave(int number, float delay = 1.0f);

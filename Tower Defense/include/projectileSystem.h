@@ -8,9 +8,9 @@ class Entity;
 
 /**
  * @class ProjectileSystem
- * @brief Syst√®me de gestion des projectiles dans le jeu.
+ * @brief SystËme de gestion des projectiles dans le jeu.
  *
- * Cr√©e, met √† jour et supprime les projectiles, et g√®re les collisions avec les cibles.
+ * CrÈe, met ‡ jour et supprime les projectiles, et gËre les collisions avec les cibles.
  */
 class ProjectileSystem {
 private:
@@ -18,34 +18,34 @@ private:
 
 public:
     /**
-     * @brief Constructeur par d√©faut.
+     * @brief Constructeur par dÈfaut.
      */
     ProjectileSystem();
 
     /**
-     * @brief Destructeur par d√©faut.
+     * @brief Destructeur par dÈfaut.
      */
     ~ProjectileSystem();
 
     /**
-     * @brief Cr√©e un nouveau projectile.
-     * @param sourceId ID de l'entit√© source (tour).
+     * @brief CrÈe un nouveau projectile.
+     * @param sourceId ID de l'entitÈ source (tour).
      * @param targetId ID de la cible (minion).
-     * @param dmg D√©g√¢ts inflig√©s par le projectile.
+     * @param dmg DÈg‚ts infligÈs par le projectile.
      * @param speed Vitesse du projectile.
      */
     void createProjectile(int sourceId, int targetId, int dmg, float speed);
 
     /**
-     * @brief Met √† jour tous les projectiles.
-     * @param dt Temps √©coul√© depuis la derni√®re frame.
-     * @param entities Liste de toutes les entit√©s (pour d√©tecter les collisions).
+     * @brief Met ‡ jour tous les projectiles.
+     * @param dt Temps ÈcoulÈ depuis la derniËre frame.
+     * @param entities Liste de toutes les entitÈs (pour dÈtecter les collisions).
      */
     void update(float dt, const std::vector<Entity*>& entities);
 
     /**
      * @brief Supprime un projectile par son ID.
-     * @param id ID du projectile √† supprimer.
+     * @param id ID du projectile ‡ supprimer.
      */
     void removeProjectile(int id);
 

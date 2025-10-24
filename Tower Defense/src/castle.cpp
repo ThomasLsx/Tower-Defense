@@ -35,5 +35,5 @@ void Castle::onDestroy()
 
 void Castle::update(float dt)
 {
-	// Ajoute ici la logique d'update du chï¿½teau si besoin
+	// Ajoute ici la logique d'update du château si besoin
 }

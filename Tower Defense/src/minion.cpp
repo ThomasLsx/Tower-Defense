@@ -15,11 +15,11 @@ void Minion::move(float dt) {
     Entity::setPosition(foo += _velocity * dt);
 }
 
-/* TODO : faire followpath des que class path crÃ©er */
+/* TODO : faire followpath des que class path créer */
 
 void Minion::followPath() {
-    // ImplÃ©mentation temporaire : avance le pathProgress
-    // TODO: Remplacer par une vraie logique de suivi de chemin quand Path sera implÃ©mentÃ©
+    // Implémentation temporaire : avance le pathProgress
+    // TODO: Remplacer par une vraie logique de suivi de chemin quand Path sera implémenté
     pathProgress += 0.01f;
     if (pathProgress >= 1.0f) {
         pathProgress = 1.0f;
@@ -40,7 +40,7 @@ void Minion::takeDamage(int amount) {
 void Minion::onDestroy() {
     Entity::setIsAlive(false);
     /*
-    TODO : appelÃ© fct affichage du BOOM et la thune
+    TODO : appelé fct affichage du BOOM et la thune
     */
 }
 
