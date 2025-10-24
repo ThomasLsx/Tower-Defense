@@ -145,7 +145,7 @@ void TileMap::printTiles() const
             const int tileNumber = level[i + j * width];
             std::cout << tileNumber << " ";
         }
-        std::cout << "\n"; // Nouvelle ligne pour chaque rangï¿½e
+        std::cout << "\n"; // Nouvelle ligne pour chaque rangée
     }
 }
 
@@ -157,15 +157,15 @@ void TileMap::DrawMouseHover()
     sf::Vector2u tSize = getTileSize();
     float scale = getScale();
 
-    // Calcule la position alignï¿½e sur la grille
+    // Calcule la position alignée sur la grille
     unsigned int i = static_cast<unsigned int>(vMousePosition.x / (tSize.x * scale));
     unsigned int j = static_cast<unsigned int>(vMousePosition.y / (tSize.y * scale));
     sf::Vector2f gridPos(i * tSize.x * scale, j * tSize.y * scale);
 
-    // Prï¿½pare le sprite de la tuile sï¿½lectionnï¿½e
+    // Prépare le sprite de la tuile sélectionnée
     sf::Sprite tileSprite(m_tileset);
 
-    // Calcule le rectangle de texture ï¿½ partir de l'index sï¿½lectionnï¿½
+    // Calcule le rectangle de texture à partir de l'index sélectionné
     int tu = m_TileIndex % (m_tileset.getSize().x / tSize.x);
     int tv = m_TileIndex / (m_tileset.getSize().x / tSize.x);
     sf::IntRect rect;

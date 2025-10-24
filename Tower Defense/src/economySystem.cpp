@@ -8,7 +8,7 @@ EconomySystem::EconomySystem(Player* p) : player(p) {}
 EconomySystem::~EconomySystem() {}
 
 void EconomySystem::rewardForKill(const Minion& minion) {
-    // TODO: ajouter la valeur de rÃ©compense du minion
+    // TODO: ajouter la valeur de récompense du minion
     player->addMoney(10);
     player->addScore(100);
 }
