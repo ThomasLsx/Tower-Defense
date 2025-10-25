@@ -5,7 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 
-class Entity; // Forward declaration
+class Minion; // Forward declaration
+struct Position;
 
 // Structure to hold the state of keys
 struct KeyState {
@@ -25,18 +26,23 @@ public:
     void processEvents();
     void update();
     void render();
+    sf::Vector2f gridToPixel(Position gridPos);
+    Position pixelToGrid(sf::Vector2f pixelPos);
+    void drawGrid(const std::vector<std::vector<int>>& adjacencyMatrix);
 private:
 
     Window window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
-    Entity* entity;
-	Entity* entity2;
+    Minion* entity;
+	Minion* entity2;
     sf::Vector2f entityPosition;
     sf::FloatRect detectionZone;
     bool isRunning;
 
     KeyState keyState;           // Touches
     float currentSpeed = 0.f;    // Vitesse du bloc
+
+    std::vector<std::vector<int>> adjacencyMatrix;
 
     // Variables de configuration chargées depuis config.json
     int playerHealth = 100;

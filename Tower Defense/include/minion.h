@@ -4,7 +4,7 @@
 #include "entity.h"
 
 class Path;
-
+struct Position;
 /**
  * @class Minion
  * @brief Représente un minion dans un jeu de type Tower Defense.
@@ -14,9 +14,10 @@ class Path;
 class Minion : public Entity {
 private:
     unsigned int health;          ///< Points de vie actuels du minion.
-    float pathProgress;  ///< Progression le long du chemin (0.0 à 1.0).
-    // Path* targetPath;    ///< Chemin que le minion doit suivre.
+    size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
     unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
+
+    std::vector<sf::Vector2f> targetPath;
 
 public:
     /**
@@ -28,7 +29,7 @@ public:
      * @param velocity Vitesse initiale du minion.
      * @param reward Récompense accordée à la mort du minion.
      */
-    Minion(int id, /*Path* path, */ unsigned int healt = 100, sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f), unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
+    Minion(int id, /*Path* path, */ unsigned int healt = 100, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
      * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
@@ -37,9 +38,17 @@ public:
     void move(float dt);
 
     /**
-     * @brief Met à jour la position du minion pour qu'il suive son chemin.
+     * @brief Logique de mouvement interne pour suivre le chemin.
+     * @param dt Temps écoulé (delta time).
      */
-    void followPath(void);
+    void followPath(float dt);
+
+    /**
+     * @brief Assigne un nouveau chemin au minion.
+     * @param gridPath Le chemin en coordonnées de GRILLE (venant de Pathfinding).
+     * @param tileSize La taille (largeur/hauteur) d'une tuile en pixels.
+     */
+    void setPath(const std::vector<Position>& gridPath, float tileSize);
 
     /**
      * @brief Inflige des dégâts au minion.
@@ -54,7 +63,7 @@ public:
      * @brief Retourne la progression du minion le long de son chemin.
      * @return Valeur entre 0.0 et 1.0 représentant la progression.
      */
-    float getPathProgress(void) const { return pathProgress; }
+    size_t getPathProgress(void) const { return currentTargetIndex; }
 
     /**
      * @brief Retourne les points de vie actuels du minion.

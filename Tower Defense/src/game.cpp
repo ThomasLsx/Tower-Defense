@@ -6,14 +6,41 @@
 
 #include "entity.h"
 #include "minion.h"
+#include "path.h"
 
 Game::Game()
     : window(800, 600, "SFML + TGUI Example"),
     detectionZone(sf::Vector2f(200, 150), sf::Vector2f(400, 200)),
     isRunning(true)
 {
-	this->entity = new Minion(1, 100, sf::Vector2f(0.0f, 0.0f), 10, sf::Vector2f(100.0f, 100.0f), 0.0f, sf::Color::White);
-	this->entity2 = new Minion(2, 100, sf::Vector2f(0.0f, 0.0f), 10, sf::Vector2f(300.0f, 300.0f), 0.0f, sf::Color::Red);
+	this->entity = new Minion(1);
+	entity->init(30, sf::Color::Green, sf::Color::Black, 2);
+    this->entity2 = new Minion(2);
+	entity2->init(30, sf::Color::Blue, sf::Color::Black, 2);
+
+    // Matrice d'adjacence (0 = accessible, 1 = mur)
+    std::vector<std::vector<int>> adjacencyMatrix = {
+        {0, 0, 1, 0},
+        {1, 0, 1, 0},
+        {1, 0, 1, 0},
+        {1, 0, 0, 0}
+    };
+
+    // 1. Initialiser le système de pathfinding avec la grille
+    Pathfinding pf(adjacencyMatrix);
+
+    // 2. Définir le départ et l'arrivée
+    Position start = { 0, 0 };
+    Position goal = { 0, 3 };
+
+    std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
+        << ") à (" << goal.x << ", " << goal.y << ")" << std::endl;
+
+    // 3. Trouver le chemin
+    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+
+    entity->setPath(*pathOpt, 100);
+
     window.create();
     window.getRenderWindow().setFramerateLimit(60);
     ui = new UI(window.getRenderWindow());
@@ -109,13 +136,14 @@ void Game::processEvents()
 void Game::update()
 {
     ui->setSpeed(currentSpeed);
+    entity->update(1);
+    std::cout << "Position : " << entity->getPosition().x << " " << entity->getPosition().y << std::endl;
 }
 
 void Game::render()
 {
     window.clear(sf::Color(50, 50, 50));
     entity->draw(window.getRenderWindow());
-	entity2->draw(window.getRenderWindow());
     ui->draw();
     window.display();
 }

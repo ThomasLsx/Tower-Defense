@@ -71,6 +71,7 @@ public:
      */
     inline void setPosition(const sf::Vector2f& position) {
         _position = position;
+		_shape.setPosition(_position);
     }
 
     /**

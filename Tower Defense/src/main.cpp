@@ -1,26 +1,12 @@
-// main.cpp
+#include "path.h"
+#include "minion.h"
+#include <iostream>
 
-/*
-#include "Game.h"
-int main()
-{
-    Game game;
-    game.run();
 
-    return 0;
-}
-*/
+#include "game.h"
 
-#include "app.h"
-
-int main()
-{
-
-    App* application = new App();
-
-    application->run();
-
-    delete application;
-
-    return 0;
+int main() {
+	Game game;
+	game.run();
+	return 0;
 }
