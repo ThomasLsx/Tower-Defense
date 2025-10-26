@@ -115,6 +115,9 @@
     <Image Include="assets\TileMap.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="assets\menu_background.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="assets\map1.txt">

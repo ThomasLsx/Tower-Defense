@@ -5,7 +5,7 @@
 
 Minion::Minion(int id,/*Path* path, */ unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
     : Entity(id), health(health), pathProgress(0.0f),
-    /*targetPath(path),*/ rewardOnDeath(reward)
+	/*targetPath(path),*/ rewardOnDeath(reward)
 {
     Entity::init();
 }
@@ -35,6 +35,10 @@ void Minion::takeDamage(int amount) {
         health = 0;
         onDestroy();
     }
+}
+
+void Minion::makeDamage(int amount)
+{
 }
 
 void Minion::onDestroy() {

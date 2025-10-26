@@ -53,6 +53,7 @@
     <ClInclude Include="include\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\menu_background.png" />
     <Image Include="assets\TileMap.png" />
     <Image Include="assets\Tiles.png" />
   </ItemGroup>

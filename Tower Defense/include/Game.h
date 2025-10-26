@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "UI.h"
 #include "map.h"
+#include "minion.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
@@ -33,6 +34,7 @@ private:
     Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
     TileMap* map; // Utilisation de la classe Map
+	Minion* minion; // Utilisation de la classe Minion
     GameMode m_eGameMode;
 
     bool menuInitialized = false;
