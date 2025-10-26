@@ -8,12 +8,11 @@ Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int
 }
 
 void Projectile::update(float dt) {
-    // Met à jour la position du projectile en fonction de sa vitesse
-    sf::Vector2f position;
-	Entity::setPosition(position += velocity * dt);
+	_position += velocity * dt;
+    _shape.setPosition(_position);
 
     // Décrémente la durée de vie
-    lifetime -= dt;
+    lifetime -= 0;
 
     if (lifetime <= 0.0f) {
         onDestroy();

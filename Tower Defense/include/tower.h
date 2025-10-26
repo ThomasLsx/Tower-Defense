@@ -6,6 +6,7 @@
 #include <vector>
 
 class ProjectileSystem;
+class Minion;
 
 /**
  * @class Tower
@@ -20,11 +21,6 @@ private:
     unsigned int level;              ///< Niveau actuel de la tour
     unsigned int damage;  ///< Dégâts infligés par projectile
 	std::vector<int> targetIds; ///< Liste des IDs des cibles actuellement visées
-
-    /**
-     * @brief Vitesse d'attaque de la tour.
-     */
-    float attackSpeed;
 
 public:
     /**
@@ -71,7 +67,7 @@ public:
 	 */
     void update(float dt) override; // Cette version override bien Entity
 
-	std::vector<int>  SearchTargets(unsigned int maxTargets); ///< Recherche des cibles dans la portée de la tour
+	void  SearchTargets(std::vector<Minion> mimi); ///< Recherche des cibles dans la portée de la tour
 
     // Getters
     float getRange() const { return range; }          ///< Retourne la portée de la tour.

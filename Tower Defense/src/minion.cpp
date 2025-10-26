@@ -15,8 +15,6 @@ void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
     currentTargetIndex = 0;
 
     for (const Position& p : gridPath) {
-        // Convertit les coordonnées de grille (ligne, colonne) en coordonnées-monde (x, y)
-        // Nous visons le *centre* de la tuile pour un mouvement plus fluide.
         // ATTENTION: p.x est la LIGNE (Y), p.y est la COLONNE (X)
         float worldX = (p.y * tileSize) + (tileSize / 2.0f);
         float worldY = (p.x * tileSize) + (tileSize / 2.0f);
@@ -27,6 +25,7 @@ void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
     if (!targetPath.empty()) {
        _position = targetPath[0];
     }
+	// TODO : gérer le cas où le chemin est vide
 }
 
 void Minion::update(float dt) {

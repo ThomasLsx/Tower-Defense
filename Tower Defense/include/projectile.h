@@ -14,6 +14,7 @@ private:
     float lifetime;        ///< Durée de vie restante du projectile (en secondes).
     unsigned int sourceTowerId;     ///< ID de la tour source du projectile.
     unsigned int targetEntityId;    ///< ID de l'entité cible du projectile.
+    sf::Vector2f direction;
 
 public:
     /**

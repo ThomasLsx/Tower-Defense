@@ -1,5 +1,5 @@
 #include "path.h"
-#include <boost/graph/graph_traits.hpp> // Pour null_vertex()
+#include <boost/graph/graph_traits.hpp>
 
 Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
     : m_height(grid.size()), m_width(0)
@@ -40,9 +40,25 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                     boost::put(boost::edge_weight_t(), m_graph, e, 1);
                 }
 
+                // Voisin de gauche (j-1)
+                if (j - 1 >= 0 && grid[i][j - 1] == 0) {
+                    Vertex neighbor_v = m_gridToVertex[i][j - 1];
+                    Edge e; bool inserted;
+                    boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
+                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                }
+
                 // Voisin du bas (i+1)
                 if (i + 1 < m_height && grid[i + 1][j] == 0) {
                     Vertex neighbor_v = m_gridToVertex[i + 1][j];
+                    Edge e; bool inserted;
+                    boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
+                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                }
+
+                // Voisin du haut (i-1)
+                if (i - 1 >= 0 && grid[i - 1][j] == 0) {
+                    Vertex neighbor_v = m_gridToVertex[i - 1][j];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
                     boost::put(boost::edge_weight_t(), m_graph, e, 1);
@@ -98,7 +114,7 @@ std::optional<std::vector<Position>> Pathfinding::findPath(Position startPos, Po
         );
     }
     catch (...) {
-        // Gérer une éventuelle exception de Boost (bien que rare avec default_visitor)
+        // TODO : Gérer une éventuelle exception de Boost 
         return std::nullopt;
     }
 

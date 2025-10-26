@@ -14,9 +14,8 @@ void ProjectileSystem::createProjectile(int sourceId, int targetId, int dmg, flo
 void ProjectileSystem::update(float dt, const std::vector<Entity*>& entities) {
     for (auto it = projectiles.begin(); it != projectiles.end(); ) {
         Projectile& projectile = **it;
-        projectile.update(dt); // Corrige l'appel, ne passe qu'un seul argument
+        projectile.update(dt);
 
-        // Supprime le projectile s'il a atteint sa cible ou est hors d'usage
         if (projectile.hasReachedTarget() || projectile.isExpired()) {
             it = projectiles.erase(it);
         }

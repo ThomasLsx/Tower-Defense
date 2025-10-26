@@ -28,7 +28,7 @@ struct Position {
 typedef boost::adjacency_list<
     boost::vecS,
     boost::vecS,
-    boost::undirectedS, // Non orienté, comme corrigé
+    boost::undirectedS,
     boost::property<boost::vertex_position_t, Position>,
     boost::property<boost::edge_weight_t, int>
 > Graph;
@@ -37,7 +37,6 @@ typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
 typedef boost::property_map<Graph, boost::vertex_position_t>::type PositionMap;
 typedef boost::graph_traits<Graph>::edge_descriptor Edge;
 
-// Heuristique de Manhattan (nécessaire pour A*)
 struct ManhattanHeuristic : public boost::astar_heuristic<Graph, int> {
     ManhattanHeuristic(Vertex goal, PositionMap positions)
         : m_goal(goal), m_positions(positions) {
