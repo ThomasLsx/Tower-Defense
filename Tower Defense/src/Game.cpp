@@ -66,7 +66,7 @@ void Game::run()
             ui->gui.removeAllWidgets();
             menuInitialized = false;
             UpdatePlay(events);
-            //mimi->update(1);
+            mimi->update(1);
             break;
         case Editor:
             ui->gui.removeAllWidgets();
@@ -102,7 +102,7 @@ void Game::Render()
     if (m_eGameMode == Play)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
-		//mimi->draw(window->getRenderWindow());
+		mimi->draw(window->getRenderWindow());
 
 	}
 
@@ -171,7 +171,7 @@ void Game::showMenu()
             std::cout << "Play button pressed!" << std::endl;
             m_eGameMode = Play;
             ui->setMode("Play");
-			//mv_minion();
+			mv_minion();
         });
         ui->gui.add(boutonPlay);
 
@@ -224,8 +224,8 @@ void Game::mv_minion(void)
     Pathfinding pf(adjacencyMatrix);
 
     // 2. Définir le départ et l'arrivée
-    Position start = { 4, 2 };
-    Position goal = { 4, 18 };
+    Position start = { 5, 1 };
+    Position goal = { 5, 19 };
 
     std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
         << ") à (" << goal.x << ", " << goal.y << ")" << std::endl;
@@ -233,5 +233,16 @@ void Game::mv_minion(void)
     // 3. Trouver le chemin
     std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
 
-    static_cast<Minion*>(mimi)->setPath(*pathOpt, 100);
+    if (pathOpt.has_value()) {
+        std::cout << "Chemin trouvé avec " << pathOpt->size() << " positions." << std::endl;
+        for (const Position& p : *pathOpt) {
+            std::cout << "(" << p.x << ", " << p.y << ") ";
+        }
+        std::cout << std::endl;
+    }
+    else {
+        std::cout << "Aucun chemin trouvé !" << std::endl;
+    }
+
+    static_cast<Minion*>(mimi)->setPath(*pathOpt, 96);
 }

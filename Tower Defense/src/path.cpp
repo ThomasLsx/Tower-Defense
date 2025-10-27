@@ -1,4 +1,6 @@
 #include "path.h"
+
+#include <iostream>
 #include <boost/graph/graph_traits.hpp>
 
 Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
@@ -8,60 +10,74 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
     m_width = grid[0].size();
     if (m_width == 0) return;
 
-    // Initialiser la map de position
+    // 1. Initialiser la map de position
     m_positionMap = boost::get(boost::vertex_position, m_graph);
 
-    // Initialiser la grille de mapping avec un sommet "nul"
+    // 2. Initialiser la grille de mapping avec un sommet "nul"
     Vertex null_v = boost::graph_traits<Graph>::null_vertex();
     m_gridToVertex.resize(m_height, std::vector<Vertex>(m_width, null_v));
 
-    // --- 1. Ajouter les sommets ---
+    // --- 3. Ajouter les sommets ---
+    // On ajoute un sommet POUR CHAQUE CASE ACCESSIBLE (3, 4, ou 7)
     for (int i = 0; i < m_height; ++i) {
         for (int j = 0; j < m_width; ++j) {
-            if (grid[i][j] == 3) { // Case accessible
+            
+            if (grid[i][j] == 3 || grid[i][j] == 4 || grid[i][j] == 7) {
                 Vertex v = boost::add_vertex(m_graph);
-                m_gridToVertex[i][j] = v;
-                m_positionMap[v] = { i, j }; // Assigner la position
+                m_gridToVertex[i][j] = v; 
+                m_positionMap[v] = { i, j };
             }
         }
     }
 
-    // --- 2. Ajouter les arêtes (non orientées) ---
+    // Construction des arêtes
     for (int i = 0; i < m_height; ++i) {
         for (int j = 0; j < m_width; ++j) {
-            if (grid[i][j] == 3) {
+
+            // On ne crée des arêtes QUE si la case actuelle est accessible
+            if (grid[i][j] == 3 || grid[i][j] == 4 || grid[i][j] == 7) {
+
+                // On récupère le sommet créé à l'étape 3
                 Vertex current_v = m_gridToVertex[i][j];
 
-                // Voisin de droite (j+1)
+                // Voisin de droite
                 if (j + 1 < m_width && (grid[i][j + 1] == 3 || grid[i][j + 1] == 4 || grid[i][j + 1] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i][j + 1];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (inserted) {
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
 
-                // Voisin de gauche (j-1)
+                // Voisin de gauche
                 if (j - 1 >= 0 && (grid[i][j - 1] == 3 || grid[i][j - 1] == 4 || grid[i][j - 1] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i][j - 1];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (inserted) {
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
 
-                // Voisin du bas (i+1)
+                // Voisin du bas
                 if (i + 1 < m_height && (grid[i + 1][j] == 3 || grid[i + 1][j] == 4 || grid[i + 1][j] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i + 1][j];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (inserted) {
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
 
-                // Voisin du haut (i-1)
+                // Voisin du haut
                 if (i - 1 >= 0 && (grid[i - 1][j] == 3 || grid[i - 1][j] == 4 || grid[i - 1][j] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i - 1][j];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (inserted) {
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
             }
         }
