@@ -18,7 +18,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
     // --- 1. Ajouter les sommets ---
     for (int i = 0; i < m_height; ++i) {
         for (int j = 0; j < m_width; ++j) {
-            if (grid[i][j] == 0) { // Case accessible
+            if (grid[i][j] == 3) { // Case accessible
                 Vertex v = boost::add_vertex(m_graph);
                 m_gridToVertex[i][j] = v;
                 m_positionMap[v] = { i, j }; // Assigner la position
@@ -29,11 +29,11 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
     // --- 2. Ajouter les arêtes (non orientées) ---
     for (int i = 0; i < m_height; ++i) {
         for (int j = 0; j < m_width; ++j) {
-            if (grid[i][j] == 0) {
+            if (grid[i][j] == 3) {
                 Vertex current_v = m_gridToVertex[i][j];
 
                 // Voisin de droite (j+1)
-                if (j + 1 < m_width && grid[i][j + 1] == 0) {
+                if (j + 1 < m_width && (grid[i][j + 1] == 3 || grid[i][j + 1] == 4 || grid[i][j + 1] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i][j + 1];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
@@ -41,7 +41,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                 }
 
                 // Voisin de gauche (j-1)
-                if (j - 1 >= 0 && grid[i][j - 1] == 0) {
+                if (j - 1 >= 0 && (grid[i][j - 1] == 3 || grid[i][j - 1] == 4 || grid[i][j - 1] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i][j - 1];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
@@ -49,7 +49,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                 }
 
                 // Voisin du bas (i+1)
-                if (i + 1 < m_height && grid[i + 1][j] == 0) {
+                if (i + 1 < m_height && (grid[i + 1][j] == 3 || grid[i + 1][j] == 4 || grid[i + 1][j] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i + 1][j];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
@@ -57,7 +57,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                 }
 
                 // Voisin du haut (i-1)
-                if (i - 1 >= 0 && grid[i - 1][j] == 0) {
+                if (i - 1 >= 0 && (grid[i - 1][j] == 3 || grid[i - 1][j] == 4 || grid[i - 1][j] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i - 1][j];
                     Edge e; bool inserted;
                     boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);

@@ -5,9 +5,15 @@
 #include "Window.h"
 #include <SFML/Graphics.hpp>
 
-#include "entity.h"
+#include <fstream>
+#include <vector>
+#include <sstream>
+#include <optional>
 #include "minion.h"
 #include "path.h"
+#include "Window.h"
+#include "UI.h"
+#include "map.h"
 
 Game::Game()
     : m_eGameMode(Menu)
@@ -60,6 +66,7 @@ void Game::run()
             ui->gui.removeAllWidgets();
             menuInitialized = false;
             UpdatePlay(events);
+            //mimi->update(1);
             break;
         case Editor:
             ui->gui.removeAllWidgets();
@@ -95,6 +102,8 @@ void Game::Render()
     if (m_eGameMode == Play)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
+		//mimi->draw(window->getRenderWindow());
+
 	}
 
     // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
@@ -157,6 +166,7 @@ void Game::showMenu()
             std::cout << "Play button pressed!" << std::endl;
             m_eGameMode = Play;
             ui->setMode("Play");
+			//mv_minion();
         });
         ui->gui.add(boutonPlay);
 
@@ -173,3 +183,50 @@ void Game::showMenu()
     }
 }
 
+std::vector<std::vector<int>> loadMap(const std::string& nomFichier) {
+    std::ifstream fichier(nomFichier);
+    std::vector<std::vector<int>> map;
+    std::string ligne;
+
+    if (!fichier.is_open()) {
+        std::cerr << "Erreur : impossible d'ouvrir le fichier " << nomFichier << std::endl;
+        return map; // Retourne un vector vide en cas d'erreur
+    }
+
+    while (std::getline(fichier, ligne)) {
+        std::istringstream iss(ligne);
+        std::vector<int> ligneMap;
+        int nombre;
+        while (iss >> nombre) {
+            ligneMap.push_back(nombre);
+        }
+        map.push_back(ligneMap);
+    }
+
+    fichier.close();
+    return map;
+}
+
+void Game::mv_minion(void)
+{
+    this->mimi = new Minion(1);
+    mimi->init(30, sf::Color::Green, sf::Color::Black, 2);
+
+    // Matrice d'adjacence (0 = accessible, 1 = mur)
+	std::vector<std::vector<int>> adjacencyMatrix = loadMap("assets/map1.txt");
+
+    // 1. Initialiser le système de pathfinding avec la grille
+    Pathfinding pf(adjacencyMatrix);
+
+    // 2. Définir le départ et l'arrivée
+    Position start = { 4, 2 };
+    Position goal = { 4, 18 };
+
+    std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
+        << ") à (" << goal.x << ", " << goal.y << ")" << std::endl;
+
+    // 3. Trouver le chemin
+    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+
+    static_cast<Minion*>(mimi)->setPath(*pathOpt, 100);
+}

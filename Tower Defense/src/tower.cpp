@@ -52,14 +52,6 @@ void Tower::SearchTargets(std::vector<Minion> mimi)
     }
 }
 
-// Ajout d'une version override de update pour la base
 void Tower::update(float dt)
 {
-    // Optionnel : logique de base si besoin
-}
-
-// Ajout d'une version override de update pour la base
-void Tower::update(float dt)
-{
-    // Optionnel : logique de base si besoin
 }

@@ -13,8 +13,6 @@ class Minion : public Entity {
 private:
     unsigned int health;          ///< Points de vie actuels du minion.
     size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
-    Path* targetPath;    ///< Chemin que le minion doit suivre.
-    Path* targetPath;    ///< Chemin que le minion doit suivre.
     unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
 
     std::vector<sf::Vector2f> targetPath;
@@ -76,12 +74,6 @@ public:
      * @return Récompense en points ou monnaie.
      */
     int getRewardOnDeath(void) const { return rewardOnDeath; }
-
-    /**
-     * @brief Retourne le chemin suivi par le minion.
-     * @return Pointeur vers le chemin suivi.
-     */
-	Path* getTargetPath(void) const { return targetPath; }
 
      /**
       * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).

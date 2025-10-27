@@ -1,15 +1,15 @@
 // Game.h
 #pragma once
-#include "Window.h"
-#include "UI.h"
-#include "map.h"
+
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <optional>
 
-class Minion;
 class Entity;
 struct Position;
+class TileMap;
+class Window;
+class UI;
 
 
 // Main game class: handles window, GUI, and game logic
@@ -31,6 +31,8 @@ private:
 
 	void Render();
 
+    void mv_minion(void);
+
 	void HandleInput(const std::vector<sf::Event>& events);
 	void HandlePlayInput(const std::vector<sf::Event>& events);
 
@@ -40,6 +42,8 @@ private:
     UI* ui; // Utilisation de la classe UI
     TileMap* map; // Utilisation de la classe Map
     GameMode m_eGameMode;
+
+    Entity* mimi;
 
     bool menuInitialized = false;
 };
