@@ -1,5 +1,3 @@
-/// minion.h
-
 #pragma once
 #include "entity.h"
 
@@ -15,6 +13,8 @@ class Minion : public Entity {
 private:
     unsigned int health;          ///< Points de vie actuels du minion.
     size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
+    Path* targetPath;    ///< Chemin que le minion doit suivre.
+    Path* targetPath;    ///< Chemin que le minion doit suivre.
     unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
 
     std::vector<sf::Vector2f> targetPath;
@@ -81,11 +81,11 @@ public:
      * @brief Retourne le chemin suivi par le minion.
      * @return Pointeur vers le chemin suivi.
      */
-	// Path* getTargetPath(void) const { return targetPath; }
+	Path* getTargetPath(void) const { return targetPath; }
 
-    /**
-     * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).
-     */
+     /**
+      * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).
+      */
     void onDestroy(void) override;
 
     /**

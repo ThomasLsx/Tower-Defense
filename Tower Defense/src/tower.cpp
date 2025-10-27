@@ -1,3 +1,4 @@
+
 #include "tower.h"
 #include "projectilesystem.h"
 #include "minion.h"
@@ -32,9 +33,11 @@ void Tower::onDestroy() {
     Entity::setIsAlive(false);
 }
 
-void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) 
+// La méthode update de la base Entity ne correspond pas à celle de Tower
+// On ajoute une surcharge non override pour la version Tower
+void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem)
 {
-    tryFire(minions, projectileSystem); 
+    tryFire(minions, projectileSystem);
 }
 
 void Tower::SearchTargets(std::vector<Minion> mimi)
@@ -47,6 +50,12 @@ void Tower::SearchTargets(std::vector<Minion> mimi)
         if (distance <= range)
             targetIds.push_back(it->getId());
     }
+}
+
+// Ajout d'une version override de update pour la base
+void Tower::update(float dt)
+{
+    // Optionnel : logique de base si besoin
 }
 
 // Ajout d'une version override de update pour la base

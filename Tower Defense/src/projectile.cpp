@@ -21,12 +21,12 @@ void Projectile::update(float dt) {
 
 void Projectile::onHit()
 {
-	onDestroy();
+    onDestroy();
 }
 
 void Projectile::onDestroy() {
     // Logique de destruction du projectile
     std::cout << "Projectile " << Entity::getId() << " détruit (fin de vie ou collision)." << std::endl;
     // Marquer le projectile comme inactif ou le supprimer de la liste des projectiles actifs
-    // (cette partie est généralement gérée par le ProjectileSystem)
+    // (cette partie est g?n?ralement g?r?e par le ProjectileSystem)
 }

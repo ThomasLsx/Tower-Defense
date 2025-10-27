@@ -1,51 +1,45 @@
+// Game.h
 #pragma once
 #include "Window.h"
 #include "UI.h"
-
+#include "map.h"
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include <optional>
 
-class Minion; // Forward declaration
+class Minion;
+class Entity;
 struct Position;
 
-// Structure to hold the state of keys
-struct KeyState {
-    bool up = false;
-    bool down = false;
-    bool left = false;
-    bool right = false;
-    bool a = false;
-    bool e = false;
-};
 
 // Main game class: handles window, GUI, and game logic
 class Game {
 public:
-    Game();
-    void run();
-    void processEvents();
-    void update();
-    void render();
-    sf::Vector2f gridToPixel(Position gridPos);
-    Position pixelToGrid(sf::Vector2f pixelPos);
-    void drawGrid(const std::vector<std::vector<int>>& adjacencyMatrix);
+    Game(); // Setup game objects
+	~Game(); // Cleanup
+	void run(); // Main loop
+
+    enum GameMode
+    {
+        Menu,
+        Play,
+		Editor
+    };
+
 private:
+    void UpdatePlay(const std::vector<sf::Event>& events);
 
-    Window window; // Utilisation de la classe Window
+	void Render();
+
+	void HandleInput(const std::vector<sf::Event>& events);
+	void HandlePlayInput(const std::vector<sf::Event>& events);
+
+	void showMenu();
+
+    Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
-    Minion* entity;
-	Minion* entity2;
-    sf::Vector2f entityPosition;
-    sf::FloatRect detectionZone;
-    bool isRunning;
+    TileMap* map; // Utilisation de la classe Map
+    GameMode m_eGameMode;
 
-    KeyState keyState;           // Touches
-    float currentSpeed = 0.f;    // Vitesse du bloc
-
-    std::vector<std::vector<int>> adjacencyMatrix;
-
-    // Variables de configuration chargées depuis config.json
-    int playerHealth = 100;
-    float enemySpeed = 1.5f;
-    int towerCost = 50;
+    bool menuInitialized = false;
 };
