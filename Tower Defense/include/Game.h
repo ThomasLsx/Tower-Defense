@@ -41,7 +41,6 @@ private:
     Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
     TileMap* map; // Utilisation de la classe Map
-	Minion* minion; // Utilisation de la classe Minion
     GameMode m_eGameMode;
 
     Entity* mimi;

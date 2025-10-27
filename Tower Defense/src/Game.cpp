@@ -32,9 +32,6 @@ Game::Game()
 
     // Initialise le label mode au démarrage
     ui->setMode("Menu");
-
-	minion = new Minion(1);
-	minion->setPosition({ 100.0f, 100.0f });
 }
 
 Game::~Game()
@@ -87,7 +84,6 @@ void Game::run()
 void Game::UpdatePlay(const std::vector<sf::Event>& events)
 {
     HandlePlayInput(events);
-	minion->setPosition({ minion->getPosition().x + 1.0f, minion->getPosition().y });
 }
 
 

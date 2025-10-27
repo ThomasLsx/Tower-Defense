@@ -4,8 +4,7 @@
 #include <iostream>
 
 Minion::Minion(int id,/*Path* path, */ unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-    : Entity(id), health(health), pathProgress(0.0f),
-	/*targetPath(path),*/ rewardOnDeath(reward)
+    : Entity(id), health(health), rewardOnDeath(reward)
 {
 	Entity::init();
 }
