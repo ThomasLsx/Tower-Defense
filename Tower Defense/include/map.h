@@ -28,6 +28,7 @@ public:
 	float getScale() const { return scale; }
 	sf::Vector2u getTileSize() const { return tileSize; }
 	const std::vector<int>& getLevel() const { return m_level; }
+	const std::vector<std::vector<int>> getLevel2D() const;
 
 	// Setters
 	void setLevel(const std::vector<int>& newLevel) { m_level = newLevel;  }

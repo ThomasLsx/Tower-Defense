@@ -132,6 +132,23 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(m_vertices, states);
 }
 
+const std::vector<std::vector<int>> TileMap::getLevel2D() const
+{
+    std::vector<std::vector<int>>  m_level2D;
+    for (int j = 0; j < height; ++j)
+    {
+        std::vector<int> row;
+        for (unsigned int i = 0; i < width; ++i)
+        {
+            // get the current tile number
+            const int tileNumber = m_level[i + j * width];
+            row.push_back(tileNumber);
+        }
+        m_level2D.push_back(row);
+	}
+	return m_level2D;
+}
+
 void TileMap::printTiles() const
 {
     std::cout << "Contenu de m_level :\n";
