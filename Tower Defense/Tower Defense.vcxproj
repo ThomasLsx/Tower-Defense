@@ -33,24 +33,40 @@
     <ClCompile Include="src\minion.cpp" />
     <ClCompile Include="src\projectile.cpp" />
     <ClCompile Include="src\tower.cpp" />
+    <ClCompile Include="src\map.cpp" />
+    <ClCompile Include="src\projectileSystem.cpp" />
+    <ClCompile Include="src\wave.cpp" />
+    <ClCompile Include="src\path.cpp" />
+    <ClCompile Include="src\economySystem.cpp" />
+    <ClCompile Include="src\player.cpp" />
+    <ClCompile Include="src\app.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\castle.h" />
     <ClInclude Include="include\constants.h" />
     <ClInclude Include="include\economySystem.h" />
     <ClInclude Include="include\entity.h" />
-    <ClInclude Include="include\map.h" />
     <ClInclude Include="include\minion.h" />
     <ClInclude Include="include\path.h" />
     <ClInclude Include="include\player.h" />
     <ClInclude Include="include\projectile.h" />
     <ClInclude Include="include\projectileSystem.h" />
     <ClInclude Include="include\tower.h" />
+    <ClInclude Include="include\map.h" />
+    <ClInclude Include="include\projectileSystem.h" />
+    <ClInclude Include="include\wave.h" />
+    <ClInclude Include="include\path.h" />
+    <ClInclude Include="include\economySystem.h" />
+    <ClInclude Include="include\player.h" />
     <ClInclude Include="include\Game.h" />
     <ClInclude Include="include\UI.h" />
     <ClInclude Include="include\utils.h" />
     <ClInclude Include="include\wave.h" />
     <ClInclude Include="include\Window.h" />
+    <ClInclude Include="include\app.h" />
+    <ClInclude Include="include\utils.h" />
+    <ClInclude Include="include\constants.h" />
+    <ClInclude Include="include\quadtree.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\menu_background.png" />
@@ -145,7 +161,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\SFML\include;$(ProjectDir)libs\TGUI\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\SFML\include;$(ProjectDir)libs\TGUI\include;$(ProjectDir)include;C:\boost_1_89_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -167,7 +183,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)libs\SFML\include;$(ProjectDir)libs\TGUI\include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\SFML\include;$(ProjectDir)libs\TGUI\include;$(ProjectDir)include;C:\boost_1_89_0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

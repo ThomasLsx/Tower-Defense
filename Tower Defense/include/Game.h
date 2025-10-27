@@ -6,6 +6,12 @@
 #include "minion.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <optional>
+
+class Minion;
+class Entity;
+struct Position;
+
 
 // Main game class: handles window, GUI, and game logic
 class Game {

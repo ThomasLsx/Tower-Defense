@@ -1,6 +1,13 @@
 // Game.cpp
 #include "Game.h"
 #include <iostream>
+#include <cmath>
+#include "Window.h"
+#include <SFML/Graphics.hpp>
+
+#include "entity.h"
+#include "minion.h"
+#include "path.h"
 
 Game::Game()
     : m_eGameMode(Menu)
