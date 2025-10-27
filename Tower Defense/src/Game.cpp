@@ -17,7 +17,7 @@ Game::Game()
     map->loadTile("assets/TileMap.png", map->getLevel().data());
     map->printTiles();
 
-    // Initialise le label mode au d�marrage
+    // Initialise le label mode au démarrage
     ui->setMode("Menu");
 
 }
@@ -54,6 +54,8 @@ void Game::run()
             ui->gui.removeAllWidgets();
             menuInitialized = false;
             UpdatePlay(events);
+
+            mimi->update(1);
             break;
         case Editor:
             ui->gui.removeAllWidgets();
@@ -89,9 +91,11 @@ void Game::Render()
     if (m_eGameMode == Play)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
-    }
+        mimi->draw(window->getRenderWindow());
 
-    // Affiche la tuile s�lectionn�e sous la souris uniquement en mode Editor
+	}
+
+    // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
     if (m_eGameMode == Editor)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
@@ -156,7 +160,8 @@ void Game::showMenu()
             std::cout << "Play button pressed!" << std::endl;
             m_eGameMode = Play;
             ui->setMode("Play");
-            });
+            mv_minion();
+        });
         ui->gui.add(boutonPlay);
 
         // Bouton Level Editor
@@ -170,4 +175,63 @@ void Game::showMenu()
 
         menuInitialized = true;
     }
+}
+
+std::vector<std::vector<int>> loadMap(const std::string& nomFichier) {
+    std::ifstream fichier(nomFichier);
+    std::vector<std::vector<int>> map;
+    std::string ligne;
+
+    if (!fichier.is_open()) {
+        std::cerr << "Erreur : impossible d'ouvrir le fichier " << nomFichier << std::endl;
+        return map; // Retourne un vector vide en cas d'erreur
+    }
+
+    while (std::getline(fichier, ligne)) {
+        std::istringstream iss(ligne);
+        std::vector<int> ligneMap;
+        int nombre;
+        while (iss >> nombre) {
+            ligneMap.push_back(nombre);
+        }
+        map.push_back(ligneMap);
+    }
+
+    fichier.close();
+    return map;
+}
+
+void Game::mv_minion(void)
+{
+    this->mimi = new Minion(1);
+    mimi->init(30, sf::Color::Green, sf::Color::Black, 2);
+
+    // Matrice d'adjacence (0 = accessible, 1 = mur)
+	std::vector<std::vector<int>> adjacencyMatrix = loadMap("assets/map1.txt");
+
+    // 1. Initialiser le système de pathfinding avec la grille
+    Pathfinding pf(adjacencyMatrix);
+
+    // 2. Définir le départ et l'arrivée
+    Position start = { 5, 1 };
+    Position goal = { 5, 19 };
+
+    std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
+        << ") à (" << goal.x << ", " << goal.y << ")" << std::endl;
+
+    // 3. Trouver le chemin
+    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+
+    if (pathOpt.has_value()) {
+        std::cout << "Chemin trouvé avec " << pathOpt->size() << " positions." << std::endl;
+        for (const Position& p : *pathOpt) {
+            std::cout << "(" << p.x << ", " << p.y << ") ";
+        }
+        std::cout << std::endl;
+    }
+    else {
+        std::cout << "Aucun chemin trouvé !" << std::endl;
+    }
+
+    static_cast<Minion*>(mimi)->setPath(*pathOpt, 96);
 }
