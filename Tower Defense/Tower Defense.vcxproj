@@ -34,7 +34,6 @@
 	<ClCompile Include="src\projectile.cpp" />
 	<ClCompile Include="src\tower.cpp" />
 	<ClCompile Include="src\path.cpp" />
-	<ClCompile Include="src\app.cpp" />
   </ItemGroup>
   <ItemGroup>
 	<ClInclude Include="include\castle.h" />
@@ -53,7 +52,6 @@
 	<ClInclude Include="include\utils.h" />
 	<ClInclude Include="include\wave.h" />
 	<ClInclude Include="include\Window.h" />
-	<ClInclude Include="include\app.h" />
 	<ClInclude Include="include\quadtree.h" />
   </ItemGroup>
   <ItemGroup>

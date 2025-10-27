@@ -1,49 +1,39 @@
 // Game.h
 #pragma once
-
+#include "Window.h"
+#include "UI.h"
+#include "map.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <optional>
-
-class Entity;
-struct Position;
-class TileMap;
-class Window;
-class UI;
-
 
 // Main game class: handles window, GUI, and game logic
 class Game {
 public:
     Game(); // Setup game objects
-	~Game(); // Cleanup
-	void run(); // Main loop
+    ~Game(); // Cleanup
+    void run(); // Main loop
 
     enum GameMode
     {
         Menu,
         Play,
-		Editor
+        Editor
     };
 
 private:
     void UpdatePlay(const std::vector<sf::Event>& events);
 
-	void Render();
+    void Render();
 
-    void mv_minion(void);
+    void HandleInput(const std::vector<sf::Event>& events);
+    void HandlePlayInput(const std::vector<sf::Event>& events);
 
-	void HandleInput(const std::vector<sf::Event>& events);
-	void HandlePlayInput(const std::vector<sf::Event>& events);
-
-	void showMenu();
+    void showMenu();
 
     Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
     TileMap* map; // Utilisation de la classe Map
     GameMode m_eGameMode;
-
-    Entity* mimi;
 
     bool menuInitialized = false;
 };
