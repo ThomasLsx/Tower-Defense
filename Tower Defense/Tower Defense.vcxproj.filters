@@ -120,4 +120,20 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\Tiles.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\TileMap.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\menu_background.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="assets\map1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

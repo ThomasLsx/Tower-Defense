@@ -5,6 +5,7 @@
 #include <TGUI/Backend/SFML-Graphics.hpp>
 #include <TGUI/Widgets/Button.hpp>
 #include <TGUI/Widgets/Label.hpp>
+#include <TGUI/Widgets/Picture.hpp>
 #include <SFML/Graphics.hpp>
 #include <memory>
 
@@ -14,6 +15,7 @@ class UI {
     tgui::Gui gui;
 	tgui::Label::Ptr createLabel(const std::string& text, int x, int y);
     tgui::Button::Ptr createButton(const std::string& text, int x, int y, int width, int height);
+	tgui::Picture::Ptr createPicture(const std::string& imagePath, int x, int y, int width, int height);
     
     void handleEvent(const sf::Event& event);
     void draw();
