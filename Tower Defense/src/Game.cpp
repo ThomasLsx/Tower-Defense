@@ -32,6 +32,9 @@ Game::Game()
 
     // Initialise le label mode au démarrage
     ui->setMode("Menu");
+
+	minion = new Minion(1);
+	minion->setPosition({ 100.0f, 100.0f });
 }
 
 Game::~Game()
@@ -84,6 +87,7 @@ void Game::run()
 void Game::UpdatePlay(const std::vector<sf::Event>& events)
 {
     HandlePlayInput(events);
+	minion->setPosition({ minion->getPosition().x + 1.0f, minion->getPosition().y });
 }
 
 
@@ -160,6 +164,11 @@ void Game::HandlePlayInput(const std::vector<sf::Event>& events)
 void Game::showMenu()
 {
     if (!menuInitialized) {
+		// Ecrant d'accueil
+		auto picture = ui->createPicture("assets/menu_background.png", 0, 0, window->getWidth(), window->getHeight());
+        picture->setSize({ "100%", "100%" });
+        ui->gui.add(picture);
+
 		// Bouton Play
         auto boutonPlay = ui->createButton("Play", window->getWidth()/2 - 100, window->getHeight()/2 -25, 200, 50);
         boutonPlay->onPress([this]() {

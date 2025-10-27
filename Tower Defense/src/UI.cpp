@@ -28,6 +28,14 @@ tgui::Button::Ptr UI::createButton(const std::string& text, int x, int y, int wi
     return btn;
 }
 
+tgui::Picture::Ptr UI::createPicture(const std::string& imagePath, int x, int y, int width, int height)
+{
+    auto picture = tgui::Picture::create({ imagePath });
+	picture->setPosition(x, y);
+	picture->setSize(width, height);
+	return picture;
+}
+
 void UI::handleEvent(const sf::Event& event)
 {
     gui.handleEvent(event);

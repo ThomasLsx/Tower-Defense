@@ -24,6 +24,10 @@ void Wave::trySpawnMinion()
     }
 }
 
+void Wave::spawn()
+{
+}
+
 /**
  * @brief Démarre la vague (initialise le timer)
  */

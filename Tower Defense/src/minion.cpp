@@ -4,8 +4,8 @@
 #include <iostream>
 
 Minion::Minion(int id,/*Path* path, */ unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-	: Entity(id), health(health), currentTargetIndex(0),
-    /*targetPath(path),*/ rewardOnDeath(reward)
+    : Entity(id), health(health), pathProgress(0.0f),
+	/*targetPath(path),*/ rewardOnDeath(reward)
 {
 	Entity::init();
 }
@@ -21,15 +21,15 @@ void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
         targetPath.push_back(sf::Vector2f(worldX, worldY));
     }
 
-    // Place le minion au début du chemin
+    // Place le minion au dÃ©but du chemin
     if (!targetPath.empty()) {
        _position = targetPath[0];
     }
-	// TODO : gérer le cas où le chemin est vide
+	// TODO : gÃ©rer le cas oÃ¹ le chemin est vide
 }
 
 void Minion::update(float dt) {
-    // Entity::update(dt); // Appelle la mise à jour de base (si elle existe)
+    // Entity::update(dt); // Appelle la mise Ã  jour de base (si elle existe)
 
     // Le minion ne bouge que s'il est en vie
     if (health > 0) {
@@ -43,7 +43,7 @@ void Minion::followPath(float dt) {
         return;
     }
 
-    // 1. Définir la cible actuelle
+    // 1. DÃ©finir la cible actuelle
     sf::Vector2f target = targetPath[currentTargetIndex];
 
     // 2. Calculer le vecteur direction et la distance
@@ -57,26 +57,26 @@ void Minion::followPath(float dt) {
     sf::Vector2f direction = target - _position;
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
-    // 3. Calculer le déplacement pour cette frame
+    // 3. Calculer le dÃ©placement pour cette frame
     float moveAmount = std::sqrt(_velocity.x* _velocity.x + _velocity.y * _velocity.y) * dt;
 
-    // 4. Vérifier si on atteint (ou dépasse) la cible
+    // 4. VÃ©rifier si on atteint (ou dÃ©passe) la cible
     if (distance <= moveAmount) {
         // On a atteint la cible
-        _position = target; // On "snap" à la position cible pour éviter les dépassements
+        _position = target; // On "snap" Ã  la position cible pour Ã©viter les dÃ©passements
         _shape.setPosition(_position);
         currentTargetIndex++; // On vise le point suivant
 
-        // Vérifier si c'était le dernier point
+        // VÃ©rifier si c'Ã©tait le dernier point
         if (currentTargetIndex >= targetPath.size()) {
             std::cout << "Minion " << _id << " a atteint la fin du chemin !" << std::endl;
-            // Ici, déclenchez la logique de fin de chemin (ex: infliger dégâts à la base)
+            // Ici, dÃ©clenchez la logique de fin de chemin (ex: infliger dÃ©gÃ¢ts Ã  la base)
             this->onDestroy();
         }
     }
     else {
         // 5. On n'a pas atteint la cible, on s'en approche
-        // Normaliser le vecteur direction (longueur de 1) et le multiplier par le déplacement
+        // Normaliser le vecteur direction (longueur de 1) et le multiplier par le dÃ©placement
         direction /= distance; // (direction.x / distance, direction.y / distance)
         _position += direction * moveAmount;
         _shape.setPosition(_position);
@@ -86,10 +86,14 @@ void Minion::followPath(float dt) {
     }
 }
 
+void Minion::makeDamage(int amount)
+{
+}
+
 void Minion::onDestroy() {
     Entity::setIsAlive(false);
     /*
-    TODO : appelé fct affichage du BOOM et la thune
+    TODO : appelÃ© fct affichage du BOOM et la thune
     */
 }
 
