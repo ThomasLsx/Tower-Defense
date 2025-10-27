@@ -20,8 +20,6 @@ Game::Game()
     // Initialise le label mode au démarrage
     ui->setMode("Menu");
 
-	minion = new Minion(1);
-	minion->setPosition({ 100.0f, 100.0f });
 }
 
 Game::~Game()
@@ -49,9 +47,9 @@ void Game::run()
         HandleInput(events);
 
         switch (m_eGameMode) {
-		case Menu:
+        case Menu:
             showMenu();
-			break;
+            break;
         case Play:
             ui->gui.removeAllWidgets();
             menuInitialized = false;
@@ -73,7 +71,6 @@ void Game::run()
 void Game::UpdatePlay(const std::vector<sf::Event>& events)
 {
     HandlePlayInput(events);
-	minion->setPosition({ minion->getPosition().x + 1.0f, minion->getPosition().y });
 }
 
 
@@ -85,15 +82,14 @@ void Game::Render()
     // Affiche le menu
     if (m_eGameMode == Menu)
     {
-		//window->clear(sf::Color(100, 100, 100));
-	}
+        //window->clear(sf::Color(100, 100, 100));
+    }
 
     // Affiche la map de jeux
     if (m_eGameMode == Play)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
-		minion->draw(window->getRenderWindow());
-	}
+    }
 
     // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
     if (m_eGameMode == Editor)
@@ -109,9 +105,9 @@ void Game::Render()
 void Game::HandleInput(const std::vector<sf::Event>& events)
 {
     static bool bTWasPressedLastUpdate = false;
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::T))
     {
-        if(!bTWasPressedLastUpdate)
+        if (!bTWasPressedLastUpdate)
         {
             if (m_eGameMode == Editor) {
                 m_eGameMode = Menu;
@@ -120,17 +116,17 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
             else if (m_eGameMode == Play) {
                 m_eGameMode = Editor;
                 ui->setMode("Editor");
-            } 
+            }
             else {
                 m_eGameMode = Play;
                 ui->setMode("Play");
             }
-		}
+        }
         bTWasPressedLastUpdate = true;
-	}
+    }
     else
     {
-		bTWasPressedLastUpdate = false;
+        bTWasPressedLastUpdate = false;
     }
 
     // N'appeler HandlePlayInput() que dans UpdatePlay()
@@ -149,30 +145,29 @@ void Game::HandlePlayInput(const std::vector<sf::Event>& events)
 void Game::showMenu()
 {
     if (!menuInitialized) {
-		// Ecrant d'accueil
-		auto picture = ui->createPicture("assets/menu_background.png", 0, 0, window->getWidth(), window->getHeight());
+        // Ecrant d'accueil
+        auto picture = ui->createPicture("assets/menu_background.png", 0, 0, window->getWidth(), window->getHeight());
         picture->setSize({ "100%", "100%" });
         ui->gui.add(picture);
 
-		// Bouton Play
-        auto boutonPlay = ui->createButton("Play", window->getWidth()/2 - 100, window->getHeight()/2 -25, 200, 50);
+        // Bouton Play
+        auto boutonPlay = ui->createButton("Play", window->getWidth() / 2 - 100, window->getHeight() / 2 - 25, 200, 50);
         boutonPlay->onPress([this]() {
             std::cout << "Play button pressed!" << std::endl;
             m_eGameMode = Play;
             ui->setMode("Play");
-        });
+            });
         ui->gui.add(boutonPlay);
 
-		// Bouton Level Editor
-        auto boutonEditor = ui->createButton("Level Editor", window->getWidth()/2 - 100, window->getHeight()/2 + 25, 200, 50);
+        // Bouton Level Editor
+        auto boutonEditor = ui->createButton("Level Editor", window->getWidth() / 2 - 100, window->getHeight() / 2 + 25, 200, 50);
         boutonEditor->onPress([this]() {
             std::cout << "Level Editor button pressed!" << std::endl;
             m_eGameMode = Editor;
             ui->setMode("Level Editor");
             });
-		ui->gui.add(boutonEditor);
+        ui->gui.add(boutonEditor);
 
         menuInitialized = true;
     }
 }
-

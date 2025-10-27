@@ -2,18 +2,17 @@
 #include <iostream>
 
 Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity, unsigned int damage, float lifetime, sf::Vector2f pos, float rotation, sf::Color color)
-    :Entity(id), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId), targetEntityId(targetEntityId)
+	:Entity(id), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId), targetEntityId(targetEntityId)
 {
     Entity::init();
 }
 
 void Projectile::update(float dt) {
-    // Met ? jour la position du projectile en fonction de sa vitesse
-    sf::Vector2f position;
-    Entity::setPosition(position += velocity * dt);
+	_position += velocity * dt;
+    _shape.setPosition(_position);
 
-    // D?cr?mente la dur?e de vie
-    lifetime -= dt;
+    // Décrémente la durée de vie
+    lifetime -= 0;
 
     if (lifetime <= 0.0f) {
         onDestroy();
@@ -27,7 +26,7 @@ void Projectile::onHit()
 
 void Projectile::onDestroy() {
     // Logique de destruction du projectile
-    std::cout << "Projectile " << Entity::getId() << " d?truit (fin de vie ou collision)." << std::endl;
+    std::cout << "Projectile " << Entity::getId() << " détruit (fin de vie ou collision)." << std::endl;
     // Marquer le projectile comme inactif ou le supprimer de la liste des projectiles actifs
     // (cette partie est g?n?ralement g?r?e par le ProjectileSystem)
 }

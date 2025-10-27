@@ -34,10 +34,10 @@ namespace sf
 {
 namespace priv
 {
-constexpr float pi  = 3.141592654f;
-constexpr float tau = pi * 2.f;
+inline constexpr float pi  = 3.141592654f;
+inline constexpr float tau = pi * 2.f;
 
-constexpr float positiveRemainder(float a, float b)
+inline constexpr float positiveRemainder(float a, float b)
 {
     assert(b > 0.f && "Cannot calculate remainder with non-positive divisor");
     const float val = a - static_cast<float>(static_cast<int>(a / b)) * b;
@@ -46,153 +46,153 @@ constexpr float positiveRemainder(float a, float b)
 } // namespace priv
 
 ////////////////////////////////////////////////////////////
-constexpr float Angle::asDegrees() const
+inline constexpr float Angle::asDegrees() const
 {
     return m_radians * (180.f / priv::pi);
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr float Angle::asRadians() const
+inline constexpr float Angle::asRadians() const
 {
     return m_radians;
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle Angle::wrapSigned() const
+inline constexpr Angle Angle::wrapSigned() const
 {
     return radians(priv::positiveRemainder(m_radians + priv::pi, priv::tau) - priv::pi);
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle Angle::wrapUnsigned() const
+inline constexpr Angle Angle::wrapUnsigned() const
 {
     return radians(priv::positiveRemainder(m_radians, priv::tau));
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle::Angle(float radians) : m_radians(radians)
+inline constexpr Angle::Angle(float radians) : m_radians(radians)
 {
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle degrees(float angle)
+inline constexpr Angle degrees(float angle)
 {
     return Angle(angle * (priv::pi / 180.f));
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle radians(float angle)
+inline constexpr Angle radians(float angle)
 {
     return Angle(angle);
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr bool operator==(Angle left, Angle right)
+inline constexpr bool operator==(Angle left, Angle right)
 {
     return left.asRadians() == right.asRadians();
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr bool operator!=(Angle left, Angle right)
+inline constexpr bool operator!=(Angle left, Angle right)
 {
     return left.asRadians() != right.asRadians();
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr bool operator<(Angle left, Angle right)
+inline constexpr bool operator<(Angle left, Angle right)
 {
     return left.asRadians() < right.asRadians();
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr bool operator>(Angle left, Angle right)
+inline constexpr bool operator>(Angle left, Angle right)
 {
     return left.asRadians() > right.asRadians();
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr bool operator<=(Angle left, Angle right)
+inline constexpr bool operator<=(Angle left, Angle right)
 {
     return left.asRadians() <= right.asRadians();
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr bool operator>=(Angle left, Angle right)
+inline constexpr bool operator>=(Angle left, Angle right)
 {
     return left.asRadians() >= right.asRadians();
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator-(Angle right)
+inline constexpr Angle operator-(Angle right)
 {
     return radians(-right.asRadians());
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator+(Angle left, Angle right)
+inline constexpr Angle operator+(Angle left, Angle right)
 {
     return radians(left.asRadians() + right.asRadians());
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle& operator+=(Angle& left, Angle right)
+inline constexpr Angle& operator+=(Angle& left, Angle right)
 {
     return left = left + right;
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator-(Angle left, Angle right)
+inline constexpr Angle operator-(Angle left, Angle right)
 {
     return radians(left.asRadians() - right.asRadians());
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle& operator-=(Angle& left, Angle right)
+inline constexpr Angle& operator-=(Angle& left, Angle right)
 {
     return left = left - right;
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator*(Angle left, float right)
+inline constexpr Angle operator*(Angle left, float right)
 {
     return radians(left.asRadians() * right);
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator*(float left, Angle right)
+inline constexpr Angle operator*(float left, Angle right)
 {
     return right * left;
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle& operator*=(Angle& left, float right)
+inline constexpr Angle& operator*=(Angle& left, float right)
 {
     return left = left * right;
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator/(Angle left, float right)
+inline constexpr Angle operator/(Angle left, float right)
 {
     assert(right != 0.f && "Angle::operator/ cannot divide by 0");
     return radians(left.asRadians() / right);
@@ -200,7 +200,7 @@ constexpr Angle operator/(Angle left, float right)
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle& operator/=(Angle& left, float right)
+inline constexpr Angle& operator/=(Angle& left, float right)
 {
     assert(right != 0.f && "Angle::operator/= cannot divide by 0");
     return left = left / right;
@@ -208,7 +208,7 @@ constexpr Angle& operator/=(Angle& left, float right)
 
 
 ////////////////////////////////////////////////////////////
-constexpr float operator/(Angle left, Angle right)
+inline constexpr float operator/(Angle left, Angle right)
 {
     assert(right.asRadians() != 0.f && "Angle::operator/ cannot divide by 0");
     return left.asRadians() / right.asRadians();
@@ -216,7 +216,7 @@ constexpr float operator/(Angle left, Angle right)
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator%(Angle left, Angle right)
+inline constexpr Angle operator%(Angle left, Angle right)
 {
     assert(right.asRadians() != 0.f && "Angle::operator% cannot modulus by 0");
     return radians(priv::positiveRemainder(left.asRadians(), right.asRadians()));
@@ -224,7 +224,7 @@ constexpr Angle operator%(Angle left, Angle right)
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle& operator%=(Angle& left, Angle right)
+inline constexpr Angle& operator%=(Angle& left, Angle right)
 {
     assert(right.asRadians() != 0.f && "Angle::operator%= cannot modulus by 0");
     return left = left % right;
@@ -232,34 +232,31 @@ constexpr Angle& operator%=(Angle& left, Angle right)
 
 namespace Literals
 {
-
-////////////////////////////////////////////////////////////
-constexpr Angle operator""_deg(long double angle)
+inline constexpr Angle operator""_deg(long double angle)
 {
     return degrees(static_cast<float>(angle));
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator""_deg(unsigned long long angle)
+inline constexpr Angle operator""_deg(unsigned long long angle)
 {
     return degrees(static_cast<float>(angle));
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator""_rad(long double angle)
+inline constexpr Angle operator""_rad(long double angle)
 {
     return radians(static_cast<float>(angle));
 }
 
 
 ////////////////////////////////////////////////////////////
-constexpr Angle operator""_rad(unsigned long long angle)
+inline constexpr Angle operator""_rad(unsigned long long angle)
 {
     return radians(static_cast<float>(angle));
 }
-
 } // namespace Literals
 
 

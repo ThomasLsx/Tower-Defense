@@ -1,4 +1,3 @@
-
 #include "economySystem.h"
 #include "player.h"
 #include "minion.h"

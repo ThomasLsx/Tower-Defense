@@ -1,4 +1,3 @@
-
 #ifndef ECONOMYSYSTEM_H
 #define ECONOMYSYSTEM_H
 
