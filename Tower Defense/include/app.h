@@ -20,13 +20,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
 
-#define WINDOW_WIDTH 1200
-#define WINDOW_HEIGHT 1200
-#define NB_ENTITY 100
-#define STARTING_OFFSET sf::Vector2f(600, 600)
-#define BETWEEN(X, A, B) ((X>=A) && (X<B))
+#ifndef APP_H
+#define APP_H
+
+#include <SFML/Graphics.hpp>
+#include <memory>
+#include <vector>
+#include "entity.h"
+#include "quadtree.h"
+#include "constants.h"
+
+class App {
+public:
+    App();
+    ~App();
+    void run();
+
+private:
+    void handleEvents();
+    void render();
+    void resolveCollisions();
+
+    std::unique_ptr<sf::RenderWindow> _window;
+    std::unique_ptr<Node> _quadtree;
+    std::vector<Entity> _entities;
+};
 
 #endif

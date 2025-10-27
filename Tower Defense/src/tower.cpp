@@ -1,14 +1,15 @@
 
 #include "tower.h"
 #include "projectilesystem.h"
+#include "minion.h"
 #include <iostream>
 
 Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage, sf::Vector2f pos, float rotation, sf::Color color)
     : Entity(id),
-    range(range),
-    fireRate(fireRate),
-    level(level),
-    damage(damage)
+      range(range),
+      fireRate(fireRate),
+      level(level),
+      damage(damage) 
 {
     Entity::init();
 }
@@ -39,10 +40,22 @@ void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSyst
     tryFire(minions, projectileSystem);
 }
 
-std::vector<int> Tower::SearchTargets(unsigned int maxTargets)
+void Tower::SearchTargets(std::vector<Minion> mimi)
 {
-    //use projsys pour get targets
-    return std::vector<int>();
+    for (auto it = mimi.begin(); it != mimi.end(); ++it)
+    {
+        sf::Vector2f direction = it->getPosition() - _position;
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (distance <= range)
+            targetIds.push_back(it->getId());
+    }
+}
+
+// Ajout d'une version override de update pour la base
+void Tower::update(float dt)
+{
+    // Optionnel : logique de base si besoin
 }
 
 // Ajout d'une version override de update pour la base

@@ -43,7 +43,7 @@ public:
      * @param outline color
      * @param outline thickness
      */
-    void init(int radius = 50, const sf::Color& color = sf::Color::Red, const sf::Color& outline = sf::Color::Black, int thickness = 1);
+    void init(int radius = 50, const sf::Color& color = sf::Color::Red , const sf::Color& outline = sf::Color::Black, int thickness = 1);
 
     /**
      * Upadte object at each frame
@@ -54,7 +54,7 @@ public:
     /**
      * Render object
      * @param the window to draw to
-     */
+	 */
     void draw(sf::RenderWindow& window);
 
     /**
@@ -80,7 +80,7 @@ public:
      */
     inline unsigned int getId() const {
         return _id;
-    }
+	}
 
     /**
      * Collision detection
@@ -129,9 +129,9 @@ public:
 
     inline sf::FloatRect getGlobalBounds() const {
         return _shape.getGlobalBounds();
-    }
+	}
 
-
+    
 protected:
     sf::CircleShape _shape;
     sf::Vector2f _position;
@@ -142,7 +142,7 @@ protected:
 
     bool _isAlive;
 
-    unsigned int _id;
+	unsigned int _id;
 };
 
 #endif
