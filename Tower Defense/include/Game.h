@@ -6,6 +6,9 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+#include "Minion.h"
+#include "path.h"
+
 // Main game class: handles window, GUI, and game logic
 class Game {
 public:
@@ -36,4 +39,9 @@ private:
     GameMode m_eGameMode;
 
     bool menuInitialized = false;
+
+    void mv_minion(void);
+
+	Minion* mimi;
+
 };
