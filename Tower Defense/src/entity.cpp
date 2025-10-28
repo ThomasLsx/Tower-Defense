@@ -34,11 +34,13 @@ void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, 
     _shape.setFillColor(color);
     _shape.setOutlineColor(outline);
     _shape.setOutlineThickness(thickness);
+    _shape.setOrigin(sf::Vector2f(radius, radius));
     _squaredRadius = radius * radius;
 }
 
 void Entity::draw(sf::RenderWindow& window)
 {
+    if (getIsAlive())
     window.draw(_shape);
 }
 

@@ -1,3 +1,4 @@
+
 // map.h
 #pragma once
 #include "Window.h"
@@ -29,9 +30,10 @@ public:
 	sf::Vector2u getTileSize() const { return tileSize; }
 	const std::vector<int>& getLevel() const { return m_level; }
 	const std::vector<std::vector<int>> getLevel2D() const;
+	const sf::Vector2u getCurentTile(sf::Vector2f position) const;
 
 	// Setters
-	void setLevel(const std::vector<int>& newLevel) { m_level = newLevel;  }
+	void setLevel(const std::vector<int>& newLevel) { m_level = newLevel; }
 
 	// Debug
 	void printTiles() const;
@@ -41,11 +43,11 @@ private:
 	unsigned int height;
 	float scale;
 	sf::Vector2u tileSize;
-    sf::VertexArray m_vertices;
-    sf::Texture     m_tileset;
+	sf::VertexArray m_vertices;
+	sf::Texture     m_tileset;
 	std::vector<int> m_level;
 
-// LevelEditor
+	// LevelEditor
 
 public:
 	// Getters

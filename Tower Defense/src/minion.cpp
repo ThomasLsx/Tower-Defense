@@ -1,12 +1,41 @@
 #include "minion.h"
 #include "path.h"
-
 #include <iostream>
 
-Minion::Minion(int id,/*Path* path, */ unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-    : Entity(id), health(health), rewardOnDeath(reward)
+Minion::Minion(int id, TileMap* map, unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
+    : Entity(id), map(map), health(health), rewardOnDeath(reward)
 {
-	Entity::init();
+    Entity::init();
+}
+
+void Minion::move()
+{
+    // 1. Initialiser le système de pathfinding avec la grille
+    Pathfinding pf(map->getLevel2D());
+    
+    // 2. Définir le départ et l'arrivée
+    sf::Vector2u pos = map->getCurentTile(this->getPosition());
+
+    Position start = { pos.y, pos.x };
+    Position goal = { 5, 19 };
+
+    std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
+        << ") a (" << goal.x << ", " << goal.y << ")" << std::endl;
+
+    // 3. Trouver le chemin
+    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+
+    if (pathOpt.has_value() && !pathOpt->empty()) {
+        std::cout << "Chemin trouve avec " << pathOpt->size() << " positions." << std::endl;
+        for (const Position& p : *pathOpt) {
+            std::cout << "(" << p.x << ", " << p.y << ") ";
+        }
+        std::cout << std::endl;
+        static_cast<Minion*>(this)->setPath(*pathOpt, 96);
+    }
+    else {
+        std::cout << "Aucun chemin valide trouve !" << std::endl;
+    }
 }
 
 void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {

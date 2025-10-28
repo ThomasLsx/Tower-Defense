@@ -2,38 +2,13 @@
 #include "UI.h"
 #include <iostream>
 
-UI::UI(sf::RenderWindow& window)
+UI::UI(Window* window, Game* game) : window(window), game(game)
 {
-    gui.setTarget(window);
+    gui.setTarget(window->getRenderWindow());
 
-    modeLabel = createLabel("Mode: ", 10, 10);
-	gui.add(modeLabel, "modeLabel");
-}
-
-tgui::Label::Ptr UI::createLabel(const std::string& text, int x, int y)
-{
-    auto label = tgui::Label::create();
-    label->setText(text);
-    label->setPosition(x, y);
-    label->setTextSize(18);
-    label->getRenderer()->setTextColor(tgui::Color::White);
-    return label;
-}
-
-tgui::Button::Ptr UI::createButton(const std::string& text, int x, int y, int width, int height)
-{
-    auto btn = tgui::Button::create(text);
-    btn->setPosition(x, y);
-    btn->setSize(width, height);
-    return btn;
-}
-
-tgui::Picture::Ptr UI::createPicture(const std::string& imagePath, int x, int y, int width, int height)
-{
-    auto picture = tgui::Picture::create({ imagePath });
-	picture->setPosition(x, y);
-	picture->setSize(width, height);
-	return picture;
+	initMenuUI();
+	initPlayUI();
+	initEditorUI();
 }
 
 void UI::handleEvent(const sf::Event& event)
@@ -46,38 +21,122 @@ void UI::draw()
     gui.draw();
 }
 
-void UI::setMode(const std::string& mode)
+void UI::initMenuUI()
 {
-    if (modeLabel)
-        modeLabel->setText("Mode: " + mode);
+    menuUI = tgui::Group::create();
+
+    // Ecrant d'accueil
+    auto picture = tgui::Picture::create("assets/menu_background.png");
+	picture->setPosition(0, 0);
+    picture->setSize(window->getWidth(), window->getHeight());
+    menuUI->add(picture);
+
+    // Bouton Play
+    auto boutonPlay = tgui::Button::create("Play");
+    boutonPlay->setSize(200, 50);
+	tgui::Vector2f boutonPlaySize = boutonPlay->getSize();
+	boutonPlay->setPosition(window->getWidth() / 2 - boutonPlaySize.x / 2, window->getHeight() / 2 - boutonPlaySize.y);
+    boutonPlay->onPress([this]() {
+        std::cout << "Play button pressed!" << std::endl;
+		game->setGameMode(Game::GameMode::Play);
+        });
+    menuUI->add(boutonPlay);
+
+    // Bouton Level Editor
+    auto boutonEditor = tgui::Button::create("Level Editor");
+    boutonEditor->setSize(200, 50);
+	tgui::Vector2f boutonEditorSize = boutonEditor->getSize();
+    boutonEditor->setPosition(window->getWidth() / 2 - boutonEditorSize.x / 2, window->getHeight() / 2 + boutonEditorSize.y);
+    boutonEditor->onPress([this]() {
+        std::cout << "Level Editor button pressed!" << std::endl;
+        game->setGameMode(Game::GameMode::Editor);
+        });
+    menuUI->add(boutonEditor);
+
+    gui.add(menuUI);
 }
 
-//void UI::createMenu()
-//{
-//    if (!menuInitialized) {
-//        auto menu_ui = tgui::Group::create();
-//        // Bouton Play
-//        auto boutonPlay = ui->createButton("Play", window->getWidth() / 2 - 100, window->getHeight() / 2 - 25, 200, 50);
-//        boutonPlay->onPress([this]() {
-//            std::cout << "Play button pressed!" << std::endl;
-//            m_eGameMode = Play;
-//            ui->setMode("Play");
-//            });
-//        // Bouton Level Editor
-//        auto boutonEditor = ui->createButton("Level Editor", window->getWidth() / 2 - 100, window->getHeight() / 2 + 25, 200, 50);
-//        boutonEditor->onPress([this]() {
-//            std::cout << "Level Editor button pressed!" << std::endl;
-//            m_eGameMode = Editor;
-//            ui->setMode("Level Editor");
-//            });
-//
-//        menu_ui->add(boutonPlay);
-//        menu_ui->add(boutonEditor);
-//
-//        ui->gui.add(menu_ui);
-//
-//        menu_ui->setVisible(true);
-//
-//        menuInitialized = true;
-//    }
-//}
+void UI::showMenuUI()
+{
+    menuUI->setVisible(true);
+	playUI->setVisible(false);
+	editorUI->setVisible(false);
+}
+
+void UI::initPlayUI()
+{
+	playUI = tgui::Group::create();
+
+	// Label Wave Info
+    auto waveLabel = tgui::Label::create("Wave: 0");
+	tgui::Vector2f waveLabelSize = waveLabel->getSize();
+	waveLabel->setPosition(window->getWidth() / 2 - waveLabelSize.x, waveLabelSize.y);
+	waveLabel->setTextSize(30);
+	waveLabel->getRenderer()->setTextColor(tgui::Color::White);
+	waveLabel->getRenderer()->setTextStyle(tgui::TextStyle::Bold);
+	playUI->add(waveLabel);
+
+	// Bouton Start Wave
+	auto startWaveButton = tgui::Button::create("Start Wave");
+	startWaveButton->setSize(150, 40);
+	tgui::Vector2f startWaveButtonSize = startWaveButton->getSize();
+	startWaveButton->setPosition(10, 10);
+	startWaveButton->onPress([this]() {
+		std::cout << "Start Wave button pressed!" << std::endl;
+		game->startNextWave = true;
+		});
+	playUI->add(startWaveButton);
+
+	// Bouton Pause
+	auto pauseButton = tgui::Button::create("Pause");
+	pauseButton->setSize(100, 40);
+	tgui::Vector2f pauseButtonSize = pauseButton->getSize();
+	pauseButton->setPosition(window->getWidth() - pauseButtonSize.x - 10, 10);
+	pauseButton->onPress([this, pauseButton]() {
+		std::cout << "Pause button pressed!" << std::endl;
+		if (isPaused) {
+			isPaused = false;
+			game->setGameMode(Game::GameMode::Play);
+			pauseButton->setText("Pause");
+		}
+		else {
+			isPaused = true;
+			game->setGameMode(Game::GameMode::Pause);
+			pauseButton->setText("Resume");
+		}
+		});
+	playUI->add(pauseButton);
+
+	gui.add(playUI);
+}
+
+void UI::showPlayUI()
+{
+    menuUI->setVisible(false);
+	playUI->setVisible(true);
+	editorUI->setVisible(false);
+}
+
+void UI::initEditorUI()
+{
+    editorUI = tgui::Group::create();
+    // Label Editor Info
+    auto editorLabel = tgui::Label::create("Editor Mode Active");
+	tgui::Vector2f editorLabelSize = editorLabel->getSize();
+	editorLabel->setPosition(window->getWidth() / 2 - editorLabelSize.x, editorLabelSize.y);
+	editorLabel->setTextSize(30);
+	editorLabel->getRenderer()->setTextColor(tgui::Color::White);
+	editorLabel->getRenderer()->setTextStyle(tgui::TextStyle::Bold);
+	editorUI->add(editorLabel);
+
+	gui.add(editorUI);
+}
+
+void UI::showEditorUI()
+{
+    menuUI->setVisible(false);
+	playUI->setVisible(false);
+	editorUI->setVisible(true);
+}
+
+

@@ -5,9 +5,9 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 {
     width = 20;
     height = 11;
-	scale = 3.0f;
-	tileSize = sf::Vector2u(32, 32);
-	m_level = std::vector<int>(width * height, 0);
+    scale = 3.0f;
+    tileSize = sf::Vector2u(32, 32);
+    m_level = std::vector<int>(width * height, 0);
     m_TileIndex = 0;
     m_TileOptions = 8;
 }
@@ -75,7 +75,7 @@ bool TileMap::loadLevel(const std::filesystem::path& levelFilePath)
             level.push_back(tile);
         }
     }
-	setLevel(level);
+    setLevel(level);
 
     return true;
 }
@@ -91,11 +91,12 @@ bool TileMap::saveLevel(const std::filesystem::path& levelFilePath)
         file << m_level[i];
         if ((i + 1) % getWidth() == 0) {
             file << '\n';
-        } else {
+        }
+        else {
             file << ' ';
         }
     }
-	return true;
+    return true;
 }
 
 void TileMap::updateTile(int x, int y, const int index, sf::Vector2u tileSize)
@@ -145,8 +146,21 @@ const std::vector<std::vector<int>> TileMap::getLevel2D() const
             row.push_back(tileNumber);
         }
         m_level2D.push_back(row);
+    }
+    return m_level2D;
+}
+
+const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
+{
+	// donne la valeur de la tuile Ã  la position (x, y)
+	unsigned int x = static_cast<unsigned int>(position.x / (tileSize.x * scale));
+	unsigned int y = static_cast<unsigned int>(position.y / (tileSize.y * scale));
+    if (x < width && y < height)
+    {
+        return sf::Vector2u(x, y);
 	}
-	return m_level2D;
+	std::cout << "getCurentTile: Coordinates (" << x << ", " << y << ") sont hors limites.\n";
+	return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnÃ©es sont hors limites
 }
 
 void TileMap::printTiles() const
@@ -162,7 +176,7 @@ void TileMap::printTiles() const
             const int tileNumber = level[i + j * width];
             std::cout << tileNumber << " ";
         }
-        std::cout << "\n"; // Nouvelle ligne pour chaque rangée
+        std::cout << "\n"; // Nouvelle ligne pour chaque rangÃ©e
     }
 }
 
@@ -174,15 +188,15 @@ void TileMap::DrawMouseHover()
     sf::Vector2u tSize = getTileSize();
     float scale = getScale();
 
-    // Calcule la position alignée sur la grille
+    // Calcule la position alignÃ©e sur la grille
     unsigned int i = static_cast<unsigned int>(vMousePosition.x / (tSize.x * scale));
     unsigned int j = static_cast<unsigned int>(vMousePosition.y / (tSize.y * scale));
     sf::Vector2f gridPos(i * tSize.x * scale, j * tSize.y * scale);
 
-    // Prépare le sprite de la tuile sélectionnée
+    // PrÃ©pare le sprite de la tuile sÃ©lectionnÃ©e
     sf::Sprite tileSprite(m_tileset);
 
-    // Calcule le rectangle de texture à partir de l'index sélectionné
+    // Calcule le rectangle de texture Ã  partir de l'index sÃ©lectionnÃ©
     int tu = m_TileIndex % (m_tileset.getSize().x / tSize.x);
     int tv = m_TileIndex / (m_tileset.getSize().x / tSize.x);
     sf::IntRect rect;
@@ -208,7 +222,7 @@ void TileMap::HandleLevelEditorInput(const std::vector<sf::Event>& events)
 {
     for (const sf::Event& event : events)
     {
-		// Gestion de la molette de la souris
+        // Gestion de la molette de la souris
         if (event.is<sf::Event::MouseWheelScrolled>())
         {
             auto mouseWheel = event.getIf<sf::Event::MouseWheelScrolled>();
@@ -233,7 +247,7 @@ void TileMap::HandleLevelEditorInput(const std::vector<sf::Event>& events)
                     std::cerr << "Failed to save level to " << levelFilePath << std::endl;
             }
         }
-		// Gestion des clics souris
+        // Gestion des clics souris
         if (event.is<sf::Event::MouseButtonPressed>())
         {
             sf::Event::MouseButtonPressed mouse = *event.getIf<sf::Event::MouseButtonPressed>();

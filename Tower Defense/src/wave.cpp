@@ -1,4 +1,3 @@
-
 #include "Wave.h"
 #include "Minion.h"
 
@@ -7,24 +6,9 @@
  * @param number Numéro de la vague
  * @param delay Délai entre chaque spawn de Minion (en secondes)
  */
-Wave::Wave(int number, float delay)
-    : waveNumber(number), finished(false),
-    spawnTimer(0.0f), spawnDelay(delay), minionsSpawned(0)
-{
-}
-
-/**
- * @brief Essaye de spawner un Minion si le délai est écoulé
- */
-void Wave::trySpawnMinion()
-{
-    if (minionsSpawned < 5) { // Exemple : 5 Minions par vague
-        minions.push_back(std::make_unique<Minion>(waveNumber));
-        ++minionsSpawned;
-    }
-}
-
-void Wave::spawn()
+Wave::Wave(int id, int nb_enemies, TileMap* map, float delay)
+    : id(id), nb_enemies(nb_enemies), finished(false),
+    spawnTimer(0.0f), spawnDelay(delay), minionsSpawned(0), map(map)
 {
 }
 
@@ -33,7 +17,8 @@ void Wave::spawn()
  */
 void Wave::start()
 {
-    spawnTimer = 0.0f;
+	finished = false;
+    spawnTimer = 1.0f;
     minionsSpawned = 0;
     minions.clear();
 }
@@ -42,28 +27,47 @@ void Wave::start()
  * @brief Met à jour l'état de la vague et des Minions
  * @param dt Delta time (temps écoulé depuis la dernière frame)
  */
-void Wave::update(float dt)
+void Wave::update(float sec)
 {
-    // Mise à jour du timer de spawn
-    spawnTimer += dt;
-    if (spawnTimer >= spawnDelay) {
-        spawnTimer = 0.0f;
-        trySpawnMinion();
+    // Spawner les minions un par un avec un délai
+    if (minionsSpawned < nb_enemies) {
+        spawnTimer += sec;
+        if (spawnTimer >= spawnDelay) {
+            minions.push_back(std::make_unique<Minion>(minionsSpawned, map));
+            minions.back()->init(30, sf::Color::Green, sf::Color::Black, 2);
+            float tile = map->getTileSize().x * map->getScale();
+            minions.back()->setPosition(sf::Vector2f(1 * tile, 5 * tile));
+            minions.back()->move();
+            ++minionsSpawned;
+            spawnTimer = 0.0f;
+        }
     }
 
     // Mise à jour des Minions existants
     for (auto& minion : minions) {
-        minion->update(dt);
+        minion->update(sec*120);
     }
 
     // Vérifie si tous les Minions sont morts ou arrivés à destination
-    finished = (minionsSpawned >= 5); // Exemple : 5 Minions par vague
+    finished = (minionsSpawned >= nb_enemies);
     for (const auto& minion : minions) {
         if (minion->getIsAlive()) {
             finished = false;
             break;
         }
     }
+}
+
+/**
+ * @brief Dessine les Minions de la vague sur la fenêtre
+ * @param window Référence vers la fenêtre de rendu SFML
+ */
+void Wave::draw(sf::RenderWindow& window)
+{
+    for (const auto& minion : minions) {
+        minion->draw(window);
+    }
+
 }
 
 /**

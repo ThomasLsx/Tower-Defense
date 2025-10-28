@@ -1,5 +1,6 @@
 #pragma once
 #include "entity.h"
+#include "map.h"
 
 class Path;
 struct Position;
@@ -11,29 +12,30 @@ struct Position;
  */
 class Minion : public Entity {
 private:
+	TileMap* map;               ///< Pointeur vers la map du jeu.
     unsigned int health;          ///< Points de vie actuels du minion.
     size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
     unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
-
     std::vector<sf::Vector2f> targetPath;
 
 public:
     /**
      * @brief Constructeur de Minion.
      * @param id Identifiant unique du minion.
-     * @param pos Position initiale du minion.
-     * @param path Chemin que le minion doit suivre.
+     * @param map Pointeur vers la map du jeu.
      * @param health Points de vie initiaux du minion.
-     * @param velocity Vitesse initiale du minion.
      * @param reward Récompense accordée à la mort du minion.
+     * @param pos Position initiale du minion.
+     * @param rotation Rotation initiale.
+     * @param color Couleur du minion.
      */
-    Minion(int id, /*Path* path, */ unsigned int healt = 100, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
+    Minion(int id, TileMap* map = nullptr , unsigned int health = 100, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
      * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
      * @param dt Temps écoulé depuis la dernière frame (en secondes).
      */
-    void move(float dt);
+    void move(); 
 
     /**
      * @brief Logique de mouvement interne pour suivre le chemin.
