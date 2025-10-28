@@ -20,6 +20,13 @@ Game::Game()
     // Initialise le label mode au démarrage
     ui->setMode("Menu");
 
+    mimi = new Minion(1, map);
+    mimi->init(30, sf::Color::Green, sf::Color::Black, 2);
+	mimi->setPosition(sf::Vector2f(1 * map->getTileSize().x * map->getScale(), 5 * map->getTileSize().y * map->getScale()));
+
+    sf::Vector2u pos = map->getCurentTile(mimi->getPosition());
+
+	std::cout << "(" << pos.x << ", " << pos.y << ")" << std::endl;
 }
 
 Game::~Game()
@@ -54,6 +61,8 @@ void Game::run()
             ui->gui.removeAllWidgets();
             menuInitialized = false;
             UpdatePlay(events);
+
+            mimi->update(1);
             break;
         case Editor:
             ui->gui.removeAllWidgets();
@@ -89,6 +98,8 @@ void Game::Render()
     if (m_eGameMode == Play)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
+        mimi->draw(window->getRenderWindow());
+
     }
 
     // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
@@ -156,6 +167,7 @@ void Game::showMenu()
             std::cout << "Play button pressed!" << std::endl;
             m_eGameMode = Play;
             ui->setMode("Play");
+            mimi->move();
             });
         ui->gui.add(boutonPlay);
 
@@ -171,3 +183,5 @@ void Game::showMenu()
         menuInitialized = true;
     }
 }
+
+

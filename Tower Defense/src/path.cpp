@@ -1,5 +1,6 @@
 #include "path.h"
 #include <boost/graph/graph_traits.hpp>
+#include <iostream>
 
 Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
     : m_height(grid.size()), m_width(0)
@@ -18,7 +19,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
     // --- 1. Ajouter les sommets ---
     for (int i = 0; i < m_height; ++i) {
         for (int j = 0; j < m_width; ++j) {
-            if (grid[i][j] == 3) { // Case accessible
+            if (grid[i][j] == 3 || grid[i][j] == 4 || grid[i][j] == 7) { // Cases accessibles
                 Vertex v = boost::add_vertex(m_graph);
                 m_gridToVertex[i][j] = v;
                 m_positionMap[v] = { i, j }; // Assigner la position
@@ -35,33 +36,41 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                 // Voisin de droite (j+1)
                 if (j + 1 < m_width && (grid[i][j + 1] == 3 || grid[i][j + 1] == 4 || grid[i][j + 1] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i][j + 1];
-                    Edge e; bool inserted;
-                    boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (neighbor_v != null_v && current_v != null_v) {
+                        Edge e; bool inserted;
+                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
 
                 // Voisin de gauche (j-1)
                 if (j - 1 >= 0 && (grid[i][j - 1] == 3 || grid[i][j - 1] == 4 || grid[i][j - 1] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i][j - 1];
-                    Edge e; bool inserted;
-                    boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (neighbor_v != null_v && current_v != null_v) {
+                        Edge e; bool inserted;
+                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
 
                 // Voisin du bas (i+1)
                 if (i + 1 < m_height && (grid[i + 1][j] == 3 || grid[i + 1][j] == 4 || grid[i + 1][j] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i + 1][j];
-                    Edge e; bool inserted;
-                    boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (neighbor_v != null_v && current_v != null_v) {
+                        Edge e; bool inserted;
+                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
 
                 // Voisin du haut (i-1)
                 if (i - 1 >= 0 && (grid[i - 1][j] == 3 || grid[i - 1][j] == 4 || grid[i - 1][j] == 7)) {
                     Vertex neighbor_v = m_gridToVertex[i - 1][j];
-                    Edge e; bool inserted;
-                    boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                    boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    if (neighbor_v != null_v && current_v != null_v) {
+                        Edge e; bool inserted;
+                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
+                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
+                    }
                 }
             }
         }
@@ -70,11 +79,13 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
 
 std::optional<Vertex> Pathfinding::getVertex(Position pos) const {
     if (pos.x < 0 || pos.x >= m_height || pos.y < 0 || pos.y >= m_width) {
+		std::cout << "Position hors limites: (" << pos.x << ", " << pos.y << ")" << std::endl;
         return std::nullopt; // Hors limites
     }
 
     Vertex v = m_gridToVertex[pos.x][pos.y];
     if (v == boost::graph_traits<Graph>::null_vertex()) {
+		std::cout << "Position inaccessible (mur): (" << pos.x << ", " << pos.y << ")" << std::endl;
         return std::nullopt; // C'est un mur
     }
 

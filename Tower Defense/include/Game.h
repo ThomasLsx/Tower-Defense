@@ -3,8 +3,11 @@
 #include "Window.h"
 #include "UI.h"
 #include "map.h"
+#include "minion.h"
+#include "path.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
+
 
 // Main game class: handles window, GUI, and game logic
 class Game {
@@ -34,6 +37,8 @@ private:
     UI* ui; // Utilisation de la classe UI
     TileMap* map; // Utilisation de la classe Map
     GameMode m_eGameMode;
+    Minion* mimi;
 
     bool menuInitialized = false;
+
 };
