@@ -17,10 +17,6 @@ Game::Game()
     map->loadTile("assets/TileMap.png", map->getLevel().data());
 
     wave = new Wave(1, 5, map);
-
-    mimi = new Minion(1);
-    mimi->init(30, sf::Color::Green, sf::Color::Black, 2);
-
 }
 
 Game::~Game()
