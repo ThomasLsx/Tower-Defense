@@ -10,23 +10,14 @@ Game::Game()
     window->create();
     window->getRenderWindow().setFramerateLimit(60);
 
-    ui = new UI(window->getRenderWindow());
+    ui = new UI(window, this);
     map = new TileMap(window->getRenderWindow());
 
     map->loadLevel("assets/map1.txt");
     map->loadTile("assets/TileMap.png", map->getLevel().data());
-    map->printTiles();
 
-    // Initialise le label mode au démarrage
-    ui->setMode("Menu");
+    wave = new Wave(1, 5, map);
 
-    mimi = new Minion(1, map);
-    mimi->init(30, sf::Color::Green, sf::Color::Black, 2);
-	mimi->setPosition(sf::Vector2f(1 * map->getTileSize().x * map->getScale(), 5 * map->getTileSize().y * map->getScale()));
-
-    sf::Vector2u pos = map->getCurentTile(mimi->getPosition());
-
-	std::cout << "(" << pos.x << ", " << pos.y << ")" << std::endl;
 }
 
 Game::~Game()
@@ -35,8 +26,10 @@ Game::~Game()
 
 void Game::run()
 {
+    sf::Clock clock;
     while (window->isOpen())
     {
+        float sec = clock.restart().asSeconds();
         std::vector<sf::Event> events;
         while (const std::optional<sf::Event> event = window->pollEvent())
         {
@@ -55,19 +48,16 @@ void Game::run()
 
         switch (m_eGameMode) {
         case Menu:
-            showMenu();
+			ui->showMenuUI();
             break;
         case Play:
-            ui->gui.removeAllWidgets();
-            menuInitialized = false;
+            ui->showPlayUI();
             UpdatePlay(events);
-
-            mimi->update(1);
+            if (startNextWave)
+				wave->update(sec);
             break;
         case Editor:
-            ui->gui.removeAllWidgets();
-            menuInitialized = false;
-            //map->UpdateLevelEditor(events);
+            ui->showEditorUI();
             break;
         }
 
@@ -95,11 +85,10 @@ void Game::Render()
     }
 
     // Affiche la map de jeux
-    if (m_eGameMode == Play)
+    if (m_eGameMode == Play  or m_eGameMode == Pause)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
-        mimi->draw(window->getRenderWindow());
-
+        wave->draw(window->getRenderWindow());
     }
 
     // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
@@ -108,7 +97,6 @@ void Game::Render()
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
         map->DrawMouseHover();
     }
-
     ui->draw();
     window->display();
 }
@@ -120,18 +108,18 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
     {
         if (!bTWasPressedLastUpdate)
         {
-            if (m_eGameMode == Editor) {
-                m_eGameMode = Menu;
-                ui->setMode("Menu");
+            if (m_eGameMode == Menu) {
+                m_eGameMode = Play;
             }
             else if (m_eGameMode == Play) {
+                m_eGameMode = Pause;
+            }
+            else if (m_eGameMode == Pause) {
                 m_eGameMode = Editor;
-                ui->setMode("Editor");
-            }
-            else {
-                m_eGameMode = Play;
-                ui->setMode("Play");
-            }
+			}
+            else if (m_eGameMode == Editor) {
+                m_eGameMode = Menu;
+			}
         }
         bTWasPressedLastUpdate = true;
     }
@@ -150,37 +138,6 @@ void Game::HandlePlayInput(const std::vector<sf::Event>& events)
     for (const auto& event : events)
     {
         ui->handleEvent(event);
-    }
-}
-
-void Game::showMenu()
-{
-    if (!menuInitialized) {
-        // Ecrant d'accueil
-        auto picture = ui->createPicture("assets/menu_background.png", 0, 0, window->getWidth(), window->getHeight());
-        picture->setSize({ "100%", "100%" });
-        ui->gui.add(picture);
-
-        // Bouton Play
-        auto boutonPlay = ui->createButton("Play", window->getWidth() / 2 - 100, window->getHeight() / 2 - 25, 200, 50);
-        boutonPlay->onPress([this]() {
-            std::cout << "Play button pressed!" << std::endl;
-            m_eGameMode = Play;
-            ui->setMode("Play");
-            mimi->move();
-            });
-        ui->gui.add(boutonPlay);
-
-        // Bouton Level Editor
-        auto boutonEditor = ui->createButton("Level Editor", window->getWidth() / 2 - 100, window->getHeight() / 2 + 25, 200, 50);
-        boutonEditor->onPress([this]() {
-            std::cout << "Level Editor button pressed!" << std::endl;
-            m_eGameMode = Editor;
-            ui->setMode("Level Editor");
-            });
-        ui->gui.add(boutonEditor);
-
-        menuInitialized = true;
     }
 }
 

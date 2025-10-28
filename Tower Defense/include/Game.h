@@ -3,11 +3,15 @@
 #include "Window.h"
 #include "UI.h"
 #include "map.h"
-#include "minion.h"
+#include "wave.h"
 #include "path.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
+class Window;
+class UI;
+class TileMap;
+class Wave;
 
 // Main game class: handles window, GUI, and game logic
 class Game {
@@ -20,8 +24,17 @@ public:
     {
         Menu,
         Play,
+        Pause,
         Editor
     };
+
+    bool startNextWave = false;
+
+	// Getters
+	GameMode getGameMode() const { return m_eGameMode; }
+
+	// Setters
+	void setGameMode(GameMode mode) { m_eGameMode = mode; }
 
 private:
     void UpdatePlay(const std::vector<sf::Event>& events);
@@ -30,15 +43,10 @@ private:
 
     void HandleInput(const std::vector<sf::Event>& events);
     void HandlePlayInput(const std::vector<sf::Event>& events);
-
-    void showMenu();
-
+    
+    GameMode m_eGameMode;
     Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
     TileMap* map; // Utilisation de la classe Map
-    GameMode m_eGameMode;
-    Minion* mimi;
-
-    bool menuInitialized = false;
-
+    Wave* wave;
 };

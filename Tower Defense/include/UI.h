@@ -8,21 +8,40 @@
 #include <TGUI/Widgets/Picture.hpp>
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include "Window.h"
+#include "Game.h"
+
+class Window;
+class Game;
 
 class UI {
-  public:
-    UI(sf::RenderWindow& window);
+public:
+    UI(Window* window, Game* game);
     tgui::Gui gui;
-	tgui::Label::Ptr createLabel(const std::string& text, int x, int y);
-    tgui::Button::Ptr createButton(const std::string& text, int x, int y, int width, int height);
-	tgui::Picture::Ptr createPicture(const std::string& imagePath, int x, int y, int width, int height);
-    
+     
     void handleEvent(const sf::Event& event);
     void draw();
-    void setMode(const std::string& mode);
     
-	//void createMenu();
+	// UI Menu Modes
+    void initMenuUI();
+	void showMenuUI();
 
-  private:
-    tgui::Label::Ptr modeLabel;
+	// UI Play Modes
+	void initPlayUI();
+	void showPlayUI();
+
+	// UI Editor Modes
+	void initEditorUI();
+	void showEditorUI();
+
+private:
+    tgui::Group::Ptr menuUI;
+	tgui::Group::Ptr playUI;
+	tgui::Group::Ptr editorUI;
+
+	bool isPaused = false;
+
+    Window* window; // Pointeur vers l'instance de Window
+    Game* game; // Pointeur vers l'instance de Game
+
 };
