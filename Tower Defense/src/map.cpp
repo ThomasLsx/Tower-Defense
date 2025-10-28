@@ -152,7 +152,7 @@ const std::vector<std::vector<int>> TileMap::getLevel2D() const
 
 const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
 {
-	// donne la valeur de la tuile à la position (x, y)
+	// donne la valeur de la tuile Ã  la position (x, y)
 	unsigned int x = static_cast<unsigned int>(position.x / (tileSize.x * scale));
 	unsigned int y = static_cast<unsigned int>(position.y / (tileSize.y * scale));
     if (x < width && y < height)
@@ -160,7 +160,7 @@ const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
         return sf::Vector2u(x, y);
 	}
 	std::cout << "getCurentTile: Coordinates (" << x << ", " << y << ") sont hors limites.\n";
-	return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnées sont hors limites
+	return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnÃ©es sont hors limites
 }
 
 void TileMap::printTiles() const
@@ -176,7 +176,7 @@ void TileMap::printTiles() const
             const int tileNumber = level[i + j * width];
             std::cout << tileNumber << " ";
         }
-        std::cout << "\n"; // Nouvelle ligne pour chaque rangée
+        std::cout << "\n"; // Nouvelle ligne pour chaque rangÃ©e
     }
 }
 
@@ -188,15 +188,15 @@ void TileMap::DrawMouseHover()
     sf::Vector2u tSize = getTileSize();
     float scale = getScale();
 
-    // Calcule la position alignée sur la grille
+    // Calcule la position alignÃ©e sur la grille
     unsigned int i = static_cast<unsigned int>(vMousePosition.x / (tSize.x * scale));
     unsigned int j = static_cast<unsigned int>(vMousePosition.y / (tSize.y * scale));
     sf::Vector2f gridPos(i * tSize.x * scale, j * tSize.y * scale);
 
-    // Prépare le sprite de la tuile sélectionnée
+    // PrÃ©pare le sprite de la tuile sÃ©lectionnÃ©e
     sf::Sprite tileSprite(m_tileset);
 
-    // Calcule le rectangle de texture à partir de l'index sélectionné
+    // Calcule le rectangle de texture Ã  partir de l'index sÃ©lectionnÃ©
     int tu = m_TileIndex % (m_tileset.getSize().x / tSize.x);
     int tv = m_TileIndex / (m_tileset.getSize().x / tSize.x);
     sf::IntRect rect;

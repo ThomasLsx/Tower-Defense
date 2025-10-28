@@ -18,6 +18,9 @@ Game::Game()
 
     wave = new Wave(1, 5, map);
 
+    mimi = new Minion(1);
+    mimi->init(30, sf::Color::Green, sf::Color::Black, 2);
+
 }
 
 Game::~Game()
@@ -91,7 +94,7 @@ void Game::Render()
         wave->draw(window->getRenderWindow());
     }
 
-    // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
+    // Affiche la tuile sÃ©lectionnÃ©e sous la souris uniquement en mode Editor
     if (m_eGameMode == Editor)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);

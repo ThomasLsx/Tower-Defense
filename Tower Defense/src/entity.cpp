@@ -38,30 +38,6 @@ void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, 
     _squaredRadius = radius * radius;
 }
 
-void Entity::update(float dt) {
-    // Mise à jour de la position en fonction de la vélocité
-    _position += _velocity * dt;
-    _shape.setPosition(_position);
-
-    // Rebond sur les bords de l'aire de jeu
-    if (_position.x < _area.position.x) {
-        _position.x = _area.position.x;
-        _velocity.x = -_velocity.x * 0.9f; // Rebond avec un peu de frottement
-    }
-    else if (_position.x > _area.position.x + _area.size.x) {
-        _position.x = _area.position.x + _area.size.x;
-        _velocity.x = -_velocity.x * 0.9f;
-    }
-    if (_position.y < _area.position.y) {
-        _position.y = _area.position.y;
-        _velocity.y = -_velocity.y * 0.9f;
-    }
-    else if (_position.y > _area.position.y + _area.size.y) {
-        _position.y = _area.position.y + _area.size.y;
-        _velocity.y = -_velocity.y * 0.9f;
-    }
-}
-
 void Entity::draw(sf::RenderWindow& window)
 {
     if (getIsAlive())

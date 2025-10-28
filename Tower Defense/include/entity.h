@@ -49,7 +49,7 @@ public:
      * Upadte object at each frame
      * @param time since last update
      */
-    virtual void update(float dt);
+    virtual void update(float dt) = 0;
 
     /**
      * Render object
