@@ -13,10 +13,11 @@
 
 class Window;
 class Game;
+class Wave;
 
 class UI {
 public:
-    UI(Window* window, Game* game);
+    UI(Window* window, Game* game, Wave* wave);
     tgui::Gui gui;
      
     void handleEvent(const sf::Event& event);
@@ -43,5 +44,6 @@ private:
 
     Window* window; // Pointeur vers l'instance de Window
     Game* game; // Pointeur vers l'instance de Game
+	Wave* wave; // Pointeur vers l'instance de Wave
 
 };

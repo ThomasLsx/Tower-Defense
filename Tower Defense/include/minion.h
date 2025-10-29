@@ -14,9 +14,10 @@ class Minion : public Entity {
 private:
 	TileMap* map;               ///< Pointeur vers la map du jeu.
     unsigned int health;          ///< Points de vie actuels du minion.
+	float speed;        ///< Vitesse de déplacement du minion (pixels par seconde).
     size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
     unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
-    std::vector<sf::Vector2f> targetPath;
+	std::vector<sf::Vector2f> targetPath; ///< Chemin en coordonnées du monde (pixels).
 
 public:
     /**
@@ -29,7 +30,7 @@ public:
      * @param rotation Rotation initiale.
      * @param color Couleur du minion.
      */
-    Minion(int id, TileMap* map = nullptr , unsigned int health = 100, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
+    Minion(int id, TileMap* map = nullptr , unsigned int health = 100, float speed = 50.0f, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
      * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
@@ -87,4 +88,16 @@ public:
      * @param dt Temps écoulé depuis la dernière frame (en secondes).
      */
     void update(float dt) override;
+
+    /**
+	* @brief Définit la vitesse de déplacement du minion.
+	* @param newSpeed Nouvelle vitesse en pixels par seconde.
+    */
+	void setSpeed(float newSpeed) { speed = newSpeed; }
+
+	/**
+	* @brief Récupère la vitesse actuelle du minion.
+    * @return Vitesse en pixels par seconde.
+	*/
+	float getSpeed() const { return speed; }
 };

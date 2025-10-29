@@ -2,8 +2,8 @@
 #include "path.h"
 #include <iostream>
 
-Minion::Minion(int id, TileMap* map, unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-    : Entity(id), map(map), health(health), rewardOnDeath(reward)
+Minion::Minion(int id, TileMap* map, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
+	: Entity(id), map(map), health(health), rewardOnDeath(reward), speed(speed), currentTargetIndex(0)
 {
     Entity::init();
 }
@@ -15,9 +15,11 @@ void Minion::move()
     
     // 2. Définir le départ et l'arrivée
     sf::Vector2u pos = map->getCurentTile(this->getPosition());
-
     Position start = { pos.y, pos.x };
-    Position goal = { 5, 19 };
+
+    // Trouver la position de fin (valeur 4 sur le bord)
+    sf::Vector2u endTile = map->findEdgeTile(4);
+    Position goal = { endTile.y, endTile.x };
 
     std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
         << ") a (" << goal.x << ", " << goal.y << ")" << std::endl;
@@ -27,11 +29,11 @@ void Minion::move()
 
     if (pathOpt.has_value() && !pathOpt->empty()) {
         std::cout << "Chemin trouve avec " << pathOpt->size() << " positions." << std::endl;
-        for (const Position& p : *pathOpt) {
+        /*for (const Position& p : *pathOpt) {
             std::cout << "(" << p.x << ", " << p.y << ") ";
-        }
+        }*/
         std::cout << std::endl;
-        static_cast<Minion*>(this)->setPath(*pathOpt, 96);
+        static_cast<Minion*>(this)->setPath(*pathOpt, map->getTileSize().x * map->getScale());
     }
     else {
         std::cout << "Aucun chemin valide trouve !" << std::endl;

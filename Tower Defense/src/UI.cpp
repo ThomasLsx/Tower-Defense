@@ -2,7 +2,7 @@
 #include "UI.h"
 #include <iostream>
 
-UI::UI(Window* window, Game* game) : window(window), game(game)
+UI::UI(Window* window, Game* game, Wave* wave) : window(window), game(game), wave(wave)
 {
     gui.setTarget(window->getRenderWindow());
 
@@ -83,7 +83,7 @@ void UI::initPlayUI()
 	startWaveButton->setPosition(10, 10);
 	startWaveButton->onPress([this]() {
 		std::cout << "Start Wave button pressed!" << std::endl;
-		game->startNextWave = true;
+		wave->start();
 		});
 	playUI->add(startWaveButton);
 

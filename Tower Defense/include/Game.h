@@ -28,8 +28,6 @@ public:
         Editor
     };
 
-    bool startNextWave = false;
-
 	// Getters
 	GameMode getGameMode() const { return m_eGameMode; }
 

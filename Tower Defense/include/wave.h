@@ -12,6 +12,7 @@ class Wave {
 private:
 	int id;
     int nb_enemies;
+	bool started;
     bool finished;
     std::vector<std::unique_ptr<Minion>> minions;
     float spawnTimer;       // Timer pour gérer le délai entre chaque spawn
@@ -20,9 +21,10 @@ private:
 	TileMap* map;         // Pointeur vers la carte du jeu
 
 public:
-    Wave(int id, int number, TileMap* map, float delay = 1.0f);
+    Wave(int id, int number, TileMap* map);
     ~Wave() = default;
     void start();
+	void spwanMinion();
     void update(float dt);
 	void draw(sf::RenderWindow& window);
     bool isFinished() const;

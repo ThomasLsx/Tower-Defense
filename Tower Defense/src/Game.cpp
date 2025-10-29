@@ -10,17 +10,13 @@ Game::Game()
     window->create();
     window->getRenderWindow().setFramerateLimit(60);
 
-    ui = new UI(window, this);
     map = new TileMap(window->getRenderWindow());
-
     map->loadLevel("assets/map1.txt");
     map->loadTile("assets/TileMap.png", map->getLevel().data());
 
     wave = new Wave(1, 5, map);
 
-    mimi = new Minion(1);
-    mimi->init(30, sf::Color::Green, sf::Color::Black, 2);
-
+    ui = new UI(window, this, wave);
 }
 
 Game::~Game()
@@ -56,8 +52,7 @@ void Game::run()
         case Play:
             ui->showPlayUI();
             UpdatePlay(events);
-            if (startNextWave)
-				wave->update(sec);
+			wave->update(sec);
             break;
         case Editor:
             ui->showEditorUI();
