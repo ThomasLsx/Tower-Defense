@@ -1,9 +1,9 @@
 ///tower.h
 
 #pragma once
-#include "entity.h"
 
 #include <vector>
+#include "entity.h"
 
 class ProjectileSystem;
 class Minion;
@@ -20,7 +20,7 @@ private:
     float fireRate;         ///< Fréquence de tir en tirs par seconde
     unsigned int level;              ///< Niveau actuel de la tour
     unsigned int damage;  ///< Dégâts infligés par projectile
-    std::vector<int> targetIds; ///< Liste des IDs des cibles actuellement visées
+    std::vector<Minion> targets; ///< Liste des cibles actuellement visées
 
 public:
     /**
@@ -41,7 +41,7 @@ public:
      * @param minions Liste des minions. opti avec quadtree plus tard
      * @param projectileSystem Système de gestion des projectiles.
      */
-    void tryFire(const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem);
+    void tryFire(ProjectileSystem& projectileSystem);
 
     /**
      * @brief Améliore la tour (augmente portée et dégâts).
@@ -74,5 +74,5 @@ public:
     float getFireRate() const { return fireRate; }    ///< Retourne la fréquence de tir.
     int getLevel() const { return level; }            ///< Retourne le niveau de la tour.
     int getDamage() const { return damage; }          ///< Retourne les dégâts infligés par projectile.
-    const std::vector<int>& getTargetIds() { return targetIds; } ///< Retourne la liste des IDs des cibles.
+    const std::vector<Minion>& getTargets() const { return targets; } ///< Retourne la liste des cibles.
 };
