@@ -1,8 +1,8 @@
-
 #include "tower.h"
 #include "projectilesystem.h"
 #include "minion.h"
 #include <iostream>
+#include <memory>
 
 Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage, sf::Vector2f pos, float rotation, sf::Color color)
     : Entity(id),
@@ -14,10 +14,10 @@ Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, u
     Entity::init();
 }
 
-void Tower::tryFire(const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem) {
-    for (int targetId : targetIds) {
-        projectileSystem.createProjectile(Entity::getId(), targetId, damage, 10.0f);
-        std::cout << "Tower " << Entity::getId() << " fires at minion " << targetId << std::endl;
+void Tower::tryFire(ProjectileSystem& projectileSystem) {
+    for (auto& target : targets) {
+        projectileSystem.createProjectile(*this, target, damage, 10.0f);
+        std::cout << "Tower " << Entity::getId() << " fires at minion " << target.getId() << std::endl;
     }
 }
 
@@ -37,7 +37,8 @@ void Tower::onDestroy() {
 // On ajoute une surcharge non override pour la version Tower
 void Tower::update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem)
 {
-    tryFire(minions, projectileSystem);
+	SearchTargets(std::vector<Minion>());
+    tryFire(projectileSystem);
 }
 
 void Tower::SearchTargets(std::vector<Minion> mimi)
@@ -48,7 +49,8 @@ void Tower::SearchTargets(std::vector<Minion> mimi)
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
         if (distance <= range)
-            targetIds.push_back(it->getId());
+            targets.push_back(*it);
+
     }
 }
 
