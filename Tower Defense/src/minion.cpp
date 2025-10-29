@@ -21,18 +21,11 @@ void Minion::move()
     sf::Vector2u endTile = map->findEdgeTile(4);
     Position goal = { endTile.y, endTile.x };
 
-    std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
-        << ") a (" << goal.x << ", " << goal.y << ")" << std::endl;
-
     // 3. Trouver le chemin
     std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
 
     if (pathOpt.has_value() && !pathOpt->empty()) {
-        std::cout << "Chemin trouve avec " << pathOpt->size() << " positions." << std::endl;
-        /*for (const Position& p : *pathOpt) {
-            std::cout << "(" << p.x << ", " << p.y << ") ";
-        }*/
-        std::cout << std::endl;
+        // std::cout << std::endl; // Suppression du retour à la ligne inutile
         static_cast<Minion*>(this)->setPath(*pathOpt, map->getTileSize().x * map->getScale());
     }
     else {
@@ -99,7 +92,6 @@ void Minion::followPath(float dt) {
 
         // Vérifier si c'était le dernier point
         if (currentTargetIndex >= targetPath.size()) {
-            std::cout << "Minion " << _id << " a atteint la fin du chemin !" << std::endl;
             // Ici, déclenchez la logique de fin de chemin (ex: infliger dégâts à la base)
             this->onDestroy();
         }

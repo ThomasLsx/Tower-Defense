@@ -13,27 +13,28 @@
 
 class Window;
 class Game;
-class Wave;
+class WaveManager;
 
 class UI {
 public:
-    UI(Window* window, Game* game, Wave* wave);
+    UI(Window* window, Game* game, WaveManager* waveManager);
     tgui::Gui gui;
      
     void handleEvent(const sf::Event& event);
+    void updateUILayout();
     void draw();
-    
-	// UI Menu Modes
+
+    // UI Menu Modes
     void initMenuUI();
-	void showMenuUI();
+    void showMenuUI();
 
-	// UI Play Modes
-	void initPlayUI();
-	void showPlayUI();
+    // UI Play Modes
+    void initPlayUI();
+    void showPlayUI();
 
-	// UI Editor Modes
-	void initEditorUI();
-	void showEditorUI();
+    // UI Editor Modes
+    void initEditorUI();
+    void showEditorUI();
 
 private:
     tgui::Group::Ptr menuUI;
@@ -44,6 +45,6 @@ private:
 
     Window* window; // Pointeur vers l'instance de Window
     Game* game; // Pointeur vers l'instance de Game
-	Wave* wave; // Pointeur vers l'instance de Wave
+    WaveManager* waveManager; // Pointeur vers l'instance de WaveManager
 
 };

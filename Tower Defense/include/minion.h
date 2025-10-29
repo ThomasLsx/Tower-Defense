@@ -101,3 +101,56 @@ public:
 	*/
 	float getSpeed() const { return speed; }
 };
+
+
+/**
+* @Class MinionNormal
+* @brief Représente un minion de type normal.
+*/
+class MinionNormal : public Minion {
+    public:
+    MinionNormal(int id, TileMap* map = nullptr)
+        : Minion(id, map, 100, 2050.0f, 10) // health=100, speed=50, reward=10
+    {
+        Entity::init(15, sf::Color::Green, sf::Color::Black, 2);
+    }
+};
+
+/**
+* @Class MinionFast
+* @brief Représente un minion de type rapide.
+*/
+class MinionFast : public Minion {
+    public:
+    MinionFast(int id, TileMap* map = nullptr)
+        : Minion(id, map, 75, 100.0f, 15) // health=75, speed=100, reward=15
+    {
+        Entity::init(15, sf::Color::Blue, sf::Color::Black, 2);
+    }
+};
+
+/**
+* @Class MinionTank
+* @brief Représente un minion de type tank.
+*/
+class MinionTank : public Minion {
+    public:
+    MinionTank(int id, TileMap* map = nullptr)
+        : Minion(id, map, 200, 30.0f, 25) // health=200, speed=30, reward=25
+    {
+        Entity::init(20, sf::Color::Red, sf::Color::Black, 2);
+    }
+};
+
+/**
+* @Class MinionBoss
+* @brief Représente un minion de type boss.
+*/
+class MinionBoss : public Minion {
+    public:
+    MinionBoss(int id, TileMap* map = nullptr)
+        : Minion(id, map, 500, 20.0f, 100) // health=500, speed=20, reward=100
+    {
+        Entity::init(25, sf::Color::Magenta, sf::Color::Black, 2);
+    }
+};
