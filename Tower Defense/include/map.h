@@ -1,4 +1,3 @@
-
 // map.h
 #pragma once
 #include "Window.h"
@@ -20,6 +19,7 @@ public:
 	bool loadLevel(const std::filesystem::path& levelFilePath);
 	bool saveLevel(const std::filesystem::path& levelFilePath);
 	void updateTile(int x, int y, int newTile, sf::Vector2u tileSize);
+	bool hasMapChanged() const { return mapChanged; }
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
@@ -34,6 +34,7 @@ public:
 
 	// Setters
 	void setLevel(const std::vector<int>& newLevel) { m_level = newLevel; }
+	void setMapChanged(bool changed) { mapChanged = changed; }
 
 	// Debug
 	void printTiles() const;
@@ -46,6 +47,8 @@ private:
 	sf::VertexArray m_vertices;
 	sf::Texture     m_tileset;
 	std::vector<int> m_level;
+	bool mapChanged = false; // Flag to indicate if the map has changed
+
 
 	// LevelEditor
 
@@ -53,6 +56,7 @@ public:
 	// Getters
 	const int& GetTileIndex() const { return m_TileIndex; }
 	const int& GetTileOptions() const { return m_TileOptions; }
+	sf::Vector2u findEdgeTile(int value) const;
 
 	// Setters
 	int& SetTileIndex() { return m_TileIndex; }
@@ -69,5 +73,6 @@ private:
 
 	// Level Editor members
 	int m_TileIndex; // Index of the selected tile option
-	int m_TileOptions; // Tile option for the level editor
+	int m_TileOptions; // Tile option for the level editon
+
 };

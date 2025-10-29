@@ -10,13 +10,13 @@ Game::Game()
     window->create();
     window->getRenderWindow().setFramerateLimit(60);
 
-    ui = new UI(window, this);
     map = new TileMap(window->getRenderWindow());
-
     map->loadLevel("assets/map1.txt");
     map->loadTile("assets/TileMap.png", map->getLevel().data());
 
-    wave = new Wave(1, 5, map);
+    waveManager = new WaveManager("assets/wave.txt", map);
+
+    ui = new UI(window, this, waveManager);
 }
 
 Game::~Game()
@@ -49,11 +49,9 @@ void Game::run()
         case Menu:
 			ui->showMenuUI();
             break;
-        case Play:
+        case Play: 
             ui->showPlayUI();
-            UpdatePlay(events);
-            if (startNextWave)
-				wave->update(sec);
+            waveManager->update(sec);
             break;
         case Editor:
             ui->showEditorUI();
@@ -64,14 +62,6 @@ void Game::run()
 
     }
 }
-
-
-void Game::UpdatePlay(const std::vector<sf::Event>& events)
-{
-    HandlePlayInput(events);
-}
-
-
 
 void Game::Render()
 {
@@ -87,7 +77,7 @@ void Game::Render()
     if (m_eGameMode == Play  or m_eGameMode == Pause)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
-        wave->draw(window->getRenderWindow());
+        waveManager->draw(window->getRenderWindow());
     }
 
     // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
@@ -127,17 +117,9 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
         bTWasPressedLastUpdate = false;
     }
 
-    // N'appeler HandlePlayInput() que dans UpdatePlay()
     if (m_eGameMode == Editor)
         map->HandleLevelEditorInput(events);
 }
 
-void Game::HandlePlayInput(const std::vector<sf::Event>& events)
-{
-    for (const auto& event : events)
-    {
-        ui->handleEvent(event);
-    }
-}
 
 

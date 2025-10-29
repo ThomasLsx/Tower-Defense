@@ -11,7 +11,7 @@
 class Window;
 class UI;
 class TileMap;
-class Wave;
+class WaveManager;
 
 // Main game class: handles window, GUI, and game logic
 class Game {
@@ -28,8 +28,6 @@ public:
         Editor
     };
 
-    bool startNextWave = false;
-
 	// Getters
 	GameMode getGameMode() const { return m_eGameMode; }
 
@@ -37,16 +35,12 @@ public:
 	void setGameMode(GameMode mode) { m_eGameMode = mode; }
 
 private:
-    void UpdatePlay(const std::vector<sf::Event>& events);
-
     void Render();
-
     void HandleInput(const std::vector<sf::Event>& events);
-    void HandlePlayInput(const std::vector<sf::Event>& events);
     
     GameMode m_eGameMode;
     Window* window; // Utilisation de la classe Window
     UI* ui; // Utilisation de la classe UI
     TileMap* map; // Utilisation de la classe Map
-    Wave* wave;
+	WaveManager* waveManager; // Utilisation de la classe WaveManager
 };
