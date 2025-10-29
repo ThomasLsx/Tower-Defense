@@ -2,6 +2,7 @@
 
 #pragma once
 #include "entity.h"
+#include "minion.h" 
 
 /**
  * @class Projectile
@@ -13,7 +14,7 @@ private:
     unsigned int damage;            ///< Dégâts infligés à la cible.
     float lifetime;        ///< Durée de vie restante du projectile (en secondes).
     unsigned int sourceTowerId;     ///< ID de la tour source du projectile.
-    unsigned int targetEntityId;    ///< ID de l'entité cible du projectile.
+    Minion target;
     sf::Vector2f direction;
 
 public:
@@ -25,9 +26,9 @@ public:
      * @param damage Dégâts infligés à la cible.
      * @param lifetime Durée de vie initiale du projectile (en secondes).
      * @param sourceTowerId ID de la tour source.
-     * @param targetEntityId ID de l'entité cible.
+     * @param target Minion cible du projectile.
      */
-    Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f),unsigned int damage = 10, float lifetime = 20, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
+    Projectile(unsigned int id, unsigned int sourceTowerId, Minion target, sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f),unsigned int damage = 10, float lifetime = 20, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
      * @brief Met à jour la position du projectile et vérifie les collisions ou la fin de vie.
@@ -50,8 +51,9 @@ public:
     sf::Vector2f getVelocity() const { return velocity; }        ///< Retourne la vitesse et la direction du projectile.
     int getDamage() const { return damage; }                ///< Retourne les dégâts infligés par le projectile.
     int getSourceTowerId() const { return sourceTowerId; }  ///< Retourne l'ID de la tour source.
-    int getTargetEntityId() const { return targetEntityId; }///< Retourne l'ID de l'entité cible.
+    Minion getTarget() const { return target; }              ///< Retourne l'entité cible.
     int getId() const { return Entity::getId(); } // Ajout pour compatibilité avec ProjectileSystem
+
     bool hasReachedTarget() const { return false; } // Stub à implémenter
     bool isExpired() const { return lifetime <= 0; } // Simple expiration
 };

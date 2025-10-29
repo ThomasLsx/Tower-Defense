@@ -1,8 +1,8 @@
 #include "projectile.h"
 #include <iostream>
 
-Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity, unsigned int damage, float lifetime, sf::Vector2f pos, float rotation, sf::Color color)
-	:Entity(id), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId), targetEntityId(targetEntityId)
+Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, Minion target, sf::Vector2f velocity, unsigned int damage, float lifetime, sf::Vector2f pos, float rotation, sf::Color color)
+	:Entity(id), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId), target(target)
 {
     Entity::init();
 }

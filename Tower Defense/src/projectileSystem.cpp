@@ -1,22 +1,27 @@
 #include "projectilesystem.h"
 #include "projectile.h"
 #include "entity.h"
+#include "tower.h"
+
+#include <memory>
 #include <algorithm>
 #include <iostream>
 
 ProjectileSystem::ProjectileSystem() = default;
 ProjectileSystem::~ProjectileSystem() = default;
 
-void ProjectileSystem::createProjectile(int sourceId, int targetId, int dmg, float speed) {
-    projectiles.emplace_back(std::make_unique<Projectile>(projectiles.size(), sourceId, targetId, sf::Vector2f(speed, 0.0f), dmg, 20.0f));
+void ProjectileSystem::createProjectile(Tower source, Minion target, int dmg, float speed) {
+    projectiles.emplace_back(std::make_shared<Projectile>(projectiles.size(), source.getId(), target, sf::Vector2f(speed, 0.0f), dmg, 20, source.getPosition()));
+	projectiles.back()->setPosition(source.getPosition());
 }
 
-void ProjectileSystem::update(float dt, const std::vector<Entity*>& entities) {
+void ProjectileSystem::update(float dt) {
     for (auto it = projectiles.begin(); it != projectiles.end(); ) {
         Projectile& projectile = **it;
         projectile.update(dt);
 
-        if (projectile.hasReachedTarget() || projectile.isExpired()) {
+        if (projectile.isColliding(projectile.getTarget()) || projectile.isExpired()) {
+            projectile.onHit();
             it = projectiles.erase(it);
         }
         else {
@@ -28,7 +33,7 @@ void ProjectileSystem::update(float dt, const std::vector<Entity*>& entities) {
 void ProjectileSystem::removeProjectile(int id) {
     projectiles.erase(
         std::remove_if(projectiles.begin(), projectiles.end(),
-            [id](const std::unique_ptr<Projectile>& p) { return p->getId() == id; }),
+            [id](const std::shared_ptr<Projectile>& p) { return p->getId() == id; }),
         projectiles.end());
 }
 

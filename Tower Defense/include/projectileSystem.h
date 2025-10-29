@@ -5,6 +5,8 @@
 
 class Projectile;
 class Entity;
+class Minion;
+class Tower;
 
 /**
  * @class ProjectileSystem
@@ -14,7 +16,7 @@ class Entity;
  */
 class ProjectileSystem {
 private:
-    std::vector<std::unique_ptr<Projectile>> projectiles; ///< Liste des projectiles actifs.
+    std::vector<std::shared_ptr<Projectile>> projectiles; ///< Liste des projectiles actifs.
 
 public:
     /**
@@ -34,14 +36,14 @@ public:
      * @param dmg Dégâts infligés par le projectile.
      * @param speed Vitesse du projectile.
      */
-    void createProjectile(int sourceId, int targetId, int dmg, float speed);
+    void createProjectile(Tower source, Minion target, int dmg, float speed);
 
     /**
      * @brief Met à jour tous les projectiles.
      * @param dt Temps écoulé depuis la dernière frame.
      * @param entities Liste de toutes les entités (pour détecter les collisions).
      */
-    void update(float dt, const std::vector<Entity*>& entities);
+    void update(float dt);
 
     /**
      * @brief Supprime un projectile par son ID.
@@ -54,6 +56,10 @@ public:
      * @return Nombre de projectiles actifs.
      */
     int getActiveCount() const;
+
+    std::vector<std::shared_ptr<Projectile>> getProjectiles() const {
+        return projectiles;
+    }
 };
 
 #endif // PROJECTILSYSTEM_H

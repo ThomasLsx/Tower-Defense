@@ -26,7 +26,9 @@ SOFTWARE. */
 
 Entity::Entity(unsigned int id)
     : _shape(), _position(0.f, 0.f), _velocity(1.f, 1.f), _acceleration(1.f, 1.f),
-    _area(sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)), _squaredRadius(0), _isAlive(true), _id(id) {
+    _area(sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)), _squaredRadius(0), _isAlive(true), _id(id) 
+{
+	_shape.setPosition(_position);
 }
 
 void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, int thickness) {
