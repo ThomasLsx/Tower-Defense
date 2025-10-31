@@ -72,7 +72,7 @@ void Game::run()
         case Menu:
             ui->showMenuUI();
             break;
-        case Play:
+        case Play: 
             ui->showPlayUI();
 
             if (m_bRequestStartWave)

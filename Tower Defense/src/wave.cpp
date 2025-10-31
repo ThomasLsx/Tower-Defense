@@ -17,7 +17,7 @@ Wave::Wave(int id, int nb_enemies, TileMap* map)
 }
 
 /**
- * @brief Démarre la vague (initialise le timer)
+ * @brief DÃ©marre la vague (initialise le timer)
  */
 void Wave::startWave()
 {
@@ -34,7 +34,7 @@ void Wave::startWave()
 }
 
 /**
- * @brief Crée un minion selon le groupe courant et l'ajoute à la liste.
+ * @brief CrÃ©e un minion selon le groupe courant et l'ajoute Ã  la liste.
  */
 void Wave::spwanMinion()
 {
@@ -42,7 +42,7 @@ void Wave::spwanMinion()
         const auto& group = minionGroups[minionGroupIndex];
         std::string type = group.type;
 
-        // Création du minion selon le type
+        // CrÃ©ation du minion selon le type
         if (type == "Normal") {
             minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map));
         }
@@ -74,11 +74,11 @@ void Wave::spwanMinion()
 }
 
 /**
- * @brief Met à jour la vague et ses minions.
+ * @brief Met Ã  jour la vague et ses minions.
  */
 void Wave::update(float dt)
 {
-    // Gérer le spawn des minions
+    // GÃ©rer le spawn des minions
     if (isStarted() && minionsSpawned < nb_enemies) {
         spawnTimer += dt;
         if (spawnTimer >= spawnDelay) {
@@ -86,11 +86,10 @@ void Wave::update(float dt)
             spawnTimer = 0.0f;
         }
     }
-
-    // Met à jour chaque minion
+        
+	// Met Ã  jour chaque Minion 
     for (auto& minion : minions) {
-        minion->update(dt);
-        // Si la carte a changé, forcer le recalcul / repositionnement
+        minion->update(dt * minion->getSpeed());
         if (map->hasMapChanged()) {
             minion->move();
             map->setMapChanged(false);
@@ -106,7 +105,7 @@ void Wave::update(float dt)
         minions.end()
     );
 
-    // Vérifie si la wave est terminée
+    // VÃ©rifie si la wave est terminÃ©e
     if (!isFinished()) {
         if (minionsSpawned == nb_enemies && minions.empty()) {
             waveFinish();
@@ -115,7 +114,7 @@ void Wave::update(float dt)
 }
 
 /**
- * @brief Dessine les Minions de la vague sur la fenêtre
+ * @brief Dessine les Minions de la vague sur la fenÃªtre
  */
 void Wave::draw(sf::RenderWindow& window)
 {
@@ -125,7 +124,7 @@ void Wave::draw(sf::RenderWindow& window)
 }
 
 /**
- * @brief Indique que la vague est terminée
+ * @brief Indique que la vague est terminÃ©e
  */
 void Wave::waveFinish()
 {

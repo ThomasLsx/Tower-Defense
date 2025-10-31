@@ -9,7 +9,7 @@
 #include <fstream>
 
 /**
- * @brief TileMap gère la grille, le chargement des niveaux et l'édition de niveau.
+ * @brief TileMap gï¿½re la grille, le chargement des niveaux et l'ï¿½dition de niveau.
  */
 class TileMap : public sf::Drawable, public sf::Transformable
 {

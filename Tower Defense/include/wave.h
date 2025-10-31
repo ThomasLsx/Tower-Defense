@@ -10,11 +10,11 @@ class Minion;
 class TileMap;
 
 /**
- * @brief Représente une vague d'ennemis.
+ * @brief ReprÃ©sente une vague d'ennemis.
  *
- * La Wave possède ses minions mais expose des `std::shared_ptr<Minion>` afin que
- * d'autres systèmes (tours, projectiles, UI) puissent observer ou référencer
- * les minions en toute sécurité.
+ * La Wave possÃ¨de ses minions mais expose des `std::shared_ptr<Minion>` afin que
+ * d'autres systÃ¨mes (tours, projectiles, UI) puissent observer ou rÃ©fÃ©rencer
+ * les minions en toute sÃ©curitÃ©.
  */
 class Wave {
 private:
@@ -28,7 +28,7 @@ private:
     bool started;
     bool finished;
 
-    /// Minions détenus par la vague (partagés avec d'autres systèmes)
+    /// Minions dÃ©tenus par la vague (partagÃ©s avec d'autres systÃ¨mes)
     std::vector<std::shared_ptr<Minion>> minions;
 
     float spawnTimer;
@@ -43,19 +43,19 @@ public:
     explicit Wave(int id, int number, TileMap* map);
     ~Wave() = default;
 
-    /** Démarre la vague et initialise le timer. */
+    /** DÃ©marre la vague et initialise le timer. */
     void startWave();
 
-    /** Crée un minion selon la configuration courante du groupe. */
+    /** CrÃ©e un minion selon la configuration courante du groupe. */
     void spwanMinion();
 
-    /** Met à jour la vague et ses minions. */
+    /** Met Ã  jour la vague et ses minions. */
     void update(float dt);
 
     /** Dessine les minions actifs. */
     void draw(sf::RenderWindow& window);
 
-    /** Marque la vague comme terminée. */
+    /** Marque la vague comme terminÃ©e. */
     void waveFinish();
 
     void addMinionGroup(const std::string& type, int count);
@@ -72,7 +72,7 @@ public:
 /**
  * @brief Gestionnaire de vagues.
  *
- * Contient les vagues (propriétaires via unique_ptr) et gère la progression.
+ * Contient les vagues (propriÃ©taires via unique_ptr) et gÃ¨re la progression.
  */
 class WaveManager {
 private:
