@@ -5,20 +5,27 @@
 #include "map.h"
 #include "wave.h"
 #include "path.h"
+#include "projectileSystem.h"
+#include "tower.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <memory>
 
 class Window;
 class UI;
 class TileMap;
 class WaveManager;
+class ProjectileSystem;
+class Tower;
 
-// Main game class: handles window, GUI, and game logic
+/**
+ * @brief Classe principale du jeu : fen�tre, UI et boucle de jeu.
+ */
 class Game {
 public:
-    Game(); // Setup game objects
-    ~Game(); // Cleanup
-    void run(); // Main loop
+    Game();
+    ~Game();
+    void run();
 
     enum GameMode
     {
@@ -28,19 +35,30 @@ public:
         Editor
     };
 
-	// Getters
-	GameMode getGameMode() const { return m_eGameMode; }
+    /** Retourne le mode courant du jeu. */
+    GameMode getGameMode() const { return m_eGameMode; }
 
-	// Setters
-	void setGameMode(GameMode mode) { m_eGameMode = mode; }
+    /** Retourne l'ID de la vague courante (utilis� par l'UI).
+     *  -1 si aucune vague.
+     */
+    int getCurrentWaveId() const;
+
+    void setGameMode(GameMode mode) { m_eGameMode = mode; }
+
+    /** Drapeau utilis� par l'UI pour demander le d�marrage d'une vague. */
+    bool m_bRequestStartWave;
 
 private:
     void Render();
     void HandleInput(const std::vector<sf::Event>& events);
-    
+
     GameMode m_eGameMode;
-    Window* window; // Utilisation de la classe Window
-    UI* ui; // Utilisation de la classe UI
-    TileMap* map; // Utilisation de la classe Map
-	WaveManager* waveManager; // Utilisation de la classe WaveManager
+
+    std::unique_ptr<Window> window;
+    std::unique_ptr<UI> ui;
+    std::unique_ptr<TileMap> map;
+    std::unique_ptr<WaveManager> waveManager;
+    std::unique_ptr<ProjectileSystem> m_projectileSystem;
+
+    std::vector<std::unique_ptr<Tower>> m_towers;
 };

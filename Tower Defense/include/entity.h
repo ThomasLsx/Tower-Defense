@@ -19,104 +19,92 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
-///entity.h
 #ifndef ENTITY_H
 #define ENTITY_H
 
 #include <SFML/Graphics.hpp>
 #include "utils.h"
 
+/**
+ * @brief Classe de base pour toutes les entités du jeu.
+ *
+ * Fournit position, identifiant, la forme graphique et des utilitaires de collision.
+ */
 class Entity {
 public:
     /**
-     * Constructor
+     * @brief Constructeur
+     * @param id Identifiant unique
+     * @param position Position initiale
      */
-    Entity(unsigned int id = 0);
+    Entity(unsigned int id = 0, sf::Vector2f position = sf::Vector2f(0, 0));
 
     virtual ~Entity() = default;
+
+    /**
+     * @brief Appelé lors de la destruction de l'entité
+     */
     virtual void onDestroy() {}
 
     /**
-     * Set visual properties
-     * @param radius in pixel
-     * @param fill color
-     * @param outline color
-     * @param outline thickness
+     * @brief Initialise une forme circulaire pour l'entité.
      */
-    void init(int radius = 50, const sf::Color& color = sf::Color::Red , const sf::Color& outline = sf::Color::Black, int thickness = 1);
+    void init(int radius, const sf::Color& color = sf::Color::Red , const sf::Color& outline = sf::Color::Black, int thickness = 1);
 
     /**
-     * Upadte object at each frame
-     * @param time since last update
+     * @brief Initialise une forme rectangulaire pour l'entité.
+     */
+    void init(int l, int L, const sf::Color& color = sf::Color::Red, const sf::Color& outline = sf::Color::Black, int thickness = 1);
+
+    /**
+     * @brief Met à jour l'entité chaque frame.
+     * @param dt Temps écoulé depuis la dernière frame
      */
     virtual void update(float dt) = 0;
 
     /**
-     * Render object
-     * @param the window to draw to
-	 */
+     * @brief Dessine l'entité.
+     * @param window Fenêtre de rendu
+     */
     void draw(sf::RenderWindow& window);
 
     /**
-     * Getter for position
-     * @return object position
+     * @brief Retourne la position courante.
      */
     inline const sf::Vector2f& getPosition() const {
         return _position;
     }
 
     /**
-     * Setter for position
-     * @param new position
+     * @brief Définit la position et met à jour la forme.
      */
     inline void setPosition(const sf::Vector2f& position) {
         _position = position;
-		_shape.setPosition(_position);
+        _shape->setPosition(_position);
+    }
+
+    inline void setPosition(float x, float y) {
+        _position = sf::Vector2f(x, y);
+        _shape->setPosition(_position);
     }
 
     /**
-     * Getter for ID
-     * @return object ID
+     * @brief Retourne l'identifiant.
      */
     inline unsigned int getId() const {
         return _id;
-	}
+    }
 
     /**
-     * Collision detection
-     * @param the other entity
-     * @return true if it's colliding with the other entity
+     * @brief Vérifie la collision avec une autre entité.
      */
     bool isColliding(const Entity& e) const;
 
     /**
-     * Revert velocity according to angle of collision
-     * @param the other entity
+     * @brief Accès en lecture à la forme SFML.
      */
-    void bounce(Entity& e);
-
-    /**
-     * Getter for shape
-     * @return object acceleration
-     */
-    inline const sf::Drawable& getShape() const {
-        return _shape;
-    }
-
-    /**
-     * Move particle
-     * @param velocity
-     */
-    inline void move(const sf::Vector2f& v) {
-        _velocity = v;
-    }
-
-    /**
-     * Define external bounds for the object
-     * @param bounds coords
-     */
-    inline void setPlayableArea(const sf::FloatRect& area) {
-        _area = area;
+    inline const sf::Shape& getShape() const {
+        return *_shape;
     }
 
     inline void setIsAlive(bool alive) {
@@ -128,21 +116,17 @@ public:
     }
 
     inline sf::FloatRect getGlobalBounds() const {
-        return _shape.getGlobalBounds();
-	}
+        return _shape->getGlobalBounds();
+    }
 
-    
 protected:
-    sf::CircleShape _shape;
-    sf::Vector2f _position;
-    sf::Vector2f _velocity;
-    sf::Vector2f _acceleration;
-    sf::FloatRect _area;
-    unsigned int _squaredRadius;
+    sf::Shape* _shape = nullptr;    ///< Forme graphique (allouée dynamiquement)
+    sf::Vector2f _position;         ///< Position
+    unsigned int _squaredRadius;    ///< Rayon au carré pour tests rapides
 
     bool _isAlive;
 
-	unsigned int _id;
+    unsigned int _id;
 };
 
 #endif

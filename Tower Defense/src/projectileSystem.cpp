@@ -1,7 +1,9 @@
+// projectileSystem.cpp
 #include "projectilesystem.h"
 #include "projectile.h"
 #include "entity.h"
 #include "tower.h"
+#include "minion.h" 
 
 #include <memory>
 #include <algorithm>
@@ -10,23 +12,54 @@
 ProjectileSystem::ProjectileSystem() = default;
 ProjectileSystem::~ProjectileSystem() = default;
 
-void ProjectileSystem::createProjectile(Tower source, Minion target, int dmg, float speed) {
-    projectiles.emplace_back(std::make_shared<Projectile>(projectiles.size(), source.getId(), target, sf::Vector2f(speed, 0.0f), dmg, 20, source.getPosition()));
-	projectiles.back()->setPosition(source.getPosition());
+void ProjectileSystem::createProjectile(const Tower& source, std::shared_ptr<Minion> target, int dmg, float speed) {
+    auto proj = std::make_shared<Projectile>(
+        static_cast<unsigned int>(projectiles.size()), // ID (simple)
+        source.getId(),
+        target,
+        sf::Vector2f(speed, 0.0f),
+        dmg,
+        2.0f,
+        source.getPosition()
+    );
+
+    projectiles.emplace_back(proj);
 }
 
 void ProjectileSystem::update(float dt) {
     for (auto it = projectiles.begin(); it != projectiles.end(); ) {
         Projectile& projectile = **it;
+
         projectile.update(dt);
 
-        if (projectile.isColliding(projectile.getTarget()) || projectile.isExpired()) {
-            projectile.onHit();
+        if (!projectile.getIsAlive()) {
             it = projectiles.erase(it);
+            continue;
         }
-        else {
+
+        if (auto targetPtr = projectile.getTarget().lock())
+        {
+            if (projectile.isColliding(*targetPtr))
+            {
+                projectile.onHit();
+                it = projectiles.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+        else
+        {
             ++it;
         }
+    }
+}
+
+void ProjectileSystem::draw(sf::RenderWindow& window)
+{
+    for (const auto& projectile : projectiles)
+    {
+        projectile->draw(window);
     }
 }
 

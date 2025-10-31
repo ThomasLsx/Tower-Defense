@@ -3,8 +3,13 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
-
+/**
+ * @brief Constructeur de Wave
+ *
+ * Initialise la configuration de spawn de la vague.
+ */
 Wave::Wave(int id, int nb_enemies, TileMap* map)
     : id(id), nb_enemies(nb_enemies), started(false), finished(false),
       spawnTimer(0.0f), spawnDelay(1.0f), minionsSpawned(0), map(map), minionGroupIndex(0), minionInGroupSpawned(0)
@@ -12,13 +17,14 @@ Wave::Wave(int id, int nb_enemies, TileMap* map)
 }
 
 /**
- * @brief Démarre la vague (initialise le timer)
+ * @brief DÃ©marre la vague (initialise le timer)
  */
 void Wave::startWave()
 {
     if (started) {
         return;
     }
+
     started = true;
     finished = false;
     minionsSpawned = 0;
@@ -27,27 +33,37 @@ void Wave::startWave()
     minionInGroupSpawned = 0;
 }
 
+/**
+ * @brief CrÃ©e un minion selon le groupe courant et l'ajoute Ã  la liste.
+ */
 void Wave::spwanMinion()
 {
     if (minionsSpawned < nb_enemies && minionGroupIndex < minionGroups.size()) {
         const auto& group = minionGroups[minionGroupIndex];
         std::string type = group.type;
-        // Création du bon type de minion selon le type
+
+        // CrÃ©ation du minion selon le type
         if (type == "Normal") {
-            minions.push_back(std::make_unique<MinionNormal>(minionsSpawned, map));
-        } else if (type == "Fast" || type == "fast") {
-            minions.push_back(std::make_unique<MinionFast>(minionsSpawned, map));
-        } else if (type == "Tank") {
-            minions.push_back(std::make_unique<MinionTank>(minionsSpawned, map));
-        } else if (type == "Boss") {
-            minions.push_back(std::make_unique<MinionBoss>(minionsSpawned, map));
-        } else {
-            minions.push_back(std::make_unique<MinionNormal>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map));
         }
+        else if (type == "Fast" || type == "fast") {
+            minions.push_back(std::make_shared<MinionFast>(minionsSpawned, map));
+        }
+        else if (type == "Tank") {
+            minions.push_back(std::make_shared<MinionTank>(minionsSpawned, map));
+        }
+        else if (type == "Boss") {
+            minions.push_back(std::make_shared<MinionBoss>(minionsSpawned, map));
+        }
+        else {
+            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map));
+        }
+
         float tile = map->getTileSize().x * map->getScale();
         sf::Vector2u spawnTile = map->findEdgeTile(7);
         minions.back()->setPosition(sf::Vector2f(spawnTile.x * tile + tile / 2, spawnTile.y * tile + tile / 2));
         minions.back()->move();
+
         ++minionsSpawned;
         ++minionInGroupSpawned;
         if (minionInGroupSpawned >= group.count) {
@@ -58,13 +74,12 @@ void Wave::spwanMinion()
 }
 
 /**
- * @brief Met à jour l'état de la vague et des Minions
- * @param dt Delta time (temps écoulé depuis la dernière frame)
+ * @brief Met Ã  jour la vague et ses minions.
  */
 void Wave::update(float dt)
 {
-	// Gérer le spawn des Minions
-    if (isStarted()) {
+    // GÃ©rer le spawn des minions
+    if (isStarted() && minionsSpawned < nb_enemies) {
         spawnTimer += dt;
         if (spawnTimer >= spawnDelay) {
             spwanMinion();
@@ -72,7 +87,7 @@ void Wave::update(float dt)
         }
     }
         
-	// Met à jour chaque Minion 
+	// Met Ã  jour chaque Minion 
     for (auto& minion : minions) {
         minion->update(dt * minion->getSpeed());
         if (map->hasMapChanged()) {
@@ -81,26 +96,25 @@ void Wave::update(float dt)
         }
     }
 
-	// Vérifie si la wave est terminée
+    // Nettoyage des minions morts
+    minions.erase(
+        std::remove_if(minions.begin(), minions.end(),
+            [](const std::shared_ptr<Minion>& minion) {
+                return !minion->getIsAlive();
+            }),
+        minions.end()
+    );
+
+    // VÃ©rifie si la wave est terminÃ©e
     if (!isFinished()) {
-        if (minionsSpawned == nb_enemies) {
-            bool allDeadOrArrived = true;
-            for (const auto& minion : minions) {
-                if (minion->getIsAlive()) {
-                    allDeadOrArrived = false;
-                    break;
-                }
-            }
-            if (allDeadOrArrived) {
-                waveFinish();
-            }
+        if (minionsSpawned == nb_enemies && minions.empty()) {
+            waveFinish();
         }
     }
 }
 
 /**
- * @brief Dessine les Minions de la vague sur la fenêtre
- * @param window Référence vers la fenêtre de rendu SFML
+ * @brief Dessine les Minions de la vague sur la fenÃªtre
  */
 void Wave::draw(sf::RenderWindow& window)
 {
@@ -110,15 +124,13 @@ void Wave::draw(sf::RenderWindow& window)
 }
 
 /**
- * @brief Indique si la vague est terminée
- * @return true si tous les Minions sont morts ou arrivés, false sinon
+ * @brief Indique que la vague est terminÃ©e
  */
-void Wave::waveFinish() 
+void Wave::waveFinish()
 {
     started = false;
     finished = true;
     std::cout << "[DEBUG] waveFinish called for wave id=" << id << "\n";
-    return;
 }
 
 void Wave::addMinionGroup(const std::string& type, int count) {
@@ -131,10 +143,13 @@ void Wave::addEnemies(int count)
 }
 
 
-WaveManager::WaveManager(std::string waveFile, TileMap* map) 
-	: currentWaveIndex(0), waveFile(waveFile), map(map)
+/**
+ * WaveManager
+ */
+WaveManager::WaveManager(std::string waveFile, TileMap* map)
+    : currentWaveIndex(0), waveFile(waveFile), map(map)
 {
-	loadWavesFromFile(waveFile, map);
+    loadWavesFromFile(waveFile, map);
 }
 
 void WaveManager::loadWavesFromFile(const std::string& filename, TileMap* map)
@@ -181,26 +196,27 @@ void WaveManager::startCurrentWave()
     Wave* wave = getCurrentWave();
     if (wave && !wave->isStarted()) {
         wave->startWave();
-	}
+    }
 }
 
 void WaveManager::startOrNextWave() {
     Wave* currentWave = this->getCurrentWave();
     if (!currentWave) return;
     std::cout << "[DEBUG] startOrNextWave: waveId=" << currentWave->getWaveId()
-              << " started=" << currentWave->isStarted()
-              << " finished=" << currentWave->isFinished() << "\n";
+        << " started=" << currentWave->isStarted()
+        << " finished=" << currentWave->isFinished() << "\n";
     if (currentWave->isFinished()) {
         this->nextWave();
         Wave* next = this->getCurrentWave();
         if (next && !next->isStarted() && !next->isFinished())
             next->startWave();
-    } else if (!currentWave->isStarted()) {
+    }
+    else if (!currentWave->isStarted()) {
         this->startCurrentWave();
     }
 }
 
-int WaveManager::getCurrentWaveId() 
+int WaveManager::getCurrentWaveId()
 {
     Wave* wave = getCurrentWave();
     int id = wave ? wave->getWaveId() : -1;

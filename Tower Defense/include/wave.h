@@ -1,4 +1,4 @@
-#ifndef WAVE_H
+ #ifndef WAVE_H
 #define WAVE_H
 
 #include "map.h"
@@ -10,11 +10,11 @@ class Minion;
 class TileMap;
 
 /**
- * @brief Constructeur de Wave
- * @param id NumÈro de la vague
- * @param nb_enemies Nombre d'ennemis dans la vague
- * @param map Pointeur vers la carte du jeu
- * @param delay DÈlai entre chaque spawn de Minion (en secondes)
+ * @brief Repr√©sente une vague d'ennemis.
+ *
+ * La Wave poss√®de ses minions mais expose des `std::shared_ptr<Minion>` afin que
+ * d'autres syst√®mes (tours, projectiles, UI) puissent observer ou r√©f√©rencer
+ * les minions en toute s√©curit√©.
  */
 class Wave {
 private:
@@ -22,43 +22,64 @@ private:
         std::string type;
         int count;
     };
+
     int id;
     int nb_enemies;
     bool started;
     bool finished;
-    std::vector<std::unique_ptr<Minion>> minions;
-    float spawnTimer;       // Timer pour gÈrer le dÈlai entre chaque spawn
-    float spawnDelay;       // DÈlai entre chaque spawn (en secondes)
-    size_t minionsSpawned;  // Nombre de Minions dÈj‡ spawnÈs
-    TileMap* map;         // Pointeur vers la carte du jeu
-    std::vector<MinionGroupConfig> minionGroups; // AjoutÈ pour la config
-    size_t minionGroupIndex = 0; // Pour suivre le groupe courant
-    size_t minionInGroupSpawned = 0; // Pour suivre le nombre spawnÈ dans le groupe courant
+
+    /// Minions d√©tenus par la vague (partag√©s avec d'autres syst√®mes)
+    std::vector<std::shared_ptr<Minion>> minions;
+
+    float spawnTimer;
+    float spawnDelay;
+    size_t minionsSpawned;
+    TileMap* map;
+    std::vector<MinionGroupConfig> minionGroups;
+    size_t minionGroupIndex = 0;
+    size_t minionInGroupSpawned = 0;
 
 public:
-    Wave(int id, int number, TileMap* map);
+    explicit Wave(int id, int number, TileMap* map);
     ~Wave() = default;
-    void startWave();
-    void spwanMinion();
-    void update(float dt);
-    void draw(sf::RenderWindow& window);
-    void waveFinish();
-    void addMinionGroup(const std::string& type, int count);
-    void addEnemies(int count); 
 
-    // Getters
-    const std::vector<std::unique_ptr<Minion>>& getMinions() const;
+    /** D√©marre la vague et initialise le timer. */
+    void startWave();
+
+    /** Cr√©e un minion selon la configuration courante du groupe. */
+    void spwanMinion();
+
+    /** Met √† jour la vague et ses minions. */
+    void update(float dt);
+
+    /** Dessine les minions actifs. */
+    void draw(sf::RenderWindow& window);
+
+    /** Marque la vague comme termin√©e. */
+    void waveFinish();
+
+    void addMinionGroup(const std::string& type, int count);
+    void addEnemies(int count);
+
+    /** Retourne la liste des minions (shared_ptr). */
+    const std::vector<std::shared_ptr<Minion>>& getMinions() const { return minions; }
+
     inline int getWaveId() const { return id; }
     inline bool isStarted() const { return started; }
     inline bool isFinished() const { return finished; }
 };
 
+/**
+ * @brief Gestionnaire de vagues.
+ *
+ * Contient les vagues (propri√©taires via unique_ptr) et g√®re la progression.
+ */
 class WaveManager {
 private:
     std::vector<std::unique_ptr<Wave>> waves;
     int currentWaveIndex;
-	std::string waveFile;
-	TileMap* map;
+    std::string waveFile;
+    TileMap* map;
 
 public:
     WaveManager(std::string waveFile, TileMap* map);
