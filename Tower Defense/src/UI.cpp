@@ -81,9 +81,10 @@ void UI::initPlayUI()
 	startWaveButton->setSize(150, 40);
 	tgui::Vector2f startWaveButtonSize = startWaveButton->getSize();
 	startWaveButton->setPosition(10, 10);
-	startWaveButton->onPress([this]() {
+	startWaveButton->onPress([this, waveLabel]() {
 		std::cout << "Start Wave button pressed!" << std::endl;
-		game->startNextWave = true;
+		game->m_bRequestStartWave = true;
+		waveLabel->setText("Wave: " + std::to_string(game->getCurrentWaveId()));
 		});
 	playUI->add(startWaveButton);
 

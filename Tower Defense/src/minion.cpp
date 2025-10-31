@@ -1,37 +1,32 @@
+// minion.cpp
 #include "minion.h"
 #include "path.h"
 #include <iostream>
+#include <cmath> 
 
-Minion::Minion(int id, TileMap* map, unsigned int health, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-    : Entity(id), map(map), health(health), rewardOnDeath(reward)
+Minion::Minion(int id, TileMap* map, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
+    : Entity(id), map(map), health(health), rewardOnDeath(reward), speed(speed), currentTargetIndex(0)
 {
-    Entity::init();
 }
 
 void Minion::move()
 {
     // 1. Initialiser le système de pathfinding avec la grille
     Pathfinding pf(map->getLevel2D());
-    
+
     // 2. Définir le départ et l'arrivée
     sf::Vector2u pos = map->getCurentTile(this->getPosition());
-
     Position start = { pos.y, pos.x };
-    Position goal = { 5, 19 };
 
-    std::cout << "Recherche de chemin de (" << start.x << ", " << start.y
-        << ") a (" << goal.x << ", " << goal.y << ")" << std::endl;
+    // Trouver la position de fin (valeur 4 sur le bord)
+    sf::Vector2u endTile = map->findEdgeTile(4);
+    Position goal = { endTile.y, endTile.x };
 
     // 3. Trouver le chemin
     std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
 
     if (pathOpt.has_value() && !pathOpt->empty()) {
-        std::cout << "Chemin trouve avec " << pathOpt->size() << " positions." << std::endl;
-        for (const Position& p : *pathOpt) {
-            std::cout << "(" << p.x << ", " << p.y << ") ";
-        }
-        std::cout << std::endl;
-        static_cast<Minion*>(this)->setPath(*pathOpt, 96);
+        static_cast<Minion*>(this)->setPath(*pathOpt, map->getTileSize().x * map->getScale());
     }
     else {
         std::cout << "Aucun chemin valide trouve !" << std::endl;
@@ -49,80 +44,54 @@ void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
         targetPath.push_back(sf::Vector2f(worldX, worldY));
     }
 
-    // Place le minion au début du chemin
     if (!targetPath.empty()) {
-       _position = targetPath[0];
+        _position = targetPath[0]; 
+        if (_shape) _shape->setPosition(_position);
     }
-	// TODO : gérer le cas où le chemin est vide
 }
 
 void Minion::update(float dt) {
-    // Entity::update(dt); // Appelle la mise à jour de base (si elle existe)
-
-    // Le minion ne bouge que s'il est en vie
     if (health > 0) {
         followPath(dt);
     }
 }
 
 void Minion::followPath(float dt) {
-    // S'il n'y a pas de chemin ou si on a atteint la fin, on ne fait rien.
     if (targetPath.empty() || currentTargetIndex >= targetPath.size()) {
         return;
     }
 
-    // 1. Définir la cible actuelle
     sf::Vector2f target = targetPath[currentTargetIndex];
-
-    // 2. Calculer le vecteur direction et la distance
-    sf::Vector2f foo;
-    if (currentTargetIndex == 0) {
-        foo = targetPath[currentTargetIndex];
-    }
-    else {
-        foo = targetPath[currentTargetIndex-1];
-    }
     sf::Vector2f direction = target - _position;
     float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+    float moveAmount = speed * dt;
 
-    // 3. Calculer le déplacement pour cette frame
-    float moveAmount = std::sqrt(_velocity.x* _velocity.x + _velocity.y * _velocity.y) * dt;
-
-    // 4. Vérifier si on atteint (ou dépasse) la cible
     if (distance <= moveAmount) {
-        // On a atteint la cible
-        _position = target; // On "snap" à la position cible pour éviter les dépassements
-        _shape.setPosition(_position);
-        currentTargetIndex++; // On vise le point suivant
+        _position = target;
+        if (_shape) _shape->setPosition(_position);
+        currentTargetIndex++;
 
-        // Vérifier si c'était le dernier point
         if (currentTargetIndex >= targetPath.size()) {
-            std::cout << "Minion " << _id << " a atteint la fin du chemin !" << std::endl;
-            // Ici, déclenchez la logique de fin de chemin (ex: infliger dégâts à la base)
+            std::cout << "Minion " << _id << " a atteint la base!" << std::endl;
             this->onDestroy();
         }
     }
     else {
-        // 5. On n'a pas atteint la cible, on s'en approche
-        // Normaliser le vecteur direction (longueur de 1) et le multiplier par le déplacement
-        direction /= distance; // (direction.x / distance, direction.y / distance)
+        direction /= distance;
         _position += direction * moveAmount;
-        _shape.setPosition(_position);
-
-        // Optionnel : faire tourner le minion pour qu'il regarde sa cible
-        // this->rotation = std::atan2(direction.y, direction.x) * 180.0f / 3.14159265f;
+        if (_shape) _shape->setPosition(_position);
     }
 }
 
 void Minion::makeDamage(int amount)
 {
+    // TODO
 }
 
 void Minion::onDestroy() {
-    Entity::setIsAlive(false);
-    /*
-    TODO : appelé fct affichage du BOOM et la thune
-    */
+    if (_isAlive) {
+        Entity::setIsAlive(false);
+    }
 }
 
 void Minion::takeDamage(int amount) {
