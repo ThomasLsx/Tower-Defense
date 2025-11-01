@@ -1,28 +1,51 @@
-// Game.cpp
 #include "Game.h"
 #include <iostream>
+#include <memory>
 
+/**
+ * @brief Constructeur de Game
+ */
 Game::Game()
-    : m_eGameMode(Menu)
-
+    : m_eGameMode(Menu),
+      m_bRequestStartWave(false)
 {
-    window = new Window();
+    window = std::make_unique<Window>();
     window->create();
     window->getRenderWindow().setFramerateLimit(60);
 
-    map = new TileMap(window->getRenderWindow());
+    map = std::make_unique<TileMap>(window->getRenderWindow());
     map->loadLevel("assets/map1.txt");
     map->loadTile("assets/TileMap.png", map->getLevel().data());
 
-    waveManager = new WaveManager("assets/wave.txt", map);
+    waveManager = std::make_unique<WaveManager>("assets/wave.txt", map.get());
 
-    ui = new UI(window, this, waveManager);
+    m_projectileSystem = std::make_unique<ProjectileSystem>();
+
+    m_towers.push_back(std::make_unique<BasicTower>(1, sf::Vector2f(300.f, 300.f)));
+    m_towers.push_back(std::make_unique<SpeedTower>(2, sf::Vector2f(500.f, 400.f)));
+
+    ui = std::make_unique<UI>(window.get(), this);
 }
 
 Game::~Game()
 {
 }
 
+/**
+ * @brief Retourne l'ID de la vague courante, ou 0 si aucune.
+ */
+int Game::getCurrentWaveId() const
+{
+    if (waveManager && waveManager->getCurrentWave())
+    {
+        return waveManager->getCurrentWaveId();
+    }
+    return 0;
+}
+
+/**
+ * @brief Boucle principale du jeu.
+ */
 void Game::run()
 {
     sf::Clock clock;
@@ -47,11 +70,28 @@ void Game::run()
 
         switch (m_eGameMode) {
         case Menu:
-			ui->showMenuUI();
+            ui->showMenuUI();
             break;
         case Play: 
             ui->showPlayUI();
+
+            if (m_bRequestStartWave)
+            {
+                waveManager->startOrNextWave();
+                m_bRequestStartWave = false;
+            }
+
             waveManager->update(sec);
+            m_projectileSystem->update(sec);
+
+            if (waveManager->getCurrentWave())
+            {
+                const auto& minions = waveManager->getCurrentWave()->getMinions();
+                for (auto& tower : m_towers)
+                {
+                    tower->update(sec, minions, *m_projectileSystem);
+                }
+            }
             break;
         case Editor:
             ui->showEditorUI();
@@ -59,28 +99,29 @@ void Game::run()
         }
 
         Render();
-
     }
 }
 
+/**
+ * @brief Rendu de la scène selon le mode de jeu.
+ */
 void Game::Render()
 {
     window->clear(sf::Color(50, 50, 50));
 
-    // Affiche le menu
-    if (m_eGameMode == Menu)
-    {
-        //window->clear(sf::Color(100, 100, 100));
-    }
-
-    // Affiche la map de jeux
-    if (m_eGameMode == Play  or m_eGameMode == Pause)
+    if (m_eGameMode == Play or m_eGameMode == Pause)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
         waveManager->draw(window->getRenderWindow());
+
+        for (auto& tower : m_towers)
+        {
+            tower->draw(window->getRenderWindow());
+        }
+
+        m_projectileSystem->draw(window->getRenderWindow());
     }
 
-    // Affiche la tuile sélectionnée sous la souris uniquement en mode Editor
     if (m_eGameMode == Editor)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
@@ -90,6 +131,9 @@ void Game::Render()
     window->display();
 }
 
+/**
+ * @brief Gère les entrées utilisateur globales.
+ */
 void Game::HandleInput(const std::vector<sf::Event>& events)
 {
     static bool bTWasPressedLastUpdate = false;
@@ -105,10 +149,10 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
             }
             else if (m_eGameMode == Pause) {
                 m_eGameMode = Editor;
-			}
+            }
             else if (m_eGameMode == Editor) {
                 m_eGameMode = Menu;
-			}
+            }
         }
         bTWasPressedLastUpdate = true;
     }
@@ -120,6 +164,3 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
     if (m_eGameMode == Editor)
         map->HandleLevelEditorInput(events);
 }
-
-
-

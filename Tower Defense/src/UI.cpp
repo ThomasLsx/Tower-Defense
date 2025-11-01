@@ -2,7 +2,7 @@
 #include "UI.h"
 #include <iostream>
 
-UI::UI(Window* window, Game* game, WaveManager* waveManager) : window(window), game(game), waveManager(waveManager)
+UI::UI(Window* window, Game* game) : window(window), game(game)
 {
     gui.setTarget(window->getRenderWindow());
 
@@ -14,7 +14,7 @@ UI::UI(Window* window, Game* game, WaveManager* waveManager) : window(window), g
 void UI::handleEvent(const sf::Event& event)
 {
     gui.handleEvent(event);
-    // Gestion du redimensionnement de la fenêtre
+    // Gestion du redimensionnement de la fenÃªtre
     if (event.is<sf::Event::Resized>()) {
         const auto* resized = event.getIf<sf::Event::Resized>();
         if (resized) {
@@ -133,8 +133,9 @@ void UI::initPlayUI()
 	tgui::Vector2f startWaveButtonSize = startWaveButton->getSize();
 	startWaveButton->setPosition(10, 10);
 	startWaveButton->onPress([this, waveLabel]() {
-    waveManager->startOrNextWave();
-    waveLabel->setText("Wave: " + std::to_string(waveManager->getCurrentWaveId()));
+		std::cout << "Start Wave button pressed!" << std::endl;
+		game->m_bRequestStartWave = true;
+		waveLabel->setText("Wave: " + std::to_string(game->getCurrentWaveId()));
 		});
 	playUI->add(startWaveButton);
 

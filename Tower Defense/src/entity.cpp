@@ -1,60 +1,57 @@
-/* MIT License
-
-Copyright (c) 2022 Pierre Lefebvre
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. */
-
 /// entity.cpp
 #include "entity.h"
 #include <cmath>
+#include "utils.h"
 
-Entity::Entity(unsigned int id)
-    : _shape(), _position(0.f, 0.f), _velocity(1.f, 1.f), _acceleration(1.f, 1.f),
-    _area(sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)), _squaredRadius(0), _isAlive(true), _id(id) 
+/**
+ * @brief Constructeur d'Entity
+ */
+Entity::Entity(unsigned int id, sf::Vector2f position)
+    :_position(position), _isAlive(true), _id(id)
 {
-	_shape.setPosition(_position);
 }
 
-void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, int thickness) {
-    _shape.setRadius(radius);
-    _shape.setFillColor(color);
-    _shape.setOutlineColor(outline);
-    _shape.setOutlineThickness(thickness);
-    _shape.setOrigin(sf::Vector2f(radius, radius));
+/**
+ * @brief Initialise une forme circulaire.
+ */
+void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, int thickness)
+{
+    _shape = new sf::CircleShape(radius);
+    _shape->setPosition(_position);
+    _shape->setFillColor(color);
+    _shape->setOutlineColor(outline);
+    _shape->setOutlineThickness(thickness);
+    _shape->setOrigin(sf::Vector2f(radius, radius));
     _squaredRadius = radius * radius;
 }
 
+/**
+ * @brief Initialise une forme rectangulaire.
+ */
+void Entity::init(int l, int L, const sf::Color& color, const sf::Color& outline, int thickness)
+{
+    _shape = new sf::RectangleShape(sf::Vector2f(l,L));
+    _shape->setFillColor(color);
+    _shape->setOutlineColor(outline);
+    _shape->setOutlineThickness(thickness);
+    _shape->setOrigin(sf::Vector2f(l / 2, L / 2));
+    _squaredRadius = (l / 2) * (l / 2) + (L / 2) * (L / 2);
+}
+
+/**
+ * @brief Dessine l'entité si elle est vivante.
+ */
 void Entity::draw(sf::RenderWindow& window)
 {
     if (getIsAlive())
-    window.draw(_shape);
+        window.draw(*_shape);
 }
 
+/**
+ * @brief Collision AABB entre deux entités.
+ */
 bool Entity::isColliding(const Entity& e) const {
-    float dx = _position.x - e._position.x;
-    float dy = _position.y - e._position.y;
-    float distanceSquared = dx * dx + dy * dy;
-    float radiusSum = _shape.getRadius() + e._shape.getRadius();
-    return distanceSquared < radiusSum * radiusSum;
-}
-
-void Entity::bounce(Entity& e) {
-    _velocity = sf::Vector2f(0, 0);
-    e._velocity = sf::Vector2f(0, 0);
+    const sf::FloatRect& boundsA = _shape->getGlobalBounds();
+    const sf::FloatRect& boundsB = e._shape->getGlobalBounds();
+    return intersects(boundsA, boundsB);
 }
