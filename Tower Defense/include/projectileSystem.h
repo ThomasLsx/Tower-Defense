@@ -2,6 +2,7 @@
 #define PROJECTILSYSTEM_H
 #include <vector>
 #include <memory>
+#include <SFML/Graphics.hpp>
 
 class Projectile;
 class Entity;
@@ -11,8 +12,6 @@ class Tower;
 /**
  * @class ProjectileSystem
  * @brief Système de gestion des projectiles dans le jeu.
- *
- * Crée, met à jour et supprime les projectiles, et gère les collisions avec les cibles.
  */
 class ProjectileSystem {
 private:
@@ -31,19 +30,24 @@ public:
 
     /**
      * @brief Crée un nouveau projectile.
-     * @param sourceId ID de l'entité source (tour).
-     * @param targetId ID de la cible (minion).
+     * @param source Tour source.
+     * @param target Cible (minion).
      * @param dmg Dégâts infligés par le projectile.
      * @param speed Vitesse du projectile.
      */
-    void createProjectile(Tower source, Minion target, int dmg, float speed);
+    void createProjectile(const Tower& source, std::shared_ptr<Minion> target, int dmg, float speed);
 
     /**
      * @brief Met à jour tous les projectiles.
      * @param dt Temps écoulé depuis la dernière frame.
-     * @param entities Liste de toutes les entités (pour détecter les collisions).
      */
     void update(float dt);
+
+    /**
+     * @brief Dessine tous les projectiles.
+     * @param window Fenêtre de rendu.
+     */
+    void draw(sf::RenderWindow& window);
 
     /**
      * @brief Supprime un projectile par son ID.

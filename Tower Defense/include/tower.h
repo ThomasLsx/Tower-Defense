@@ -3,6 +3,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "entity.h"
 
 class ProjectileSystem;
@@ -15,12 +16,14 @@ class Minion;
  * Une tour peut cibler des minions, tirer des projectiles et être améliorée.
  */
 class Tower : public Entity {
-private:
+protected:
     float range;            ///< Portée de la tour
     float fireRate;         ///< Fréquence de tir en tirs par seconde
+    float fireCooldown;     ///< timer de rechargement
     unsigned int level;              ///< Niveau actuel de la tour
     unsigned int damage;  ///< Dégâts infligés par projectile
-    std::vector<Minion> targets; ///< Liste des cibles actuellement visées
+
+    std::vector<std::weak_ptr<Minion>> targets;
 
 public:
     /**
@@ -32,13 +35,11 @@ public:
      * @param damage Dégâts infligés par projectile.
      * @param level Niveau initial de la tour (par défaut 1).
      */
-
-    Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);  
+    Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), sf::Color color = sf::Color::White);
 
 
     /**
      * @brief Tente de tirer sur les cibles si possible.
-     * @param minions Liste des minions. opti avec quadtree plus tard
      * @param projectileSystem Système de gestion des projectiles.
      */
     void tryFire(ProjectileSystem& projectileSystem);
@@ -46,7 +47,7 @@ public:
     /**
      * @brief Améliore la tour (augmente portée et dégâts).
      */
-    void upgrade();
+    virtual void upgrade();
 
     /**
      * @brief Appelé quand la tour est détruite.
@@ -56,23 +57,71 @@ public:
     /**
      * @brief Met à jour la tour (ciblage et tir).
      * @param dt Temps écoulé depuis la dernière frame.
-     * @param minions Liste des minions.
+     * @param minions Liste de TOUS les minions (pour le ciblage).
      * @param projectileSystem Système de gestion des projectiles.
      */
-    void update(float dt, const std::vector<Entity*>& minions, ProjectileSystem& projectileSystem); // Surcharge, pas override
+    void update(float dt, const std::vector<std::shared_ptr<Minion>>& minions, ProjectileSystem& projectileSystem);
 
-	/**
-	 * @brief Met à jour la tour (sans cibles).
-	 * @param dt Temps écoulé depuis la dernière frame.
-	 */
+    /**
+     * @brief Met à jour la tour (sans cibles).
+     * @param dt Temps écoulé depuis la dernière frame.
+     */
     void update(float dt) override; // Cette version override bien Entity
 
-	void  SearchTargets(std::vector<Minion> mimi); ///< Recherche des cibles dans la portée de la tour
+    void SearchTargets(const std::vector<std::shared_ptr<Minion>>& allMinions);
 
     // Getters
-    float getRange() const { return range; }          ///< Retourne la portée de la tour.
-    float getFireRate() const { return fireRate; }    ///< Retourne la fréquence de tir.
-    int getLevel() const { return level; }            ///< Retourne le niveau de la tour.
-    int getDamage() const { return damage; }          ///< Retourne les dégâts infligés par projectile.
-    const std::vector<Minion>& getTargets() const { return targets; } ///< Retourne la liste des cibles.
+    float getRange() const { return range; }
+    float getFireRate() const { return fireRate; }
+    int getLevel() const { return level; }
+    int getDamage() const { return damage; }
+
+    const std::vector<std::weak_ptr<Minion>>& getTargets() const { return targets; }
+};
+
+// --- Tours Dérivées ---
+
+/**
+ * @class BasicTower
+ * @brief La tour de base standard.
+ */
+class BasicTower : public Tower {
+public:
+    BasicTower(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f));
+
+    // Override de l'upgrade pour des stats spécifiques
+    void upgrade() override;
+};
+
+/**
+ * @class SpeedTower
+ * @brief Tour rapide avec une cadence de tir élevée.
+ */
+class SpeedTower : public Tower {
+public:
+    SpeedTower(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f));
+
+    void upgrade() override;
+};
+
+/**
+ * @class SniperTower
+ * @brief Tour à longue portée et gros dégâts, mais tir lent.
+ */
+class SniperTower : public Tower {
+public:
+    SniperTower(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f));
+
+    void upgrade() override;
+};
+
+/**
+ * @class SlowTower
+ * @brief Tour qui applique un effet de ralentissement.
+ */
+class SlowTower : public Tower {
+public:
+    SlowTower(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f));
+
+    void upgrade() override;
 };

@@ -7,7 +7,7 @@ private:
     unsigned int maxHealth;
 
 public:
-    Castle(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, unsigned int maxHealth=100);
+    Castle(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), sf::Color color = sf::Color::White, unsigned int maxHealth=100);
     
     void takeDamage(unsigned int amount);
     void repair(unsigned int amount);
