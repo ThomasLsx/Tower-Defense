@@ -17,7 +17,7 @@ class WaveManager;
 
 class UI {
 public:
-    UI(Window* window, Game* game, WaveManager* waveManager);
+    UI(Window* window, Game* game);
     tgui::Gui gui;
      
     void handleEvent(const sf::Event& event);
@@ -45,6 +45,5 @@ private:
 
     Window* window; // Pointeur vers l'instance de Window
     Game* game; // Pointeur vers l'instance de Game
-    WaveManager* waveManager; // Pointeur vers l'instance de WaveManager
 
 };

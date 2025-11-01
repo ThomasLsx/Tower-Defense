@@ -2,7 +2,7 @@
 #include "UI.h"
 #include <iostream>
 
-UI::UI(Window* window, Game* game, WaveManager* waveManager) : window(window), game(game), waveManager(waveManager)
+UI::UI(Window* window, Game* game) : window(window), game(game)
 {
     gui.setTarget(window->getRenderWindow());
 
