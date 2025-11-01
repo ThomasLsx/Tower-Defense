@@ -112,7 +112,7 @@ public:
 class MinionNormal : public Minion {
 public:
     MinionNormal(int id, TileMap* map = nullptr)
-        : Minion(id, map, 100, 50.0f, 10) // health=100, speed=50, reward=10 // : Vitesse réaliste
+        : Minion(id, map, 100, 50.0f, 10) // health=100, speed=50, reward=10
     {
         Entity::init(15, sf::Color::Green, sf::Color::Black, 2);
     }
