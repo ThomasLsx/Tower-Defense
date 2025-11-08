@@ -24,7 +24,7 @@ Game::Game()
     m_towers.push_back(std::make_unique<BasicTower>(1, sf::Vector2f(300.f, 300.f)));
     m_towers.push_back(std::make_unique<SpeedTower>(2, sf::Vector2f(500.f, 400.f)));
 
-    ui = std::make_unique<UI>(window.get(), this, waveManager.get());
+    ui = std::make_unique<UI>(window.get(), this);
 }
 
 Game::~Game()
