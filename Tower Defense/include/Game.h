@@ -1,15 +1,11 @@
 // Game.h
 #pragma once
-#include "Window.h"
-#include "UI.h"
-#include "map.h"
-#include "wave.h"
-#include "path.h"
-#include "projectileSystem.h"
-#include "tower.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
+#include <iostream>
+#include <utility>
+
 
 class Window;
 class UI;
@@ -17,9 +13,10 @@ class TileMap;
 class WaveManager;
 class ProjectileSystem;
 class Tower;
+#include "towerManager.h"
 
 /**
- * @brief Classe principale du jeu : fen�tre, UI et boucle de jeu.
+ * @brief Classe principale du jeu : fenêtre, UI et boucle de jeu.
  */
 class Game {
 public:
@@ -53,6 +50,7 @@ private:
     void HandleInput(const std::vector<sf::Event>& events);
 
     GameMode m_eGameMode;
+    TowerManager towerManager;
 
     std::unique_ptr<Window> window;
     std::unique_ptr<UI> ui;

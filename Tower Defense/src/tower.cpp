@@ -88,13 +88,6 @@ void Tower::SearchTargets(const std::vector<std::shared_ptr<Minion>>& allMinions
     // TODO: Trier les cibles (ex: la plus proche, la plus faible, etc.)
 }
 
-void Tower::update(float dt)
-{
-    if (fireCooldown > 0) {
-        fireCooldown -= dt;
-    }
-}
-
 // ==========================================================
 // 1. BASIC TOWER (Tour de base)
 // ==========================================================

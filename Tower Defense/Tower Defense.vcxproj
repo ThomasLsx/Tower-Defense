@@ -24,6 +24,7 @@
     <ClCompile Include="src\map.cpp" />
     <ClCompile Include="src\player.cpp" />
     <ClCompile Include="src\projectileSystem.cpp" />
+    <ClCompile Include="src\towerManager.cpp" />
     <ClCompile Include="src\wave.cpp" />
     <ClCompile Include="src\UI.cpp" />
     <ClCompile Include="src\Window.cpp" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\castle.h" />
+    <ClInclude Include="include\compat_memory.h" />
     <ClInclude Include="include\constants.h" />
     <ClInclude Include="include\economySystem.h" />
     <ClInclude Include="include\entity.h" />
@@ -48,6 +50,7 @@
     <ClInclude Include="include\tower.h" />
     <ClInclude Include="include\map.h" />
     <ClInclude Include="include\Game.h" />
+    <ClInclude Include="include\towerManager.h" />
     <ClInclude Include="include\UI.h" />
     <ClInclude Include="include\utils.h" />
     <ClInclude Include="include\wave.h" />

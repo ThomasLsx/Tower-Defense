@@ -89,7 +89,7 @@ void Wave::update(float dt)
         
 	// Met à jour chaque Minion 
     for (auto& minion : minions) {
-        minion->update(dt * minion->getSpeed());
+        minion->update(dt);
         if (map->hasMapChanged()) {
             minion->move();
             map->setMapChanged(false);

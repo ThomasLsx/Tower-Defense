@@ -1,6 +1,12 @@
 #include "Game.h"
-#include <iostream>
-#include <memory>
+
+#include "Window.h"
+#include "UI.h"
+#include "map.h"
+#include "wave.h"
+#include "path.h"
+#include "projectileSystem.h"
+#include "tower.h"
 
 /**
  * @brief Constructeur de Game
@@ -21,6 +27,7 @@ Game::Game()
 
     m_projectileSystem = std::make_unique<ProjectileSystem>();
 
+    // initialize towers
     m_towers.push_back(std::make_unique<BasicTower>(1, sf::Vector2f(300.f, 300.f)));
     m_towers.push_back(std::make_unique<SpeedTower>(2, sf::Vector2f(500.f, 400.f)));
 
@@ -163,4 +170,7 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
 
     if (m_eGameMode == Editor)
         map->HandleLevelEditorInput(events);
+
+    else if (m_eGameMode == Play)
+        map->HandleTowerInput(events, towerManager);
 }
