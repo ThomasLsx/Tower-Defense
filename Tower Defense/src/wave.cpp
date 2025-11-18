@@ -10,9 +10,9 @@
  *
  * Initialise la configuration de spawn de la vague.
  */
-Wave::Wave(int id, int nb_enemies, TileMap* map)
+Wave::Wave(int id, int nb_enemies, TileMap* map, Castle* castle)
     : id(id), nb_enemies(nb_enemies), started(false), finished(false),
-      spawnTimer(0.0f), spawnDelay(1.0f), minionsSpawned(0), map(map), minionGroupIndex(0), minionInGroupSpawned(0)
+      spawnTimer(0.0f), spawnDelay(1.0f), minionsSpawned(0), map(map), castle(castle), minionGroupIndex(0), minionInGroupSpawned(0)
 {
 }
 
@@ -44,24 +44,22 @@ void Wave::spwanMinion()
 
         // Création du minion selon le type
         if (type == "Normal") {
-            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map, castle));
         }
-        else if (type == "Fast" || type == "fast") {
-            minions.push_back(std::make_shared<MinionFast>(minionsSpawned, map));
+        else if (type == "Fast") {
+            minions.push_back(std::make_shared<MinionFast>(minionsSpawned, map, castle));
         }
         else if (type == "Tank") {
-            minions.push_back(std::make_shared<MinionTank>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionTank>(minionsSpawned, map, castle));
         }
         else if (type == "Boss") {
-            minions.push_back(std::make_shared<MinionBoss>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionBoss>(minionsSpawned, map, castle));
         }
         else {
-            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map, castle));
         }
 
-        float tile = map->getTileSize().x * map->getScale();
-        sf::Vector2u spawnTile = map->findEdgeTile(7);
-        minions.back()->setPosition(sf::Vector2f(spawnTile.x * tile + tile / 2, spawnTile.y * tile + tile / 2));
+        minions.back()->setPosition(sf::Vector2f(map->Tile2Position(map->getSpawnTile())));
         minions.back()->move();
 
         ++minionsSpawned;
@@ -146,13 +144,13 @@ void Wave::addEnemies(int count)
 /**
  * WaveManager
  */
-WaveManager::WaveManager(std::string waveFile, TileMap* map)
-    : currentWaveIndex(0), waveFile(waveFile), map(map)
+WaveManager::WaveManager(std::string waveFile, TileMap* map, Castle* castle)
+	: currentWaveIndex(0), waveFile(waveFile), map(map), castle(castle)
 {
-    loadWavesFromFile(waveFile, map);
+    loadWavesFromFile(waveFile, map, castle);
 }
 
-void WaveManager::loadWavesFromFile(const std::string& filename, TileMap* map)
+void WaveManager::loadWavesFromFile(const std::string& filename, TileMap* map, Castle* castle)
 {
     waves.clear();
     std::ifstream file(filename);
@@ -168,7 +166,7 @@ void WaveManager::loadWavesFromFile(const std::string& filename, TileMap* map)
         std::getline(iss, type, ';');
         std::getline(iss, sep, ';'); count = std::stoi(sep);
         if (waveId != currentWaveId) {
-            waves.push_back(std::make_unique<Wave>(waveId, 0, map));
+            waves.push_back(std::make_unique<Wave>(waveId, 0, map, castle));
             currentWave = waves.back().get();
             currentWaveId = waveId;
         }

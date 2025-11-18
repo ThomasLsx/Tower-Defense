@@ -7,6 +7,7 @@
 #include "path.h"
 #include "projectileSystem.h"
 #include "tower.h"
+#include "castle.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
@@ -17,6 +18,7 @@ class TileMap;
 class WaveManager;
 class ProjectileSystem;
 class Tower;
+class Castle;
 
 /**
  * @brief Classe principale du jeu : fen�tre, UI et boucle de jeu.
@@ -59,6 +61,6 @@ private:
     std::unique_ptr<TileMap> map;
     std::unique_ptr<WaveManager> waveManager;
     std::unique_ptr<ProjectileSystem> m_projectileSystem;
-
     std::vector<std::unique_ptr<Tower>> m_towers;
+	std::unique_ptr<Castle> m_castle;
 };
