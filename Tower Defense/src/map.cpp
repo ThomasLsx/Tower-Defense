@@ -319,7 +319,6 @@ sf::Vector2u TileMap::findEdgeTile(int value) const {
 
 
 /// Placement des tours
-// MODIFICATION : Ajout de TowerManager&
 void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager)
 {
     for (const sf::Event& event : events)
@@ -329,7 +328,6 @@ void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManage
         {
             auto mouseWheel = event.getIf<sf::Event::MouseWheelScrolled>();
             int delta = static_cast<int>(mouseWheel->delta);
-            // Inversé pour être plus intuitif (molette vers le haut = index suivant)
             m_TowerIndex = (m_TowerIndex - delta + m_TowerOptions) % m_TowerOptions;
             std::cout << "Tower type selected: " << m_TowerIndex << std::endl;
         }
@@ -370,22 +368,20 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     // 2. Vérifier si les coordonnées sont valides
     if (i >= getWidth() || j >= getHeight()) {
         std::cout << "Placement hors carte." << std::endl;
-        return; // Hors de la carte
+        return;
     }
 
     // 3. Obtenir le type de tuile à cet endroit
     const int tileType = m_level[i + j * width];
 
-    // 4. VÉRIFIER LES RÈGLES : Ne pas placer sur 4 (Château) ou 7 (Portail/Spawner)
-    // (En supposant que 4 est le château et 7 le portail, basé sur vos fichiers image)
+    // 4.1 VÉRIFIER LES RÈGLES : Ne pas placer sur 4 (Château) ou 7 (Portail/Spawner)
     if (tileType == 4 || tileType == 7)
     {
         std::cout << "Placement de tour interdit sur ce type de tuile (" << tileType << ")\n";
         return;
     }
 
-    // (Optionnel : Vérifier s'il y a déjà une tour ici)
-    // (Cela nécessiterait une fonction dans TowerManager pour vérifier une position)
+    // 4.2 Vérifier s'il y a déjà une tour ici
     // if (towerManager.isTowerAt(i, j)) {
     //     std::cout << "Une tour existe deja a cet endroit." << std::endl;
     //     return;
@@ -399,8 +395,6 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     // 6. Ajouter la tour en utilisant le Manager
     towerManager.addTower(towerPosition, m_TowerIndex);
     std::cout << "Tour de type " << m_TowerIndex << " placee sur la tuile (" << i << ", " << j << ")\n";
-
-    // 7. MODIFICATION : Ne pas appeler updateTileTower
 }
 
 void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManager)
@@ -409,11 +403,6 @@ void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManag
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        // Logique future : vous devrez implémenter une fonction dans TowerManager
-        // pour supprimer une tour basée sur sa position en pixels ou ses coordonnées de grille.
-        // ex: towerManager.removeTowerAt(position);
         std::cout << "Tentative de suppression de tour a (" << i << ", " << j << ")\n";
-
-        // 7. MODIFICATION : Ne pas appeler updateTileTower
     }
 }

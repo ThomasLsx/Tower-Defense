@@ -61,7 +61,7 @@ public:
     void addMinionGroup(const std::string& type, int count);
     void addEnemies(int count);
 
-    /** Retourne la liste des minions (shared_ptr). */
+    /** Retourne la liste des minions. */
     const std::vector<std::shared_ptr<Minion>>& getMinions() const { return minions; }
 
     inline int getWaveId() const { return id; }

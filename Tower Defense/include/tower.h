@@ -62,12 +62,6 @@ public:
      */
     void update(float dt, const std::vector<std::shared_ptr<Minion>>& minions, ProjectileSystem& projectileSystem);
 
-    /**
-     * @brief Met à jour la tour (sans cibles).
-     * @param dt Temps écoulé depuis la dernière frame.
-     */
-    void update(float dt) override; // Cette version override bien Entity
-
     void SearchTargets(const std::vector<std::shared_ptr<Minion>>& allMinions);
 
     // Getters
