@@ -28,6 +28,7 @@ SOFTWARE. */
 #include <ctime>
 #include "constants.h"
 #include <cmath>
+#include <algorithm> 
 
 struct Utils {
     /**
@@ -98,4 +99,38 @@ struct Random {
 
 };
 
-#endif
+inline bool intersects(const sf::Rect<float>& a, const sf::Rect<float>& b) {
+    // Les lambdas min/max adaptées pour les floats
+    const auto min = [](float val1, float val2) { return (val1 < val2) ? val1 : val2; };
+    const auto max = [](float val1, float val2) { return (val1 < val2) ? val2 : val1; };
+
+    // --- 1. Calcul des limites min/max du premier rectangle (a) ---
+    // Gère correctement les dimensions négatives
+    const float aMinX = min(a.position.x, a.position.x + a.size.x);
+    const float aMaxX = max(a.position.x, a.position.x + a.size.x);
+    const float aMinY = min(a.position.y, a.position.y + a.size.y);
+    const float aMaxY = max(a.position.y, a.position.y + a.size.y);
+
+    // --- 2. Calcul des limites min/max du second rectangle (b) ---
+    const float bMinX = min(b.position.x, b.position.x + b.size.x);
+    const float bMaxX = max(b.position.x, b.position.x + b.size.x);
+    const float bMinY = min(b.position.y, b.position.y + b.size.y);
+    const float bMaxY = max(b.position.y, b.position.y + b.size.y);
+
+    // --- 3. Calcul des limites de l'intersection potentielle ---
+    // La limite gauche (interLeft) est le max des limites gauches (MinX)
+    const float interLeft = max(aMinX, bMinX);
+    // La limite haute (interTop) est le max des limites hautes (MinY)
+    const float interTop = max(aMinY, bMinY);
+
+    // La limite droite (interRight) est le min des limites droites (MaxX)
+    const float interRight = min(aMaxX, bMaxX);
+    // La limite basse (interBottom) est le min des limites basses (MaxY)
+    const float interBottom = min(aMaxY, bMaxY);
+
+    // --- 4. Vérification de l'intersection ---
+    // Il y a intersection si et seulement si les limites définissent un rectangle de surface non nulle.
+    return (interLeft < interRight) && (interTop < interBottom);
+}
+
+#endif // UTILS_H

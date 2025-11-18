@@ -1,23 +1,26 @@
 #pragma once
 #include "entity.h"
 #include "map.h"
+#include "castle.h"
+#include <memory> // : Ajout
+#include <vector> // : Ajout
 
-class Path;
 struct Position;
 /**
  * @class Minion
- * @brief ReprÈsente un minion dans un jeu de type Tower Defense.
+ * @brief Repr√©sente un minion dans un jeu de type Tower Defense.
  *
- * Un minion suit un chemin prÈdÈfini, peut subir des dÈg‚ts et rÈcompense le joueur ‡ sa mort.
+ * Un minion suit un chemin pr√©d√©fini, peut subir des d√©g√¢ts et r√©compense le joueur √† sa mort.
  */
 class Minion : public Entity {
 private:
-	TileMap* map;               ///< Pointeur vers la map du jeu.
+    TileMap* map;               ///< Pointeur vers la map du jeu.
+	Castle* castle; ///< Pointeur faible vers le ch√¢teau.
     unsigned int health;          ///< Points de vie actuels du minion.
-	float speed;        ///< Vitesse de dÈplacement du minion (pixels par seconde).
-    size_t currentTargetIndex; ///< Progression le long du chemin (0.0 ‡ 1.0).
-    unsigned int rewardOnDeath;   ///< RÈcompense accordÈe ‡ la mort du minion.
-	std::vector<sf::Vector2f> targetPath; ///< Chemin en coordonnÈes du monde (pixels).
+    float speed;        ///< Vitesse de d√©placement du minion (pixels par seconde).
+    size_t currentTargetIndex; ///< Progression le long du chemin (0.0 √† 1.0).
+    unsigned int rewardOnDeath;   ///< R√©compense accord√©e √† la mort du minion.
+    std::vector<sf::Vector2f> targetPath; ///< Chemin en coordonn√©es du monde (pixels).
 
 public:
     /**
@@ -25,36 +28,36 @@ public:
      * @param id Identifiant unique du minion.
      * @param map Pointeur vers la map du jeu.
      * @param health Points de vie initiaux du minion.
-     * @param reward RÈcompense accordÈe ‡ la mort du minion.
+     * @param reward R√©compense accord√©e √† la mort du minion.
      * @param pos Position initiale du minion.
      * @param rotation Rotation initiale.
      * @param color Couleur du minion.
      */
-    Minion(int id, TileMap* map = nullptr , unsigned int health = 100, float speed = 50.0f, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
+    Minion(int id, TileMap* map = nullptr, Castle* castle = nullptr, unsigned int health = 100, float speed = 50.0f, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
-     * @brief DÈplace le minion en fonction de sa vitesse et du temps ÈcoulÈ.
-     * @param dt Temps ÈcoulÈ depuis la derniËre frame (en secondes).
+     * @brief D√©place le minion en fonction de sa vitesse et du temps √©coul√©.
+     * @param dt Temps √©coul√© depuis la derni√®re frame (en secondes).
      */
-    void move(); 
+    void move();
 
     /**
      * @brief Logique de mouvement interne pour suivre le chemin.
-     * @param dt Temps ÈcoulÈ (delta time).
+     * @param dt Temps √©coul√© (delta time).
      */
     void followPath(float dt);
 
     /**
      * @brief Assigne un nouveau chemin au minion.
-     * @param gridPath Le chemin en coordonnÈes de GRILLE (venant de Pathfinding).
+     * @param gridPath Le chemin en coordonn√©es de GRILLE (venant de Pathfinding).
      * @param tileSize La taille (largeur/hauteur) d'une tuile en pixels.
      */
     void setPath(const std::vector<Position>& gridPath, float tileSize);
 
     /**
-     * @brief Inflige des dÈg‚ts au minion.
-     * @param amount Montant des dÈg‚ts infligÈs.
-     * @param sourceId ID de l'entitÈ source des dÈg‚ts (ex: ID de la tour).
+     * @brief Inflige des d√©g√¢ts au minion.
+     * @param amount Montant des d√©g√¢ts inflig√©s.
+     * @param sourceId ID de l'entit√© source des d√©g√¢ts (ex: ID de la tour).
      */
     void takeDamage(int amount);
 
@@ -62,7 +65,7 @@ public:
 
     /**
      * @brief Retourne la progression du minion le long de son chemin.
-     * @return Valeur entre 0.0 et 1.0 reprÈsentant la progression.
+     * @return Valeur entre 0.0 et 1.0 repr√©sentant la progression.
      */
     size_t getPathProgress(void) const { return currentTargetIndex; }
 
@@ -73,44 +76,44 @@ public:
     int getHealth(void) const { return health; }
 
     /**
-     * @brief Retourne la rÈcompense accordÈe ‡ la mort du minion.
-     * @return RÈcompense en points ou monnaie.
+     * @brief Retourne la r√©compense accord√©e √† la mort du minion.
+     * @return R√©compense en points ou monnaie.
      */
     int getRewardOnDeath(void) const { return rewardOnDeath; }
 
-     /**
-      * @brief AppelÈ quand le minion est dÈtruit (mort ou arrivÈe ‡ destination).
-      */
+    /**
+     * @brief Appel√© quand le minion est d√©truit (mort ou arriv√©e √† destination).
+     */
     void onDestroy(void) override;
 
     /**
-     * @brief Met ‡ jour le minion (dÈplacement, suivi de chemin, etc.).
-     * @param dt Temps ÈcoulÈ depuis la derniËre frame (en secondes).
+     * @brief Met √† jour le minion (d√©placement, suivi de chemin, etc.).
+     * @param dt Temps √©coul√© depuis la derni√®re frame (en secondes).
      */
     void update(float dt) override;
 
     /**
-	* @brief DÈfinit la vitesse de dÈplacement du minion.
-	* @param newSpeed Nouvelle vitesse en pixels par seconde.
+    * @brief D√©finit la vitesse de d√©placement du minion.
+    * @param newSpeed Nouvelle vitesse en pixels par seconde.
     */
-	void setSpeed(float newSpeed) { speed = newSpeed; }
+    void setSpeed(float newSpeed) { speed = newSpeed; }
 
-	/**
-	* @brief RÈcupËre la vitesse actuelle du minion.
+    /**
+    * @brief R√©cup√®re la vitesse actuelle du minion.
     * @return Vitesse en pixels par seconde.
-	*/
-	float getSpeed() const { return speed; }
+    */
+    float getSpeed() const { return speed; }
 };
 
 
 /**
 * @Class MinionNormal
-* @brief ReprÈsente un minion de type normal.
+* @brief Repr√©sente un minion de type normal.
 */
 class MinionNormal : public Minion {
-    public:
-    MinionNormal(int id, TileMap* map = nullptr)
-        : Minion(id, map, 100, 50.0f, 10) // health=100, speed=50, reward=10
+public:
+    MinionNormal(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 100, 50.0f, 10) // health=100, speed=50, reward=10
     {
         Entity::init(15, sf::Color::Green, sf::Color::Black, 2);
     }
@@ -118,12 +121,12 @@ class MinionNormal : public Minion {
 
 /**
 * @Class MinionFast
-* @brief ReprÈsente un minion de type rapide.
+* @brief Repr√©sente un minion de type rapide.
 */
 class MinionFast : public Minion {
-    public:
-    MinionFast(int id, TileMap* map = nullptr)
-        : Minion(id, map, 75, 100.0f, 15) // health=75, speed=100, reward=15
+public:
+    MinionFast(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 75, 100.0f, 15) // health=75, speed=100, reward=15
     {
         Entity::init(15, sf::Color::Blue, sf::Color::Black, 2);
     }
@@ -131,12 +134,12 @@ class MinionFast : public Minion {
 
 /**
 * @Class MinionTank
-* @brief ReprÈsente un minion de type tank.
+* @brief Repr√©sente un minion de type tank.
 */
 class MinionTank : public Minion {
-    public:
-    MinionTank(int id, TileMap* map = nullptr)
-        : Minion(id, map, 200, 30.0f, 25) // health=200, speed=30, reward=25
+public:
+    MinionTank(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 200, 30.0f, 25) // health=200, speed=30, reward=25
     {
         Entity::init(20, sf::Color::Red, sf::Color::Black, 2);
     }
@@ -144,12 +147,12 @@ class MinionTank : public Minion {
 
 /**
 * @Class MinionBoss
-* @brief ReprÈsente un minion de type boss.
+* @brief Repr√©sente un minion de type boss.
 */
 class MinionBoss : public Minion {
-    public:
-    MinionBoss(int id, TileMap* map = nullptr)
-        : Minion(id, map, 500, 20.0f, 100) // health=500, speed=20, reward=100
+public:
+    MinionBoss(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 500, 20.0f, 100) // health=500, speed=20, reward=100
     {
         Entity::init(25, sf::Color::Magenta, sf::Color::Black, 2);
     }

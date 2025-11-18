@@ -1,32 +1,66 @@
+// projectile.cpp
 #include "projectile.h"
 #include <iostream>
+#include <cmath> 
 
-Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, unsigned int targetEntityId, sf::Vector2f velocity, unsigned int damage, float lifetime, sf::Vector2f pos, float rotation, sf::Color color)
-	:Entity(id), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId), targetEntityId(targetEntityId)
+Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, std::shared_ptr<Minion> target, sf::Vector2f velocity, unsigned int damage, float lifetime, sf::Vector2f pos, float rotation, sf::Color color)
+    :Entity(id), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId),
+    target(target)
 {
-    Entity::init();
+    Entity::init(5, sf::Color::Yellow);
+    Entity::setPosition(pos);
 }
 
 void Projectile::update(float dt) {
-	_position += velocity * dt;
-    _shape.setPosition(_position);
+    if (!_isAlive) return;
 
-    // Décrémente la durée de vie
-    lifetime -= 0;
-
+    lifetime -= dt;
     if (lifetime <= 0.0f) {
+        onDestroy();
+        return;
+    }
+
+    if (auto targetPtr = target.lock())
+    {
+        sf::Vector2f targetPos = targetPtr->getPosition();
+        sf::Vector2f direction = targetPos - _position;
+        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        float moveSpeed = velocity.x;
+        float moveAmount = moveSpeed * dt;
+
+        if (distance < moveAmount)
+        {
+            _position = targetPos;
+        }
+        else
+        {
+            direction /= distance;
+            _position += direction * moveAmount;
+            if (_shape) _shape->setPosition(_position);
+        }
+    }
+    else
+    {
         onDestroy();
     }
 }
 
 void Projectile::onHit()
 {
-    onDestroy();
+    if (_isAlive)
+    {
+        if (auto targetPtr = target.lock())
+        {
+            targetPtr->takeDamage(damage);
+        }
+        onDestroy();
+    }
 }
 
 void Projectile::onDestroy() {
-    // Logique de destruction du projectile
-    std::cout << "Projectile " << Entity::getId() << " détruit (fin de vie ou collision)." << std::endl;
-    // Marquer le projectile comme inactif ou le supprimer de la liste des projectiles actifs
-    // (cette partie est g?n?ralement g?r?e par le ProjectileSystem)
+    if (_isAlive)
+    {
+        Entity::setIsAlive(false);
+    }
 }

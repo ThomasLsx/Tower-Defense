@@ -3,9 +3,9 @@
 
 TileMap::TileMap(sf::RenderWindow& window) : window(window)
 {
-    width = 40; 
-    height = 22; 
-    scale = 1.5f;
+    width = 40;
+    height = 22;
+    scale = 1.5;
     tileSize = sf::Vector2u(32, 32);
     m_level = std::vector<int>(width * height, 0);
     m_TileIndex = 0;
@@ -118,7 +118,7 @@ void TileMap::updateTile(int x, int y, const int index, sf::Vector2u tileSize)
         triangles[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
         triangles[4].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
         triangles[5].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
-        
+
         mapChanged = true;
     }
 }
@@ -133,6 +133,13 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
     // draw the vertex array
     target.draw(m_vertices, states);
+}
+
+sf::Vector2f TileMap::Tile2Position(const sf::Vector2u& tile) const
+{
+	float x = tile.x * tileSize.x * scale + tileSize.x * scale / 2.f;
+	float y = tile.y * tileSize.y * scale + tileSize.y * scale / 2.f;
+    return sf::Vector2f(x, y);
 }
 
 const std::vector<std::vector<int>> TileMap::getLevel2D() const
@@ -154,15 +161,31 @@ const std::vector<std::vector<int>> TileMap::getLevel2D() const
 
 const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
 {
-	// donne la valeur de la tuile à la position (x, y)
-	unsigned int x = static_cast<unsigned int>(position.x / (tileSize.x * scale));
-	unsigned int y = static_cast<unsigned int>(position.y / (tileSize.y * scale));
+    // donne la valeur de la tuile à la position (x, y)
+    unsigned int x = static_cast<unsigned int>(position.x / (tileSize.x * scale));
+    unsigned int y = static_cast<unsigned int>(position.y / (tileSize.y * scale));
     if (x < width && y < height)
     {
         return sf::Vector2u(x, y);
-	}
-	std::cout << "getCurentTile: Coordinates (" << x << ", " << y << ") sont hors limites.\n";
-	return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnées sont hors limites
+    }
+    std::cout << "getCurentTile: Coordinates (" << x << ", " << y << ") sont hors limites.\n";
+    return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnées sont hors limites
+}
+
+/**
+* @brief Trouve la première case d'une valeur donnée sur le bord de la grille
+* @param value La valeur à chercher
+* @return sf::Vector2u (x, y) de la case trouvée, ou (0,0) si non trouvée
+*/
+sf::Vector2u TileMap::findEdgeTile(int value) const {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            if (m_level[x + y * width] == value)
+                return sf::Vector2u(x, y);
+        }
+    }
+    // Si rien trouvé, retourne (0,0)
+    return sf::Vector2u(0, 0);
 }
 
 void TileMap::printTiles() const
@@ -286,18 +309,3 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
     }
 }
 
-/**
-* @brief Trouve la première case d'une valeur donnée sur le bord de la grille
-* @param value La valeur à chercher 
-* @return sf::Vector2u (x, y) de la case trouvée, ou (0,0) si non trouvée
-*/
-sf::Vector2u TileMap::findEdgeTile(int value) const {
-    for (unsigned int y = 0; y < height; ++y) {
-        for (unsigned int x = 0; x < width; ++x) {
-            if (m_level[x + y * width] == value)
-                return sf::Vector2u(x, y);
-        }
-    }
-    // Si rien trouvé, retourne (0,0)
-    return sf::Vector2u(0, 0);
-}

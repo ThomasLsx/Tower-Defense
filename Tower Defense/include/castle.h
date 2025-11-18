@@ -1,20 +1,36 @@
 #pragma once
-#include "entity.h"
+#include <SFML/Graphics.hpp>
+#include "map.h"
 
-class Castle : public Entity {
+class TileMap;
+
+class Castle {
 private:
     unsigned int health;
-    unsigned int maxHealth;
+	unsigned int maxHealth;
+	TileMap* map;
+
+	sf::RectangleShape healthBar;
+	sf::RectangleShape healthBarBack;
+	sf::Vector2u castleTile;
+
+	bool destroyed;
 
 public:
-    Castle(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White, unsigned int maxHealth=100);
+    Castle(TileMap* map = nullptr, unsigned int maxHealth = 100);
+	~Castle() = default;
     
     void takeDamage(unsigned int amount);
-    void repair(unsigned int amount);
-    void update(float dt) override;
-     
-	unsigned int getHealth() const { return health; }
-    unsigned int getMaxHealth() const { return maxHealth; }
+    void draw(sf::RenderWindow& window) ;
+    
+	inline bool isDefeated() const { return destroyed; }
 
-    void onDestroy() override;
+	inline unsigned int getHealth() const { return health; }
+	inline unsigned int getMaxHealth() const { return maxHealth; }
+
+    void destroy() ;
+
+private:
+    void setCastleTile();
+
 };
