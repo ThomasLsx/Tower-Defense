@@ -7,7 +7,8 @@
  */
 Game::Game()
     : m_eGameMode(Menu),
-      m_bRequestStartWave(false)
+      m_bRequestStartWave(false),
+      m_bAutoStartWaves(false)
 {
     window = std::make_unique<Window>();
     window->create();
@@ -76,6 +77,7 @@ void Game::run()
             break;
         case Play: 
             ui->showPlayUI();
+            ui->updatePlayUI();
 
             if (m_bRequestStartWave)
             {
@@ -90,6 +92,13 @@ void Game::run()
             
             waveManager->update(sec);
             m_projectileSystem->update(sec);
+
+            // Auto start wave logic
+            if (m_bAutoStartWaves)
+            {
+
+                waveManager->startOrNextWave();
+            }
 
             if (waveManager->getCurrentWave())
             {

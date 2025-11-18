@@ -30,6 +30,7 @@ public:
 
     // UI Play Modes
     void initPlayUI();
+    void updatePlayUI();
     void showPlayUI();
 
     // UI Editor Modes
@@ -38,12 +39,20 @@ public:
 
 private:
     tgui::Group::Ptr menuUI;
-	tgui::Group::Ptr playUI;
-	tgui::Group::Ptr editorUI;
+    tgui::Group::Ptr playUI;
+    tgui::Group::Ptr editorUI;
 
-	bool isPaused = false;
+    bool isPaused = false;
+
+	float prevWindowWidth;
+	float prevWindowHeight;
 
     Window* window; // Pointeur vers l'instance de Window
     Game* game; // Pointeur vers l'instance de Game
 
+    // Centre horizontalement un widget à la position verticale y
+    void centerWidget(tgui::Widget::Ptr widget, float y);
+    // Place une liste de boutons verticalement à partir du coin gauche (x = margin)
+    enum class ButtonAlign { Left, Center, Right };
+    void placeButtonsStacked(const std::vector<tgui::Button::Ptr>& buttons, float startY, float margin, float spacing, ButtonAlign align);
 };

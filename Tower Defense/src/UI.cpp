@@ -9,6 +9,9 @@ UI::UI(Window* window, Game* game) : window(window), game(game)
 	initMenuUI();
 	initPlayUI();
 	initEditorUI();
+
+	prevWindowWidth = window->getWidth();
+	prevWindowHeight = window->getHeight();
 }
 
 void UI::handleEvent(const sf::Event& event)
@@ -25,43 +28,63 @@ void UI::handleEvent(const sf::Event& event)
 
 void UI::updateUILayout()
 {
+	int winW = window->getWidth();
+	int winH = window->getHeight();
+    float scaleX = winW / prevWindowWidth;
+    float scaleY = winH / prevWindowHeight;
+
     // Menu UI
     if (menuUI) {
         auto picture = menuUI->get<tgui::Picture>("MenuBackground");
         if (picture)
-            picture->setSize(window->getWidth(), window->getHeight());
+            picture->setSize(winW, winH);
         auto boutonPlay = menuUI->get<tgui::Button>("PlayButton");
-        if (boutonPlay) {
-            tgui::Vector2f size = boutonPlay->getSize();
-            boutonPlay->setPosition(window->getWidth() / 2 - size.x / 2, window->getHeight() / 2 - size.y);
-        }
         auto boutonEditor = menuUI->get<tgui::Button>("EditorButton");
-        if (boutonEditor) {
-            tgui::Vector2f size = boutonEditor->getSize();
-            boutonEditor->setPosition(window->getWidth() / 2 - size.x / 2, window->getHeight() / 2 + size.y);
+        if (boutonPlay && boutonEditor) {
+            boutonPlay->setSize(boutonPlay->getSize().x * scaleX, boutonPlay->getSize().y * scaleY);
+            boutonPlay->setTextSize(boutonPlay->getTextSize() * scaleX);
+            boutonEditor->setSize(boutonEditor->getSize().x * scaleX, boutonEditor->getSize().y * scaleY);
+            boutonEditor->setTextSize(boutonEditor->getTextSize() * scaleX);
+            float spacing = boutonPlay->getSize().y * scaleY * 0.6f;
+            float startY = winH / 2 - (boutonPlay->getSize().y * scaleY * 2 + spacing) / 2;
+            centerWidget(boutonPlay, startY);
+            centerWidget(boutonEditor, startY + boutonPlay->getSize().y * scaleY + spacing);
         }
     }
     // Play UI
     if (playUI) {
         auto waveLabel = playUI->get<tgui::Label>("WaveLabel");
         if (waveLabel) {
-            tgui::Vector2f size = waveLabel->getSize();
-            waveLabel->setPosition(window->getWidth() / 2 - size.x, size.y);
+            waveLabel->setTextSize(waveLabel->getTextSize()* scaleX);
         }
+        auto startWaveButton = playUI->get<tgui::Button>("StartWaveButton");
         auto pauseButton = playUI->get<tgui::Button>("PauseButton");
-        if (pauseButton) {
-            tgui::Vector2f size = pauseButton->getSize();
-            pauseButton->setPosition(window->getWidth() - size.x - 10, 10);
+        auto autoStartButton = playUI->get<tgui::Button>("AutoStartButton");
+        auto quitButton = playUI->get<tgui::Button>("QuitButton");
+        std::vector<tgui::Button::Ptr> buttons = {startWaveButton, pauseButton, autoStartButton, quitButton};
+        for (auto& btn : buttons) {
+            if (btn) {
+                btn->setSize(btn->getSize().x * scaleX, btn->getSize().y * scaleY);
+                btn->setTextSize(btn->getTextSize() * scaleX);
+            }
         }
+        float buttonMargin = 10.f;
+        float spacing = startWaveButton->getSize().y * scaleY * 0.3f;
+        float startY = 20.f;
+        centerWidget(waveLabel, startY);
+        placeButtonsStacked(buttons, startY /*+ (waveLabel ? waveLabel->getSize().y : 0) + spacing*/, buttonMargin, spacing, ButtonAlign::Left);
     }
     // Editor UI
     if (editorUI) {
         auto editorLabel = editorUI->get<tgui::Label>("EditorLabel");
         if (editorLabel) {
-            tgui::Vector2f size = editorLabel->getSize();
-            editorLabel->setPosition(window->getWidth() / 2 - size.x, size.y);
+            editorLabel->setTextSize(editorLabel->getTextSize() * scaleX + 6);
+            centerWidget(editorLabel, editorLabel->getSize().y);
         }
     }
+    
+    prevWindowWidth = window->getWidth();
+    prevWindowHeight = window->getHeight();
 }
 
 void UI::draw()
@@ -119,47 +142,72 @@ void UI::initPlayUI()
 	// Label Wave Info
     auto waveLabel = tgui::Label::create("Wave: 0");
     waveLabel->setWidgetName("WaveLabel");
-    tgui::Vector2f waveLabelSize = waveLabel->getSize();
-	waveLabel->setPosition(window->getWidth() / 2 - waveLabelSize.x, waveLabelSize.y);
-	waveLabel->setTextSize(30);
-	waveLabel->getRenderer()->setTextColor(tgui::Color::White);
-	waveLabel->getRenderer()->setTextStyle(tgui::TextStyle::Bold);
-	playUI->add(waveLabel);
+    waveLabel->setTextSize(30);
+    waveLabel->getRenderer()->setTextColor(tgui::Color::White);
+    waveLabel->getRenderer()->setTextStyle(tgui::TextStyle::Bold);
+    centerWidget(waveLabel, 20.f);
+    playUI->add(waveLabel);
 
-	// Bouton Start Wave
-	auto startWaveButton = tgui::Button::create("Start Wave");
-	startWaveButton->setSize(150, 40);
-	startWaveButton->setWidgetName("StartWaveButton");
-	tgui::Vector2f startWaveButtonSize = startWaveButton->getSize();
-	startWaveButton->setPosition(10, 10);
-	startWaveButton->onPress([this, waveLabel]() {
-		std::cout << "Start Wave button pressed!" << std::endl;
-		game->m_bRequestStartWave = true;
-		waveLabel->setText("Wave: " + std::to_string(game->getCurrentWaveId()));
-		});
-	playUI->add(startWaveButton);
+    float buttonMargin = 10.f;
+    float spacing = 10.f;
+    float startY = 20.f;
 
-	// Bouton Pause
-	auto pauseButton = tgui::Button::create("Pause");
-	pauseButton->setSize(100, 40);
-	pauseButton->setWidgetName("PauseButton");
-	tgui::Vector2f pauseButtonSize = pauseButton->getSize();
-	pauseButton->setPosition(window->getWidth() - pauseButtonSize.x - 10, 10);
-	pauseButton->onPress([this, pauseButton]() {
-		if (isPaused) {
-			isPaused = false;
-			game->setGameMode(Game::GameMode::Play);
-			pauseButton->setText("Pause");
+    // Bouton Start Wave
+    auto startWaveButton = tgui::Button::create("Start Wave");
+    startWaveButton->setSize(150, 40);
+    startWaveButton->setWidgetName("StartWaveButton");
+    startWaveButton->onPress([this]() {
+        std::cout << "Start Wave button pressed!" << std::endl;
+        game->m_bRequestStartWave = true;
+    });
+    playUI->add(startWaveButton);
+
+	// Bouton Pause/Resume
+    auto pauseButton = tgui::Button::create("Pause");
+    pauseButton->setSize(100, 40);
+    pauseButton->setWidgetName("PauseButton");
+    pauseButton->onPress([this, pauseButton]() {
+        if (isPaused) {
+            isPaused = false;
+            game->setGameMode(Game::GameMode::Play);
+            pauseButton->setText("Pause");
+        }
+        else {
+            isPaused = true;
+            game->setGameMode(Game::GameMode::Pause);
+            pauseButton->setText("Resume");
+        }
+    });
+    playUI->add(pauseButton);
+
+	// Bouton Auto Start Wave
+	auto autoStartButton = tgui::Button::create("Auto Start Wave");
+	autoStartButton->setSize(150, 40);
+	autoStartButton->setWidgetName("AutoStartButton");
+	autoStartButton->onPress([this, autoStartButton]() {
+		game->m_bAutoStartWaves = !game->m_bAutoStartWaves;
+		if (game->m_bAutoStartWaves) {
+			autoStartButton->setText("Auto Start: ON");
 		}
 		else {
-			isPaused = true;
-			game->setGameMode(Game::GameMode::Pause);
-			pauseButton->setText("Resume");
+			autoStartButton->setText("Auto Start: OFF");
 		}
 		});
-	playUI->add(pauseButton);
+	playUI->add(autoStartButton);
 
-	gui.add(playUI);
+    // Bouton Quitter vers le Menu
+    auto quitButton = tgui::Button::create("Quit to Menu");
+    quitButton->setSize(150, 40);
+    quitButton->setWidgetName("QuitButton");
+    quitButton->onPress([this]() {
+        game->setGameMode(Game::GameMode::Menu);
+    });
+    playUI->add(quitButton);
+
+    // Placement des boutons à gauche, empilés
+    placeButtonsStacked({startWaveButton, pauseButton, autoStartButton, quitButton}, startY, buttonMargin, spacing, ButtonAlign::Left);
+
+    gui.add(playUI);
 }
 
 void UI::showPlayUI()
@@ -190,6 +238,39 @@ void UI::showEditorUI()
     menuUI->setVisible(false);
 	playUI->setVisible(false);
 	editorUI->setVisible(true);
+}
+
+void UI::centerWidget(tgui::Widget::Ptr widget, float y) {
+    if (widget) {
+        tgui::Vector2f size = widget->getSize();
+        widget->setPosition(window->getWidth() / 2 - size.x / 2, y);
+    }
+}
+
+void UI::placeButtonsStacked(const std::vector<tgui::Button::Ptr>& buttons, float startY, float margin, float spacing, ButtonAlign align) {
+    float y = startY;
+    for (const auto& button : buttons) {
+        if (button) {
+            tgui::Vector2f size = button->getSize();
+            float x = margin;
+            if (align == ButtonAlign::Center) {
+                x = window->getWidth() / 2 - size.x / 2;
+            } else if (align == ButtonAlign::Right) {
+                x = window->getWidth() - size.x - margin;
+            }
+            button->setPosition(x, y);
+            y += size.y + spacing;
+        }
+    }
+}
+
+void UI::updatePlayUI() {
+    if (playUI) {
+        auto waveLabel = playUI->get<tgui::Label>("WaveLabel");
+        if (waveLabel) {
+            waveLabel->setText("Wave: " + std::to_string(game->getCurrentWaveId()));
+        }
+    }
 }
 
 

@@ -5,7 +5,7 @@
 #include <cmath> 
 
 Minion::Minion(int id, TileMap* map, Castle* castle, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-    : Entity(id), map(map), castle(castle), health(health), rewardOnDeath(reward), speed(speed), currentTargetIndex(0)
+	: Entity(id), map(map), castle(castle), health(health), rewardOnDeath(reward), speed(speed), currentTargetIndex(0), maxHealth(health)
 {
 }
 
@@ -53,6 +53,32 @@ void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
 void Minion::update(float dt) {
     if (health > 0) {
         followPath(dt);
+    }
+}
+
+void Minion::draw(sf::RenderWindow& window)
+{
+    if (getIsAlive())
+    { 
+    // Dessiner l'arrière-plan de la barre de vie
+    healthBarBack = sf::RectangleShape(sf::Vector2f(35.f, 10.f));
+    healthBarBack.setFillColor(sf::Color::Transparent);
+    healthBarBack.setOutlineColor(sf::Color::Black);
+    healthBarBack.setOutlineThickness(2.f);
+    healthBarBack.setOrigin(sf::Vector2f(17.5f, 15.f + map->getHeight()));
+    healthBarBack.setPosition(this->getPosition());
+    window.draw(healthBarBack);
+
+    // Dessiner la barre de vie
+    healthBar = sf::RectangleShape(sf::Vector2f(35.f, 10.f));
+    healthBar.setFillColor(sf::Color::Red);
+    healthBar.setOrigin(sf::Vector2f(17.5f, 15.f + map->getHeight()));
+    healthBar.setPosition(this->getPosition());
+    float healthPercent = static_cast<float>(health) / static_cast<float>(maxHealth);
+    healthBar.setSize(sf::Vector2f(35.f * healthPercent, 10.f));
+    window.draw(healthBar);
+    
+    window.draw(*_shape);
     }
 }
 
