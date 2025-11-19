@@ -58,8 +58,8 @@
     <ClInclude Include="include\quadtree.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\Pictures\Screenshots\TileMap.png" />
     <Image Include="assets\menu_background.png" />
-    <Image Include="assets\TileMap.png" />
     <Image Include="assets\Tiles.png" />
   </ItemGroup>
   <ItemGroup>

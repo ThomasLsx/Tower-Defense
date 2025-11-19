@@ -28,8 +28,8 @@ Game::Game()
     m_projectileSystem = std::make_unique<ProjectileSystem>();
 
     // initialize towers
-    m_towers.push_back(std::make_unique<BasicTower>(1, sf::Vector2f(300.f, 300.f)));
-    m_towers.push_back(std::make_unique<SpeedTower>(2, sf::Vector2f(500.f, 400.f)));
+    towerManager.addTower(sf::Vector2f(300.f, 300.f), 0); // 0 correspond à BasicTower (enum)
+    towerManager.addTower(sf::Vector2f(500.f, 400.f), 2); // 2 correspond à SpeedTower
 
     ui = std::make_unique<UI>(window.get(), this);
 }
@@ -94,10 +94,7 @@ void Game::run()
             if (waveManager->getCurrentWave())
             {
                 const auto& minions = waveManager->getCurrentWave()->getMinions();
-                for (auto& tower : m_towers)
-                {
-                    tower->update(sec, minions, *m_projectileSystem);
-                }
+                towerManager.updateTowers(minions, sec, *m_projectileSystem);
             }
             break;
         case Editor:
@@ -119,14 +116,12 @@ void Game::Render()
     if (m_eGameMode == Play or m_eGameMode == Pause)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
-        waveManager->draw(window->getRenderWindow());
 
-        for (auto& tower : m_towers)
-        {
-            tower->draw(window->getRenderWindow());
-        }
+        towerManager.drawTowers(window->getRenderWindow()); 
 
         m_projectileSystem->draw(window->getRenderWindow());
+
+        waveManager->draw(window->getRenderWindow());
     }
 
     if (m_eGameMode == Editor)

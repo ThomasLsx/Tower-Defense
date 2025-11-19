@@ -9,13 +9,13 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 {
     width = 40;
     height = 22;
-    scale = 1.5;
-    tileSize = sf::Vector2u(32, 32);
-    m_level = std::vector<int>(width * height, 0);
+    tileSize = { 16, 16};
+    scale = 2.0;
+    m_level = std::vector<int>(width * height, 1);
 
     // Pour l'édition de tiles
     m_TileIndex = 0;
-    m_TileOptions = 8;
+    m_TileOptions = 4;
 
     
     m_TowerIndex = 0;   // Type de tour sélectionné (0 = Basic, 1 = Sniper, etc.)
@@ -24,49 +24,56 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 
 bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
 {
-    // load the tileset texture
     if (!m_tileset.loadFromFile(tileset.string()))
         return false;
 
-    // resize the vertex array to fit the level size
     m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
     m_vertices.resize(width * height * 6);
 
-    // populate the vertex array, with two triangles per tile
+    const int tilesPerRow = m_tileset.getSize().x / tileSize.x;
+
     for (unsigned int i = 0; i < width; ++i)
     {
         for (unsigned int j = 0; j < height; ++j)
         {
-            // get the current tile number
-            const int tileNumber = tiles[i + j * width];
+            int index = tiles[i + j * width];
 
-            // find its position in the tileset texture
-            const int tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
-            const int tv = tileNumber / (m_tileset.getSize().x / tileSize.x);
+            // Clamp pour éviter toute tuile inexistante
+            if (index < 0 || index >= m_TileOptions)
+                index = 1; // Herbe
 
-            // get a pointer to the triangles' vertices of the current tile
-            sf::Vertex* triangles = &m_vertices[(i + j * width) * 6];
+            // Calcul UV
+            int tu = index % tilesPerRow;
+            int tv = index / tilesPerRow;
 
-            // define the 6 corners of the two triangles
-            triangles[0].position = sf::Vector2f(i * tileSize.x * scale, j * tileSize.y * scale);
-            triangles[1].position = sf::Vector2f((i + 1) * tileSize.x * scale, j * tileSize.y * scale);
-            triangles[2].position = sf::Vector2f(i * tileSize.x * scale, (j + 1) * tileSize.y * scale);
-            triangles[3].position = sf::Vector2f(i * tileSize.x * scale, (j + 1) * tileSize.y * scale);
-            triangles[4].position = sf::Vector2f((i + 1) * tileSize.x * scale, j * tileSize.y * scale);
-            triangles[5].position = sf::Vector2f((i + 1) * tileSize.x * scale, (j + 1) * tileSize.y * scale);
+            sf::Vertex* tri = &m_vertices[(i + j * width) * 6];
 
-            // define the 6 matching texture coordinates
-            triangles[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
-            triangles[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
-            triangles[2].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
-            triangles[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
-            triangles[4].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
-            triangles[5].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
+            // Positions
+            float px = i * tileSize.x * scale;
+            float py = j * tileSize.y * scale;
+
+            tri[0].position = { px, py };
+            tri[1].position = { px + tileSize.x * scale, py };
+            tri[2].position = { px, py + tileSize.y * scale };
+            tri[3].position = tri[2].position;
+            tri[4].position = tri[1].position;
+            tri[5].position = { px + tileSize.x * scale, py + tileSize.y * scale };
+
+            // UV
+            float u = tu * tileSize.x;
+            float v = tv * tileSize.y;
+
+            tri[0].texCoords = { u, v };
+            tri[1].texCoords = { u + tileSize.x, v };
+            tri[2].texCoords = { u, v + tileSize.y };
+            tri[3].texCoords = tri[2].texCoords;
+            tri[4].texCoords = tri[1].texCoords;
+            tri[5].texCoords = { u + tileSize.x, v + tileSize.y };
         }
     }
-
     return true;
 }
+
 
 bool TileMap::loadLevel(const std::filesystem::path& levelFilePath)
 {
@@ -87,7 +94,8 @@ bool TileMap::loadLevel(const std::filesystem::path& levelFilePath)
     }
     setLevel(level);
 
-    loadTile(m_tileset.getNativeHandle() ? "" : "assets/TileMap.png", m_level.data());
+    loadTile("assets/TileMap.png", m_level.data());
+
 
     return true;
 }
@@ -113,6 +121,9 @@ bool TileMap::saveLevel(const std::filesystem::path& levelFilePath)
 
 void TileMap::updateTileEditor(int x, int y, const int index, sf::Vector2u tileSize)
 {
+    if (index < 0 || index >= m_TileOptions)
+		std::cerr << "updateTileEditor: Invalid tile index " << index << " at (" << x << ", " << y << ")\n";
+
     if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height)) {
         m_level[x + y * width] = index;
 
@@ -294,7 +305,7 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        updateTileEditor(i, j, 0, getTileSize()); // Supposer que 0 est la tuile vide (herbe)
+        updateTileEditor(i, j, 1, getTileSize());
     }
 }
 
@@ -306,11 +317,8 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
 sf::Vector2u TileMap::findEdgeTile(int value) const {
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
-            // Vérifie seulement les bords
-            if (y == 0 || y == height - 1 || x == 0 || x == width - 1) {
-                if (m_level[x + y * width] == value)
-                    return sf::Vector2u(x, y);
-            }
+            if (m_level[x + y * width] == value)
+                return sf::Vector2u(x, y);
         }
     }
     // Si rien trouvé, retourne (0,0)
@@ -375,7 +383,7 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     const int tileType = m_level[i + j * width];
 
     // 4.1 VÉRIFIER LES RÈGLES : Ne pas placer sur 4 (Château) ou 7 (Portail/Spawner)
-    if (tileType == 4 || tileType == 7)
+    if (tileType != 1)
     {
         std::cout << "Placement de tour interdit sur ce type de tuile (" << tileType << ")\n";
         return;

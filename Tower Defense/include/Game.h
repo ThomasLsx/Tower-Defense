@@ -57,6 +57,4 @@ private:
     std::unique_ptr<TileMap> map;
     std::unique_ptr<WaveManager> waveManager;
     std::unique_ptr<ProjectileSystem> m_projectileSystem;
-
-    std::vector<std::unique_ptr<Tower>> m_towers;
 };
