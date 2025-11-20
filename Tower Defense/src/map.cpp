@@ -152,6 +152,13 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(m_vertices, states);
 }
 
+sf::Vector2f TileMap::Tile2Position(const sf::Vector2u& tile) const
+{
+    float x = tile.x * tileSize.x * scale + tileSize.x * scale / 2.f;
+    float y = tile.y * tileSize.y * scale + tileSize.y * scale / 2.f;
+    return sf::Vector2f(x, y);
+}
+
 const std::vector<std::vector<int>> TileMap::getLevel2D() const
 {
     std::vector<std::vector<int>>  m_level2D;

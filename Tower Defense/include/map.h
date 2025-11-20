@@ -30,10 +30,11 @@ public:
     bool hasMapChanged() const { return mapChanged; }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    sf::Vector2f Tile2Position(const sf::Vector2u& tile) const;
 
     // Getters
-    unsigned int getWidth() const { return width; }
-    unsigned int getHeight() const { return height; }
+    inline unsigned int getWidth() const { return width; }
+    inline unsigned int getHeight() const { return height; }
     float getScale() const { return scale; }
     sf::Vector2u getTileSize() const { return tileSize; }
     const std::vector<int>& getLevel() const { return m_level; }
@@ -41,6 +42,8 @@ public:
 	const std::vector<int>& getTowerLevel() const { return m_towerLevel; }
 	const std::vector<std::vector<int>> getTowerLevel2D() const;
     const sf::Vector2u getCurentTile(sf::Vector2f position) const;
+    inline const sf::Vector2u getCastleTile() const { return findEdgeTile(3); }
+    inline const sf::Vector2u getSpawnTile() const { return findEdgeTile(0); }
 
     // Setters
     void setLevel(const std::vector<int>& newLevel) { m_level = newLevel; }

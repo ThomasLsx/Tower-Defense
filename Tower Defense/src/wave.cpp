@@ -10,9 +10,9 @@
  *
  * Initialise la configuration de spawn de la vague.
  */
-Wave::Wave(int id, int nb_enemies, TileMap* map)
+Wave::Wave(int id, int nb_enemies, TileMap* map, Castle* castle)
     : id(id), nb_enemies(nb_enemies), started(false), finished(false),
-      spawnTimer(0.0f), spawnDelay(1.0f), minionsSpawned(0), map(map), minionGroupIndex(0), minionInGroupSpawned(0)
+      spawnTimer(0.0f), spawnDelay(1.0f), minionsSpawned(0), map(map), castle(castle), minionGroupIndex(0), minionInGroupSpawned(0)
 {
 }
 
@@ -146,8 +146,8 @@ void Wave::addEnemies(int count)
 /**
  * WaveManager
  */
-WaveManager::WaveManager(std::string waveFile, TileMap* map)
-    : currentWaveIndex(0), waveFile(waveFile), map(map)
+WaveManager::WaveManager(std::string waveFile, TileMap* map, Castle* castle)
+	: currentWaveIndex(0), waveFile(waveFile), map(map), castle(castle)
 {
     loadWavesFromFile(waveFile, map);
 }
@@ -168,7 +168,7 @@ void WaveManager::loadWavesFromFile(const std::string& filename, TileMap* map)
         std::getline(iss, type, ';');
         std::getline(iss, sep, ';'); count = std::stoi(sep);
         if (waveId != currentWaveId) {
-            waves.push_back(std::make_unique<Wave>(waveId, 0, map));
+            waves.push_back(std::make_unique<Wave>(waveId, 0, map, castle));
             currentWave = waves.back().get();
             currentWaveId = waveId;
         }

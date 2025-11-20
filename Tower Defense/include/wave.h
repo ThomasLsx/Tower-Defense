@@ -8,6 +8,7 @@
 
 class Minion;
 class TileMap;
+class Castle;
 
 /**
  * @brief Représente une vague d'ennemis.
@@ -35,12 +36,13 @@ private:
     float spawnDelay;
     size_t minionsSpawned;
     TileMap* map;
+	Castle* castle;
     std::vector<MinionGroupConfig> minionGroups;
     size_t minionGroupIndex = 0;
     size_t minionInGroupSpawned = 0;
 
 public:
-    explicit Wave(int id, int number, TileMap* map);
+    explicit Wave(int id, int number, TileMap* map, Castle* castle);
     ~Wave() = default;
 
     /** Démarre la vague et initialise le timer. */
@@ -80,9 +82,10 @@ private:
     int currentWaveIndex;
     std::string waveFile;
     TileMap* map;
+	Castle* castle;
 
 public:
-    WaveManager(std::string waveFile, TileMap* map);
+    WaveManager(std::string waveFile, TileMap* map, Castle* castle);
     ~WaveManager() = default;
 
     void loadWavesFromFile(const std::string& filename, TileMap* map);

@@ -1,13 +1,5 @@
 #include "Game.h"
 
-#include "Window.h"
-#include "UI.h"
-#include "map.h"
-#include "wave.h"
-#include "path.h"
-#include "projectileSystem.h"
-#include "tower.h"
-
 /**
  * @brief Constructeur de Game
  */
@@ -23,7 +15,9 @@ Game::Game()
     map->loadLevel("assets/map1.txt");
     map->loadTile("assets/TileMap.png", map->getLevel().data());
 
-    waveManager = std::make_unique<WaveManager>("assets/wave.txt", map.get());
+	m_castle = std::make_unique<Castle>(map.get(), 100);
+
+    waveManager = std::make_unique<WaveManager>("assets/wave.txt", map.get(), m_castle.get());
 
     m_projectileSystem = std::make_unique<ProjectileSystem>();
 
@@ -84,6 +78,11 @@ void Game::run()
                 m_bRequestStartWave = false;
             }
 
+            if (m_castle->isDefeated())
+            {
+				break;
+            }
+            
             waveManager->update(sec);
             m_projectileSystem->update(sec);
 
@@ -112,12 +111,12 @@ void Game::Render()
     if (m_eGameMode == Play or m_eGameMode == Pause)
     {
         map->draw(window->getRenderWindow(), sf::RenderStates::Default);
+		m_castle->draw(window->getRenderWindow());
+        waveManager->draw(window->getRenderWindow());
 
-        towerManager.drawTowers(window->getRenderWindow()); 
+        towerManager.drawTowers(window->getRenderWindow());
 
         m_projectileSystem->draw(window->getRenderWindow());
-
-        waveManager->draw(window->getRenderWindow());
     }
 
     if (m_eGameMode == Editor)
