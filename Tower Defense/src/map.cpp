@@ -307,10 +307,8 @@ sf::Vector2u TileMap::findEdgeTile(int value) const {
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
             // Vérifie seulement les bords
-            if (y == 0 || y == height - 1 || x == 0 || x == width - 1) {
-                if (m_level[x + y * width] == value)
-                    return sf::Vector2u(x, y);
-            }
+            if (m_level[x + y * width] == value)
+                return sf::Vector2u(x, y);
         }
     }
     // Si rien trouvé, retourne (0,0)

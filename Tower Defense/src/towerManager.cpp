@@ -31,4 +31,8 @@ void TowerManager::updateTowers(const std::vector<std::shared_ptr<Minion>>& mini
 
 void TowerManager::drawTowers(sf::RenderWindow& window) const
 {
+	for (const auto& tower : towers)
+	{
+		tower->draw(window);
+	}
 }

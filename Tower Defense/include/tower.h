@@ -54,6 +54,8 @@ public:
      */
     void onDestroy() override;
 
+	void update(float dt) override {};
+
     /**
      * @brief Met à jour la tour (ciblage et tir).
      * @param dt Temps écoulé depuis la dernière frame.
