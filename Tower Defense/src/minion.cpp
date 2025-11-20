@@ -4,8 +4,8 @@
 #include <iostream>
 #include <cmath> 
 
-Minion::Minion(int id, TileMap* map, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-    : Entity(id), map(map), health(health), rewardOnDeath(reward), speed(speed), currentTargetIndex(0)
+Minion::Minion(int id, TileMap* map, Castle* castle, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
+    : Entity(id), map(map), castle(castle), health(health), rewardOnDeath(reward), speed(speed), currentTargetIndex(0)
 {
 }
 
@@ -73,6 +73,7 @@ void Minion::followPath(float dt) {
 
         if (currentTargetIndex >= targetPath.size()) {
             std::cout << "Minion " << _id << " a atteint la base!" << std::endl;
+			castle->takeDamage(10); 
             this->onDestroy();
         }
     }

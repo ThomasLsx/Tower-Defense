@@ -44,19 +44,19 @@ void Wave::spwanMinion()
 
         // Création du minion selon le type
         if (type == "Normal") {
-            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map, castle));
         }
-        else if (type == "Fast" || type == "fast") {
-            minions.push_back(std::make_shared<MinionFast>(minionsSpawned, map));
+        else if (type == "Fast") {
+            minions.push_back(std::make_shared<MinionFast>(minionsSpawned, map, castle));
         }
         else if (type == "Tank") {
-            minions.push_back(std::make_shared<MinionTank>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionTank>(minionsSpawned, map, castle));
         }
         else if (type == "Boss") {
-            minions.push_back(std::make_shared<MinionBoss>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionBoss>(minionsSpawned, map, castle));
         }
         else {
-            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map));
+            minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map, castle));
         }
 
         float tile = map->getTileSize().x * map->getScale();
@@ -149,10 +149,10 @@ void Wave::addEnemies(int count)
 WaveManager::WaveManager(std::string waveFile, TileMap* map, Castle* castle)
 	: currentWaveIndex(0), waveFile(waveFile), map(map), castle(castle)
 {
-    loadWavesFromFile(waveFile, map);
+    loadWavesFromFile(waveFile, map, castle);
 }
 
-void WaveManager::loadWavesFromFile(const std::string& filename, TileMap* map)
+void WaveManager::loadWavesFromFile(const std::string& filename, TileMap* map, Castle* castle)
 {
     waves.clear();
     std::ifstream file(filename);

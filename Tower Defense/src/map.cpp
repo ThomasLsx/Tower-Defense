@@ -15,7 +15,7 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 
     // Pour l'édition de tiles
     m_TileIndex = 0;
-    m_TileOptions = 4;
+    m_TileOptions = 8;
 
     
     m_TowerIndex = 0;   // Type de tour sélectionné (0 = Basic, 1 = Sniper, etc.)
@@ -64,9 +64,9 @@ bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
             triangles[5].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
         }
     }
+
     return true;
 }
-
 
 bool TileMap::loadLevel(const std::filesystem::path& levelFilePath)
 {
@@ -115,9 +115,6 @@ bool TileMap::saveLevel(const std::filesystem::path& levelFilePath)
 
 void TileMap::updateTileEditor(int x, int y, const int index, sf::Vector2u tileSize)
 {
-    if (index < 0 || index >= m_TileOptions)
-		std::cerr << "updateTileEditor: Invalid tile index " << index << " at (" << x << ", " << y << ")\n";
-
     if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height)) {
         m_level[x + y * width] = index;
 
@@ -204,6 +201,22 @@ const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
     }
     std::cout << "getCurentTile: Coordinates (" << x << ", " << y << ") sont hors limites.\n";
     return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnées sont hors limites
+}
+
+/**
+* @brief Trouve la première case d'une valeur donnée sur le bord de la grille
+* @param value La valeur à chercher
+* @return sf::Vector2u (x, y) de la case trouvée, ou (0,0) si non trouvée
+*/
+sf::Vector2u TileMap::findEdgeTile(int value) const {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            if (m_level[x + y * width] == value)
+                return sf::Vector2u(x, y);
+        }
+    }
+    // Si rien trouvé, retourne (0,0)
+    return sf::Vector2u(0, 0);
 }
 
 void TileMap::printTiles() const
@@ -324,7 +337,7 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        updateTileEditor(i, j, 1, getTileSize());
+        updateTileEditor(i, j, 0, getTileSize()); // Supposer que 0 est la tuile vide (herbe)
     }
 }
 
@@ -336,6 +349,7 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
 sf::Vector2u TileMap::findEdgeTile(int value) const {
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
+            // Vérifie seulement les bords
             if (m_level[x + y * width] == value)
                 return sf::Vector2u(x, y);
         }

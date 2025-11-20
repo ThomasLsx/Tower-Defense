@@ -88,7 +88,7 @@ public:
     WaveManager(std::string waveFile, TileMap* map, Castle* castle);
     ~WaveManager() = default;
 
-    void loadWavesFromFile(const std::string& filename, TileMap* map);
+    void loadWavesFromFile(const std::string& filename, TileMap* map, Castle* castle);
     Wave* getCurrentWave();
     void nextWave();
     void startCurrentWave();

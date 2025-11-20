@@ -39,6 +39,8 @@ public:
 
     void update(float dt) override;
 
+	virtual void attackSpecialEffect(std::weak_ptr<Minion> target) {}
+
     /**
      * @brief Tente de tirer sur les cibles si possible.
      * @param projectileSystem Système de gestion des projectiles.
@@ -119,4 +121,7 @@ public:
     SlowTower(unsigned int id, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f));
 
     void upgrade() override;
+	void attackSpecialEffect(std::weak_ptr<Minion> target) override;
+private:
+	float slowEffect; ///< Pourcentage de ralentissement appliqué aux minions (0.0 à 1.0)
 };

@@ -1,10 +1,10 @@
 #pragma once
 #include "entity.h"
 #include "map.h"
+#include "castle.h"
 #include <memory> // : Ajout
 #include <vector> // : Ajout
 
-class Path;
 struct Position;
 /**
  * @class Minion
@@ -15,6 +15,7 @@ struct Position;
 class Minion : public Entity {
 private:
     TileMap* map;               ///< Pointeur vers la map du jeu.
+	Castle* castle; ///< Pointeur faible vers le château.
     unsigned int health;          ///< Points de vie actuels du minion.
     float speed;        ///< Vitesse de déplacement du minion (pixels par seconde).
     size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
@@ -32,7 +33,7 @@ public:
      * @param rotation Rotation initiale.
      * @param color Couleur du minion.
      */
-    Minion(int id, TileMap* map = nullptr, unsigned int health = 100, float speed = 50.0f, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
+    Minion(int id, TileMap* map = nullptr, Castle* castle = nullptr, unsigned int health = 100, float speed = 50.0f, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
      * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
@@ -111,8 +112,8 @@ public:
 */
 class MinionNormal : public Minion {
 public:
-    MinionNormal(int id, TileMap* map = nullptr)
-        : Minion(id, map, 100, 50.0f, 10) // health=100, speed=50, reward=10 // : Vitesse réaliste
+    MinionNormal(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 100, 50.0f, 10) // health=100, speed=50, reward=10
     {
         Entity::init(15, sf::Color::Green, sf::Color::Black, 2);
     }
@@ -124,8 +125,8 @@ public:
 */
 class MinionFast : public Minion {
 public:
-    MinionFast(int id, TileMap* map = nullptr)
-        : Minion(id, map, 75, 100.0f, 15) // health=75, speed=100, reward=15
+    MinionFast(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 75, 100.0f, 15) // health=75, speed=100, reward=15
     {
         Entity::init(15, sf::Color::Blue, sf::Color::Black, 2);
     }
@@ -137,8 +138,8 @@ public:
 */
 class MinionTank : public Minion {
 public:
-    MinionTank(int id, TileMap* map = nullptr)
-        : Minion(id, map, 200, 30.0f, 25) // health=200, speed=30, reward=25
+    MinionTank(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 200, 30.0f, 25) // health=200, speed=30, reward=25
     {
         Entity::init(20, sf::Color::Red, sf::Color::Black, 2);
     }
@@ -150,8 +151,8 @@ public:
 */
 class MinionBoss : public Minion {
 public:
-    MinionBoss(int id, TileMap* map = nullptr)
-        : Minion(id, map, 500, 20.0f, 100) // health=500, speed=20, reward=100
+    MinionBoss(int id, TileMap* map = nullptr, Castle* castle = nullptr)
+        : Minion(id, map, castle, 500, 20.0f, 100) // health=500, speed=20, reward=100
     {
         Entity::init(25, sf::Color::Magenta, sf::Color::Black, 2);
     }

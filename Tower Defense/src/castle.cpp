@@ -18,7 +18,7 @@ Castle::Castle(TileMap* map, unsigned int maxHealth)
 void Castle::takeDamage(unsigned int amount)
 {
 	if (amount <= health) health -= amount;
-	if (health == 0) destroy();
+	if (health == 0) destroy(); 
 	std::cout << "Castle health: " << health << std::endl;
 
 }
@@ -62,3 +62,5 @@ void Castle::setCastleTile()
 {
 	castleTile = map->getCastleTile();
 }
+
+

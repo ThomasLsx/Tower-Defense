@@ -1,5 +1,13 @@
 // Game.h
 #pragma once
+#include "Window.h"
+#include "UI.h"
+#include "map.h"
+#include "wave.h"
+#include "path.h"
+#include "projectileSystem.h"
+#include "tower.h"
+#include "castle.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
@@ -22,6 +30,7 @@ class TileMap;
 class WaveManager;
 class ProjectileSystem;
 class Tower;
+class TowerManager
 class Castle;
 
 /**
