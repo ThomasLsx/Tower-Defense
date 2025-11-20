@@ -60,6 +60,9 @@
     <ClCompile Include="src\player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\towerManager.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h">
@@ -113,15 +116,21 @@
     <ClInclude Include="include\quadtree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\towerManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\compat_memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Tiles.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\TileMap.png">
+    <Image Include="assets\menu_background.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\menu_background.png">
+    <Image Include="..\..\..\..\Pictures\Screenshots\TileMap.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

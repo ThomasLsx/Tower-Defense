@@ -11,6 +11,9 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
+#include <iostream>
+#include <utility>
+
 
 class Window;
 class UI;
@@ -18,10 +21,11 @@ class TileMap;
 class WaveManager;
 class ProjectileSystem;
 class Tower;
+class TowerManager
 class Castle;
 
 /**
- * @brief Classe principale du jeu : fen�tre, UI et boucle de jeu.
+ * @brief Classe principale du jeu : fenêtre, UI et boucle de jeu.
  */
 class Game {
 public:
@@ -55,12 +59,12 @@ private:
     void HandleInput(const std::vector<sf::Event>& events);
 
     GameMode m_eGameMode;
+    TowerManager towerManager;
 
     std::unique_ptr<Window> window;
     std::unique_ptr<UI> ui;
     std::unique_ptr<TileMap> map;
     std::unique_ptr<WaveManager> waveManager;
     std::unique_ptr<ProjectileSystem> m_projectileSystem;
-    std::vector<std::unique_ptr<Tower>> m_towers;
-	std::unique_ptr<Castle> m_castle;
+	  std::unique_ptr<Castle> m_castle;
 };

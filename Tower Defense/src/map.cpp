@@ -1,5 +1,9 @@
 // map.cpp
 #include "map.h"
+#include "towerManager.h"
+#include "Window.h"
+#include "UI.h"
+#include <sstream> 
 
 TileMap::TileMap(sf::RenderWindow& window) : window(window)
 {
@@ -8,14 +12,20 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
     scale = 1.5;
     tileSize = sf::Vector2u(32, 32);
     m_level = std::vector<int>(width * height, 0);
+
+    // Pour l'édition de tiles
     m_TileIndex = 0;
     m_TileOptions = 8;
+
+    
+    m_TowerIndex = 0;   // Type de tour sélectionné (0 = Basic, 1 = Sniper, etc.)
+    m_TowerOptions = 3; // Nombre de types de tours (Basic, Sniper, Speed)
 }
 
 bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
 {
     // load the tileset texture
-    if (!m_tileset.loadFromFile(tileset))
+    if (!m_tileset.loadFromFile(tileset.string()))
         return false;
 
     // resize the vertex array to fit the level size
@@ -77,6 +87,8 @@ bool TileMap::loadLevel(const std::filesystem::path& levelFilePath)
     }
     setLevel(level);
 
+    loadTile(m_tileset.getNativeHandle() ? "" : "assets/TileMap.png", m_level.data());
+
     return true;
 }
 
@@ -99,9 +111,9 @@ bool TileMap::saveLevel(const std::filesystem::path& levelFilePath)
     return true;
 }
 
-void TileMap::updateTile(int x, int y, const int index, sf::Vector2u tileSize)
+void TileMap::updateTileEditor(int x, int y, const int index, sf::Vector2u tileSize)
 {
-    if (x >= 0 && x < width && y >= 0 && y < height) {
+    if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height)) {
         m_level[x + y * width] = index;
 
         // find its position in the tileset texture
@@ -145,7 +157,7 @@ sf::Vector2f TileMap::Tile2Position(const sf::Vector2u& tile) const
 const std::vector<std::vector<int>> TileMap::getLevel2D() const
 {
     std::vector<std::vector<int>>  m_level2D;
-    for (int j = 0; j < height; ++j)
+    for (int j = 0; j < static_cast<int>(height); ++j)
     {
         std::vector<int> row;
         for (unsigned int i = 0; i < width; ++i)
@@ -295,7 +307,7 @@ void TileMap::CreateTileAtPosition(const sf::Vector2f& position)
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        updateTile(i, j, m_TileIndex, getTileSize());
+        updateTileEditor(i, j, m_TileIndex, getTileSize());
     }
 }
 
@@ -305,7 +317,113 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        updateTile(i, j, 9, getTileSize());
+        updateTileEditor(i, j, 0, getTileSize()); // Supposer que 0 est la tuile vide (herbe)
     }
 }
 
+/**
+* @brief Trouve la première case d'une valeur donnée sur le bord de la grille
+* @param value La valeur à chercher
+* @return sf::Vector2u (x, y) de la case trouvée, ou (0,0) si non trouvée
+*/
+sf::Vector2u TileMap::findEdgeTile(int value) const {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            // Vérifie seulement les bords
+            if (m_level[x + y * width] == value)
+                return sf::Vector2u(x, y);
+        }
+    }
+    // Si rien trouvé, retourne (0,0)
+    return sf::Vector2u(0, 0);
+}
+
+
+/// Placement des tours
+void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager)
+{
+    for (const sf::Event& event : events)
+    {
+        // Gestion de la molette de la souris
+        if (event.is<sf::Event::MouseWheelScrolled>())
+        {
+            auto mouseWheel = event.getIf<sf::Event::MouseWheelScrolled>();
+            int delta = static_cast<int>(mouseWheel->delta);
+            m_TowerIndex = (m_TowerIndex - delta + m_TowerOptions) % m_TowerOptions;
+            std::cout << "Tower type selected: " << m_TowerIndex << std::endl;
+        }
+        // Gestion des touches claviers
+        else if (event.is<sf::Event::KeyPressed>())
+        {
+            auto key = event.getIf<sf::Event::KeyPressed>();
+            if (key->code == sf::Keyboard::Key::Up)
+                m_TowerIndex = (m_TowerIndex + 1) % m_TowerOptions;
+            else if (key->code == sf::Keyboard::Key::Down)
+                m_TowerIndex = (m_TowerIndex - 1 + m_TowerOptions) % m_TowerOptions;
+
+            if (key->code == sf::Keyboard::Key::Up || key->code == sf::Keyboard::Key::Down)
+                std::cout << "Tower type selected: " << m_TowerIndex << std::endl;
+        }
+        // Gestion des clics souris
+        else if (event.is<sf::Event::MouseButtonPressed>())
+        {
+            sf::Event::MouseButtonPressed mouse = *event.getIf<sf::Event::MouseButtonPressed>();
+            sf::Vector2f vMousePosition(static_cast<float>(mouse.position.x), static_cast<float>(mouse.position.y));
+            vMousePosition = window.mapPixelToCoords(mouse.position);
+            if (mouse.button == sf::Mouse::Button::Left)
+                PlaceTower(vMousePosition, towerManager);
+            if (mouse.button == sf::Mouse::Button::Right)
+                RemoveTower(vMousePosition, towerManager);
+
+            std::cout << "Tower Mode Click at (" << vMousePosition.x << ", " << vMousePosition.y << ")\n";
+        }
+    }
+}
+
+void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManager)
+{
+    // 1. Obtenir les coordonnées de la grille (i, j)
+    unsigned int i = static_cast<unsigned int>(position.x / (tileSize.x * scale));
+    unsigned int j = static_cast<unsigned int>(position.y / (tileSize.y * scale));
+
+    // 2. Vérifier si les coordonnées sont valides
+    if (i >= getWidth() || j >= getHeight()) {
+        std::cout << "Placement hors carte." << std::endl;
+        return;
+    }
+
+    // 3. Obtenir le type de tuile à cet endroit
+    const int tileType = m_level[i + j * width];
+
+    // 4.1 VÉRIFIER LES RÈGLES : Ne pas placer sur 4 (Château) ou 7 (Portail/Spawner)
+    if (tileType == 4 || tileType == 7)
+    {
+        std::cout << "Placement de tour interdit sur ce type de tuile (" << tileType << ")\n";
+        return;
+    }
+
+    // 4.2 Vérifier s'il y a déjà une tour ici
+    // if (towerManager.isTowerAt(i, j)) {
+    //     std::cout << "Une tour existe deja a cet endroit." << std::endl;
+    //     return;
+    // }
+
+    // 5. Calculer la position CENTRÉE de la tuile pour la tour
+    float centeredX = (i * tileSize.x * scale) + (tileSize.x * scale / 2.0f);
+    float centeredY = (j * tileSize.y * scale) + (tileSize.y * scale / 2.0f);
+    sf::Vector2f towerPosition(centeredX, centeredY);
+
+    // 6. Ajouter la tour en utilisant le Manager
+    towerManager.addTower(towerPosition, m_TowerIndex);
+    std::cout << "Tour de type " << m_TowerIndex << " placee sur la tuile (" << i << ", " << j << ")\n";
+}
+
+void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManager)
+{
+    unsigned int i = static_cast<unsigned int>(position.x / (getTileSize().x * getScale()));
+    unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
+
+    if (i < getWidth() && j < getHeight()) {
+        std::cout << "Tentative de suppression de tour a (" << i << ", " << j << ")\n";
+    }
+}

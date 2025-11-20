@@ -1,15 +1,19 @@
 // map.h
 #pragma once
-#include "Window.h"
-#include "UI.h"
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
+#include <filesystem> // Ajout pour std::filesystem::path
+
+class TowerManager;
+class Window;
+class UI;
 
 /**
- * @brief TileMap g�re la grille, le chargement des niveaux et l'�dition de niveau.
+ * @brief TileMap gère la grille, le chargement des niveaux et l'édition de niveau.
  */
 class TileMap : public sf::Drawable, public sf::Transformable
 {
@@ -46,16 +50,6 @@ public:
     // Debug
     void printTiles() const;
 
-private:
-    unsigned int width;
-    unsigned int height;
-    float scale;
-    sf::Vector2u tileSize;
-    sf::VertexArray m_vertices;
-    sf::Texture     m_tileset;
-    std::vector<int> m_level;
-    bool mapChanged = false;
-
 public:
     // Level editor accessors and methods
     inline const int& GetTileIndex() const { return m_TileIndex; }
@@ -66,7 +60,24 @@ public:
     void DrawMouseHover();
     void HandleLevelEditorInput(const std::vector<sf::Event>& events);
 
+    void HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager);
+    void PlaceTower(const sf::Vector2f& position, TowerManager& towerManager);
+    void RemoveTower(const sf::Vector2f& position, TowerManager& towerManager);
+
+public:
+    int m_TowerIndex; // Index de la tour sélectionnée (Basic, Sniper, etc.)
+    int m_TowerOptions; // Nombre de types de tours (ex: 3)
+
 private:
+    unsigned int width;
+    unsigned int height;
+    float scale;
+    sf::Vector2u tileSize;
+    sf::VertexArray m_vertices;
+    sf::Texture     m_tileset;
+    std::vector<int> m_level;
+    bool mapChanged = false;
+
     sf::RenderWindow& window;
 
     void CreateTileAtPosition(const sf::Vector2f& position);

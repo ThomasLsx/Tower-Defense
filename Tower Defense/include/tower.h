@@ -37,6 +37,7 @@ public:
      */
     Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), sf::Color color = sf::Color::White);
 
+    void update(float dt) override;
 
     /**
      * @brief Tente de tirer sur les cibles si possible.
@@ -54,6 +55,8 @@ public:
      */
     void onDestroy() override;
 
+	void update(float dt) override {};
+
     /**
      * @brief Met à jour la tour (ciblage et tir).
      * @param dt Temps écoulé depuis la dernière frame.
@@ -61,12 +64,6 @@ public:
      * @param projectileSystem Système de gestion des projectiles.
      */
     void update(float dt, const std::vector<std::shared_ptr<Minion>>& minions, ProjectileSystem& projectileSystem);
-
-    /**
-     * @brief Met à jour la tour (sans cibles).
-     * @param dt Temps écoulé depuis la dernière frame.
-     */
-    void update(float dt) override; // Cette version override bien Entity
 
     void SearchTargets(const std::vector<std::shared_ptr<Minion>>& allMinions);
 
