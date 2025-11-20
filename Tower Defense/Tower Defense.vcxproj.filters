@@ -127,10 +127,10 @@
     <Image Include="assets\Tiles.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\TileMap.png">
+    <Image Include="assets\menu_background.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\menu_background.png">
+    <Image Include="..\..\..\..\Pictures\Screenshots\TileMap.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

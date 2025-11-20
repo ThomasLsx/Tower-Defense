@@ -37,6 +37,7 @@ public:
      */
     Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), sf::Color color = sf::Color::White);
 
+    void update(float dt) override;
 
     /**
      * @brief Tente de tirer sur les cibles si possible.

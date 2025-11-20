@@ -17,6 +17,9 @@ Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, u
     Entity::setPosition(pos);
 }
 
+void Tower::update(float dt)
+{}
+
 void Tower::tryFire(ProjectileSystem& projectileSystem) {
     for (auto it = targets.begin(); it != targets.end();)
     {
@@ -117,7 +120,6 @@ SpeedTower::SpeedTower(unsigned int id, sf::Vector2f pos)
 // Initialisation : Portée courte, cadence ÉLEVÉE, dégâts FAIBLES, couleur verte
     : Tower(id, 200.0f, 0.1f, 1, 5, pos, sf::Color(0, 200, 0))
 {
-    // Logique de construction spécifique
 }
 
 void SpeedTower::upgrade()
@@ -160,7 +162,6 @@ SlowTower::SlowTower(unsigned int id, sf::Vector2f pos)
 // Initialisation : Portée moyenne, cadence moyenne/faible, dégâts TRÈS faibles, couleur cyan
     : Tower(id, 220.0f, 0.7f, 1, 2, pos, sf::Color(0, 255, 255))
 {
-    // Logique de construction spécifique
 }
 
 void SlowTower::upgrade()
