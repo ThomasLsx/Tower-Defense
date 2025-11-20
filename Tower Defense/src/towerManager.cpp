@@ -16,6 +16,9 @@ void TowerManager::addTower(const sf::Vector2f& position, int type)
 	case TowerType::Speed:
 		towers.push_back(std::make_unique<SpeedTower>(towerIDCounter, position));
 		break;
+	case TowerType::Slow:
+		towers.push_back(std::make_unique<SlowTower>(towerIDCounter, position));
+		break;
 	default:
 		break;
 	}

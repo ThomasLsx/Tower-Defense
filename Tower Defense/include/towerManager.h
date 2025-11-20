@@ -16,7 +16,8 @@ public:
 	{
 		Basic,
 		Sniper,
-		Speed
+		Speed,
+		Slow
 	};
 
 	TowerManager() = default;

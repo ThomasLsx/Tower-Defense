@@ -29,10 +29,10 @@ void Tower::tryFire(ProjectileSystem& projectileSystem) {
             projectileSystem.createProjectile(*this, targetPtr, damage, 300.0f); // 300.0f = vitesse projectile
             std::cout << "Tower " << Entity::getId() << " fires at minion " << targetPtr->getId() << std::endl;
             fireCooldown = fireRate; // Réinitialise le timer
+            
+			attackSpecialEffect(*it); // Applique l'effet spécial de la tour (si défini)
 
             break;
-
-            // ++it; Si on voulait tirer sur toutes les cibles, on ferait ++it
         }
         else
         {
@@ -160,7 +160,7 @@ void SniperTower::upgrade()
 
 SlowTower::SlowTower(unsigned int id, sf::Vector2f pos)
 // Initialisation : Portée moyenne, cadence moyenne/faible, dégâts TRÈS faibles, couleur cyan
-    : Tower(id, 220.0f, 0.7f, 1, 2, pos, sf::Color(0, 255, 255))
+	: Tower(id, 220.0f, 0.7f, 1, 2, pos, sf::Color(0, 255, 255)), slowEffect(0.3f)
 {
 }
 
@@ -177,4 +177,16 @@ void SlowTower::upgrade()
     // mais cela dépend de votre implémentation de l'effet dans ProjectileSystem/Minion.
 
     std::cout << "SlowTower upgraded to level " << level << std::endl;
+}
+
+void SlowTower::attackSpecialEffect(std::weak_ptr<Minion> target)
+{
+    if (auto targetPtr = target.lock())
+    {
+        // Appliquer l'effet de ralentissement au minion
+        float originalSpeed = targetPtr->getSpeed();
+        float newSpeed = originalSpeed * (1.0f - slowEffect);
+        targetPtr->setSpeed(newSpeed);
+        std::cout << "SlowTower " << Entity::getId() << " slows minion " << targetPtr->getId() << " to speed " << newSpeed << std::endl;
+    }
 }
