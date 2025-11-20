@@ -19,10 +19,10 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
     m_gridToVertex.resize(m_height, std::vector<Vertex>(m_width, null_v));
 
     // --- 3. Ajouter les sommets ---
-    // On ajoute un sommet POUR CHAQUE CASE ACCESSIBLE (3, 4, ou 7)
+    // On ajoute un sommet POUR CHAQUE CASE ACCESSIBLE 
     for (int i = 0; i < m_height; ++i) {
         for (int j = 0; j < m_width; ++j) {
-            if (grid[i][j] == 3 || grid[i][j] == 4 || grid[i][j] == 7) { // Cases accessibles
+            if (grid[i][j] == 0 || grid[i][j] == 1 || grid[i][j] == 3) { 
                 Vertex v = boost::add_vertex(m_graph);
                 m_gridToVertex[i][j] = v; 
                 m_positionMap[v] = { i, j };
@@ -35,13 +35,13 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
         for (int j = 0; j < m_width; ++j) {
 
             // On ne crée des arêtes QUE si la case actuelle est accessible
-            if (grid[i][j] == 3 || grid[i][j] == 4 || grid[i][j] == 7) {
+            if (grid[i][j] == 0 || grid[i][j] == 1 || grid[i][j] == 3) {
 
                 // On récupère le sommet créé à l'étape 3
                 Vertex current_v = m_gridToVertex[i][j];
 
                 // Voisin de droite
-                if (j + 1 < m_width && (grid[i][j + 1] == 3 || grid[i][j + 1] == 4 || grid[i][j + 1] == 7)) {
+                if (j + 1 < m_width && (grid[i][j + 1] == 0 || grid[i][j + 1] == 1 || grid[i][j + 1] == 3)) {
                     Vertex neighbor_v = m_gridToVertex[i][j + 1];
                     if (neighbor_v != null_v && current_v != null_v) {
                         Edge e; bool inserted;
@@ -51,7 +51,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                 }
 
                 // Voisin de gauche
-                if (j - 1 >= 0 && (grid[i][j - 1] == 3 || grid[i][j - 1] == 4 || grid[i][j - 1] == 7)) {
+                if (j - 1 >= 0 && (grid[i][j - 1] == 0 || grid[i][j - 1] == 1 || grid[i][j - 1] == 3)) {
                     Vertex neighbor_v = m_gridToVertex[i][j - 1];
                     if (neighbor_v != null_v && current_v != null_v) {
                         Edge e; bool inserted;
@@ -61,7 +61,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                 }
 
                 // Voisin du bas
-                if (i + 1 < m_height && (grid[i + 1][j] == 3 || grid[i + 1][j] == 4 || grid[i + 1][j] == 7)) {
+                if (i + 1 < m_height && (grid[i + 1][j] == 0 || grid[i + 1][j] == 1 || grid[i + 1][j] == 3)) {
                     Vertex neighbor_v = m_gridToVertex[i + 1][j];
                     if (neighbor_v != null_v && current_v != null_v) {
                         Edge e; bool inserted;
@@ -71,7 +71,7 @@ Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
                 }
 
                 // Voisin du haut
-                if (i - 1 >= 0 && (grid[i - 1][j] == 3 || grid[i - 1][j] == 4 || grid[i - 1][j] == 7)) {
+                if (i - 1 >= 0 && (grid[i - 1][j] == 0 || grid[i - 1][j] == 1 || grid[i - 1][j] == 3)) {
                     Vertex neighbor_v = m_gridToVertex[i - 1][j];
                     if (neighbor_v != null_v && current_v != null_v) {
                         Edge e; bool inserted;

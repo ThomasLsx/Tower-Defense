@@ -9,9 +9,9 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 {
     width = 40;
     height = 22;
-    tileSize = { 16, 16};
-    scale = 2.0;
-    m_level = std::vector<int>(width * height, 1);
+    scale = 1.5;
+    tileSize = sf::Vector2u(32, 32);
+    m_level = m_towerLevel = std::vector<int>(width * height, 1);
 
     // Pour l'édition de tiles
     m_TileIndex = 0;
@@ -24,51 +24,44 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 
 bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
 {
+    // load the tileset texture
     if (!m_tileset.loadFromFile(tileset.string()))
         return false;
 
+    // resize the vertex array to fit the level size
     m_vertices.setPrimitiveType(sf::PrimitiveType::Triangles);
     m_vertices.resize(width * height * 6);
 
-    const int tilesPerRow = m_tileset.getSize().x / tileSize.x;
-
+    // populate the vertex array, with two triangles per tile
     for (unsigned int i = 0; i < width; ++i)
     {
         for (unsigned int j = 0; j < height; ++j)
         {
-            int index = tiles[i + j * width];
+            // get the current tile number
+            const int tileNumber = tiles[i + j * width];
 
-            // Clamp pour éviter toute tuile inexistante
-            if (index < 0 || index >= m_TileOptions)
-                index = 1; // Herbe
+            // find its position in the tileset texture
+            const int tu = tileNumber % (m_tileset.getSize().x / tileSize.x);
+            const int tv = tileNumber / (m_tileset.getSize().x / tileSize.x);
 
-            // Calcul UV
-            int tu = index % tilesPerRow;
-            int tv = index / tilesPerRow;
+            // get a pointer to the triangles' vertices of the current tile
+            sf::Vertex* triangles = &m_vertices[(i + j * width) * 6];
 
-            sf::Vertex* tri = &m_vertices[(i + j * width) * 6];
+            // define the 6 corners of the two triangles
+            triangles[0].position = sf::Vector2f(i * tileSize.x * scale, j * tileSize.y * scale);
+            triangles[1].position = sf::Vector2f((i + 1) * tileSize.x * scale, j * tileSize.y * scale);
+            triangles[2].position = sf::Vector2f(i * tileSize.x * scale, (j + 1) * tileSize.y * scale);
+            triangles[3].position = sf::Vector2f(i * tileSize.x * scale, (j + 1) * tileSize.y * scale);
+            triangles[4].position = sf::Vector2f((i + 1) * tileSize.x * scale, j * tileSize.y * scale);
+            triangles[5].position = sf::Vector2f((i + 1) * tileSize.x * scale, (j + 1) * tileSize.y * scale);
 
-            // Positions
-            float px = i * tileSize.x * scale;
-            float py = j * tileSize.y * scale;
-
-            tri[0].position = { px, py };
-            tri[1].position = { px + tileSize.x * scale, py };
-            tri[2].position = { px, py + tileSize.y * scale };
-            tri[3].position = tri[2].position;
-            tri[4].position = tri[1].position;
-            tri[5].position = { px + tileSize.x * scale, py + tileSize.y * scale };
-
-            // UV
-            float u = tu * tileSize.x;
-            float v = tv * tileSize.y;
-
-            tri[0].texCoords = { u, v };
-            tri[1].texCoords = { u + tileSize.x, v };
-            tri[2].texCoords = { u, v + tileSize.y };
-            tri[3].texCoords = tri[2].texCoords;
-            tri[4].texCoords = tri[1].texCoords;
-            tri[5].texCoords = { u + tileSize.x, v + tileSize.y };
+            // define the 6 matching texture coordinates
+            triangles[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
+            triangles[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+            triangles[2].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+            triangles[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+            triangles[4].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+            triangles[5].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
         }
     }
     return true;
@@ -95,6 +88,7 @@ bool TileMap::loadLevel(const std::filesystem::path& levelFilePath)
     setLevel(level);
 
     loadTile("assets/TileMap.png", m_level.data());
+    m_towerLevel = m_level;
 
 
     return true;
@@ -175,6 +169,23 @@ const std::vector<std::vector<int>> TileMap::getLevel2D() const
     return m_level2D;
 }
 
+const std::vector<std::vector<int>> TileMap::getTowerLevel2D() const
+{
+    std::vector<std::vector<int>>  m_towerLevel2D;
+    for (int j = 0; j < static_cast<int>(height); ++j)
+    {
+        std::vector<int> row;
+        for (unsigned int i = 0; i < width; ++i)
+        {
+            // get the current tile number
+            const int tileNumber = m_towerLevel[i + j * width];
+            row.push_back(tileNumber);
+        }
+        m_towerLevel2D.push_back(row);
+    }
+    return m_towerLevel2D;
+}
+
 const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
 {
     // donne la valeur de la tuile à la position (x, y)
@@ -204,6 +215,7 @@ void TileMap::printTiles() const
         std::cout << "\n"; // Nouvelle ligne pour chaque rangée
     }
 }
+
 
 // Level Editor methods
 
@@ -382,7 +394,6 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     // 3. Obtenir le type de tuile à cet endroit
     const int tileType = m_level[i + j * width];
 
-    // 4.1 VÉRIFIER LES RÈGLES : Ne pas placer sur 4 (Château) ou 7 (Portail/Spawner)
     if (tileType != 1)
     {
         std::cout << "Placement de tour interdit sur ce type de tuile (" << tileType << ")\n";
@@ -403,6 +414,9 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     // 6. Ajouter la tour en utilisant le Manager
     towerManager.addTower(towerPosition, m_TowerIndex);
     std::cout << "Tour de type " << m_TowerIndex << " placee sur la tuile (" << i << ", " << j << ")\n";
+
+	// 7. Mettre à jour le niveau des tours
+	m_towerLevel[i + j * width] = 9;
 }
 
 void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManager)

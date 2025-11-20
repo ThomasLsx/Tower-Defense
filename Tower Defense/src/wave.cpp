@@ -60,7 +60,7 @@ void Wave::spwanMinion()
         }
 
         float tile = map->getTileSize().x * map->getScale();
-        sf::Vector2u spawnTile = map->findEdgeTile(7);
+        sf::Vector2u spawnTile = map->findEdgeTile(0);
         minions.back()->setPosition(sf::Vector2f(spawnTile.x * tile + tile / 2, spawnTile.y * tile + tile / 2));
         minions.back()->move();
 

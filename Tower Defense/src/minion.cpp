@@ -12,14 +12,14 @@ Minion::Minion(int id, TileMap* map, unsigned int health, float speed, unsigned 
 void Minion::move()
 {
     // 1. Initialiser le système de pathfinding avec la grille
-    Pathfinding pf(map->getLevel2D());
+    Pathfinding pf(map->getTowerLevel2D());
 
     // 2. Définir le départ et l'arrivée
     sf::Vector2u pos = map->getCurentTile(this->getPosition());
     Position start = { pos.y, pos.x };
 
-    // Trouver la position de fin (valeur 4 sur le bord)
-    sf::Vector2u endTile = map->findEdgeTile(4);
+    // Trouver la position de fin 
+    sf::Vector2u endTile = map->findEdgeTile(3);
     Position goal = { endTile.y, endTile.x };
 
     // 3. Trouver le chemin

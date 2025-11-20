@@ -38,6 +38,8 @@ public:
     sf::Vector2u getTileSize() const { return tileSize; }
     const std::vector<int>& getLevel() const { return m_level; }
     const std::vector<std::vector<int>> getLevel2D() const;
+	const std::vector<int>& getTowerLevel() const { return m_towerLevel; }
+	const std::vector<std::vector<int>> getTowerLevel2D() const;
     const sf::Vector2u getCurentTile(sf::Vector2f position) const;
 
     // Setters
@@ -74,6 +76,7 @@ private:
     sf::VertexArray m_vertices;
     sf::Texture     m_tileset;
     std::vector<int> m_level;
+	std::vector<int> m_towerLevel;
     bool mapChanged = false;
 
     sf::RenderWindow& window;
