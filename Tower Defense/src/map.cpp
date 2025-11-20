@@ -147,6 +147,13 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(m_vertices, states);
 }
 
+sf::Vector2f TileMap::Tile2Position(const sf::Vector2u& tile) const
+{
+	float x = tile.x * tileSize.x * scale + tileSize.x * scale / 2.f;
+	float y = tile.y * tileSize.y * scale + tileSize.y * scale / 2.f;
+    return sf::Vector2f(x, y);
+}
+
 const std::vector<std::vector<int>> TileMap::getLevel2D() const
 {
     std::vector<std::vector<int>>  m_level2D;
@@ -175,6 +182,22 @@ const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
     }
     std::cout << "getCurentTile: Coordinates (" << x << ", " << y << ") sont hors limites.\n";
     return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnées sont hors limites
+}
+
+/**
+* @brief Trouve la première case d'une valeur donnée sur le bord de la grille
+* @param value La valeur à chercher
+* @return sf::Vector2u (x, y) de la case trouvée, ou (0,0) si non trouvée
+*/
+sf::Vector2u TileMap::findEdgeTile(int value) const {
+    for (unsigned int y = 0; y < height; ++y) {
+        for (unsigned int x = 0; x < width; ++x) {
+            if (m_level[x + y * width] == value)
+                return sf::Vector2u(x, y);
+        }
+    }
+    // Si rien trouvé, retourne (0,0)
+    return sf::Vector2u(0, 0);
 }
 
 void TileMap::printTiles() const

@@ -1,5 +1,13 @@
 // Game.h
 #pragma once
+#include "Window.h"
+#include "UI.h"
+#include "map.h"
+#include "wave.h"
+#include "path.h"
+#include "projectileSystem.h"
+#include "tower.h"
+#include "castle.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
@@ -13,7 +21,8 @@ class TileMap;
 class WaveManager;
 class ProjectileSystem;
 class Tower;
-#include "towerManager.h"
+class TowerManager
+class Castle;
 
 /**
  * @brief Classe principale du jeu : fenêtre, UI et boucle de jeu.
@@ -57,4 +66,5 @@ private:
     std::unique_ptr<TileMap> map;
     std::unique_ptr<WaveManager> waveManager;
     std::unique_ptr<ProjectileSystem> m_projectileSystem;
+	  std::unique_ptr<Castle> m_castle;
 };
