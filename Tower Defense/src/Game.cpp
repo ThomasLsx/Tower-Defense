@@ -21,10 +21,6 @@ Game::Game()
 
     m_projectileSystem = std::make_unique<ProjectileSystem>();
 
-    // initialize towers
-    towerManager.addTower(sf::Vector2f(300.f, 300.f), 0); // 0 correspond à BasicTower (enum)
-    towerManager.addTower(sf::Vector2f(500.f, 400.f), 2); // 2 correspond à SpeedTower
-
     ui = std::make_unique<UI>(window.get(), this);
 }
 

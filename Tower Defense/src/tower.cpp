@@ -27,7 +27,7 @@ void Tower::tryFire(ProjectileSystem& projectileSystem) {
         {
             // SUCCÈS: Le minion (targetPtr) existe toujours
             projectileSystem.createProjectile(*this, targetPtr, damage, 300.0f); // 300.0f = vitesse projectile
-            std::cout << "Tower " << Entity::getId() << " fires at minion " << targetPtr->getId() << std::endl;
+            //std::cout << "Tower " << Entity::getId() << " fires at minion " << targetPtr->getId() << std::endl;
             fireCooldown = fireRate; // Réinitialise le timer
             
 			attackSpecialEffect(*it); // Applique l'effet spécial de la tour (si défini)

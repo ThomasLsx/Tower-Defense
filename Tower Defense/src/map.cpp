@@ -113,7 +113,7 @@ bool TileMap::saveLevel(const std::filesystem::path& levelFilePath)
     return true;
 }
 
-void TileMap::updateTileEditor(int x, int y, const int index, sf::Vector2u tileSize)
+void TileMap::updateTile(int x, int y, const int index, sf::Vector2u tileSize)
 {
     if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height)) {
         m_level[x + y * width] = index;
@@ -327,7 +327,7 @@ void TileMap::CreateTileAtPosition(const sf::Vector2f& position)
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        updateTileEditor(i, j, m_TileIndex, getTileSize());
+        updateTile(i, j, m_TileIndex, getTileSize());
     }
 }
 
@@ -337,25 +337,8 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        updateTileEditor(i, j, 0, getTileSize()); // Supposer que 0 est la tuile vide (herbe)
+        updateTile(i, j, 0, getTileSize()); // Supposer que 0 est la tuile vide (herbe)
     }
-}
-
-/**
-* @brief Trouve la première case d'une valeur donnée sur le bord de la grille
-* @param value La valeur à chercher
-* @return sf::Vector2u (x, y) de la case trouvée, ou (0,0) si non trouvée
-*/
-sf::Vector2u TileMap::findEdgeTile(int value) const {
-    for (unsigned int y = 0; y < height; ++y) {
-        for (unsigned int x = 0; x < width; ++x) {
-            // Vérifie seulement les bords
-            if (m_level[x + y * width] == value)
-                return sf::Vector2u(x, y);
-        }
-    }
-    // Si rien trouvé, retourne (0,0)
-    return sf::Vector2u(0, 0);
 }
 
 
@@ -438,6 +421,10 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
 
 	// 7. Mettre à jour le niveau des tours
 	m_towerLevel[i + j * width] = 9;
+
+    // 8. Stocker la tuile modifiée
+    lastModifiedTile = sf::Vector2u(i, j);
+    mapChanged = true;
 }
 
 void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManager)
@@ -446,6 +433,16 @@ void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManag
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
-        std::cout << "Tentative de suppression de tour a (" << i << ", " << j << ")\n";
+        // 1. Supprimer la tour du TowerManager
+        towerManager.removeTowerAt(i, j, getTileSize(), getScale());
+
+        // 2. Remettre la tuile à sa valeur d'origine
+        m_towerLevel[i + j * width] = m_level[i + j * width];
+
+        // 3. Stocker la tuile modifiée et déclencher le recalcul
+        lastModifiedTile = sf::Vector2u(i, j);
+        mapChanged = true;
+
+        std::cout << "Tour supprimée à (" << i << ", " << j << ")\n";
     }
 }

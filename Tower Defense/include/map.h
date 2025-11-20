@@ -28,21 +28,24 @@ public:
     inline bool hasMapChanged() const { return mapChanged; }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    sf::Vector2f Tile2Position(const sf::Vector2u& tile) const;
 
 
     // Getters
     inline unsigned int getWidth() const { return width; }
     inline unsigned int getHeight() const { return height; }
-    float getScale() const { return scale; }
-    sf::Vector2u getTileSize() const { return tileSize; }
-    const std::vector<int>& getLevel() const { return m_level; }
+    inline float getScale() const { return scale; }
+    inline sf::Vector2u getTileSize() const { return tileSize; }
+    inline const std::vector<int>& getLevel() const { return m_level; }
     const std::vector<std::vector<int>> getLevel2D() const;
+	inline const std::vector<int>& getTowerLevel() const { return m_towerLevel; }
+	const std::vector<std::vector<int>> getTowerLevel2D() const;
     const sf::Vector2u getCurentTile(sf::Vector2f position) const;
+    sf::Vector2u findEdgeTile(int value) const;
     inline const sf::Vector2u getCastleTile() const { return findEdgeTile(3); }
     inline const sf::Vector2u getSpawnTile() const { return findEdgeTile(0); }
-    sf::Vector2u findEdgeTile(int value) const;
-    inline const sf::Vector2u getCastleTile() const { return findEdgeTile(7);}
-    inline const sf::Vector2u getSpawnTile() const { return findEdgeTile(4); }
+	inline const sf::Vector2u& getLastModifiedTile() const { return lastModifiedTile; }
+
 
     // Setters
     inline void setLevel(const std::vector<int>& newLevel) { m_level = newLevel; }
@@ -87,4 +90,5 @@ private:
 
     int m_TileIndex;
     int m_TileOptions;
+    sf::Vector2u lastModifiedTile; // Position de la dernière tuile modifiée
 };

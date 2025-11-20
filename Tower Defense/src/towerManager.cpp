@@ -39,3 +39,16 @@ void TowerManager::drawTowers(sf::RenderWindow& window) const
 		tower->draw(window);
 	}
 }
+
+void TowerManager::removeTowerAt(unsigned int i, unsigned int j, sf::Vector2u tileSize, float scale)
+{
+    towers.erase(
+        std::remove_if(towers.begin(), towers.end(),
+            [i, j, tileSize, scale](const std::unique_ptr<Tower>& tower) {
+                sf::Vector2f pos = tower->getPosition();
+                unsigned int ti = static_cast<unsigned int>(pos.x / (tileSize.x * scale));
+                unsigned int tj = static_cast<unsigned int>(pos.y / (tileSize.y * scale));
+                return ti == i && tj == j;
+            }),
+        towers.end());
+}

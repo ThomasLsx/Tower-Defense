@@ -30,7 +30,7 @@ class TileMap;
 class WaveManager;
 class ProjectileSystem;
 class Tower;
-class TowerManager
+class TowerManager;
 class Castle;
 
 /**

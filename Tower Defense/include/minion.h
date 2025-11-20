@@ -103,6 +103,12 @@ public:
     * @return Vitesse en pixels par seconde.
     */
     float getSpeed() const { return speed; }
+
+    /**
+    * @brief Retourne le chemin cible actuel du minion.
+    * @return Référence constante vers le vecteur de positions cibles.
+    */
+    const std::vector<sf::Vector2f>& getTargetPath() const { return targetPath; }
 };
 
 
