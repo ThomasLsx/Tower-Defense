@@ -66,7 +66,7 @@ public:
      * @brief Dessine l'entité.
      * @param window Fenêtre de rendu
      */
-    void draw(sf::RenderWindow& window);
+    virtual void draw(sf::RenderWindow& window);
 
     /**
      * @brief Retourne la position courante.

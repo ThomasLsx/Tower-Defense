@@ -200,9 +200,6 @@ void WaveManager::startCurrentWave()
 void WaveManager::startOrNextWave() {
     Wave* currentWave = this->getCurrentWave();
     if (!currentWave) return;
-    std::cout << "[DEBUG] startOrNextWave: waveId=" << currentWave->getWaveId()
-        << " started=" << currentWave->isStarted()
-        << " finished=" << currentWave->isFinished() << "\n";
     if (currentWave->isFinished()) {
         this->nextWave();
         Wave* next = this->getCurrentWave();
@@ -218,7 +215,6 @@ int WaveManager::getCurrentWaveId()
 {
     Wave* wave = getCurrentWave();
     int id = wave ? wave->getWaveId() : -1;
-    std::cout << "[DEBUG] getCurrentWaveId: " << id << "\n";
     return id;
 }
 

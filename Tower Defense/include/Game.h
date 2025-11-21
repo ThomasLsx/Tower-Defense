@@ -53,6 +53,8 @@ public:
 
     /** Drapeau utilis� par l'UI pour demander le d�marrage d'une vague. */
     bool m_bRequestStartWave;
+    /** Drapeau pour l'auto-d�marrage des vagues (utilis� par l'UI) */
+    bool m_bAutoStartWaves = false;
 
 private:
     void Render();

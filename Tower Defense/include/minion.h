@@ -2,8 +2,8 @@
 #include "entity.h"
 #include "map.h"
 #include "castle.h"
-#include <memory> // : Ajout
-#include <vector> // : Ajout
+#include <memory>
+#include <vector> 
 
 struct Position;
 /**
@@ -21,6 +21,11 @@ private:
     size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
     unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
     std::vector<sf::Vector2f> targetPath; ///< Chemin en coordonnées du monde (pixels).
+	unsigned int maxHealth; 		///< Points de vie maximum du minion.
+	sf::RectangleShape healthBarBack;   ///< Arrière-plan de la barre de vie.
+	sf::RectangleShape healthBar;       ///< Barre de vie.
+
+
 
 public:
     /**
@@ -91,6 +96,12 @@ public:
      * @param dt Temps écoulé depuis la dernière frame (en secondes).
      */
     void update(float dt) override;
+
+    /**
+	* @brief Dessine le minion.
+	* @param window Fenêtre de rendu.
+    */
+	void draw(sf::RenderWindow& window) override;
 
     /**
     * @brief Définit la vitesse de déplacement du minion.
