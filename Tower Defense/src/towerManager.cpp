@@ -52,3 +52,14 @@ void TowerManager::removeTowerAt(unsigned int i, unsigned int j, sf::Vector2u ti
             }),
         towers.end());
 }
+
+bool TowerManager::isTowerAt(unsigned int i, unsigned int j, sf::Vector2u tileSize, float scale) const {
+    for (const auto& tower : towers) {
+        sf::Vector2f pos = tower->getPosition();
+        unsigned int ti = static_cast<unsigned int>(pos.x / (tileSize.x * scale));
+        unsigned int tj = static_cast<unsigned int>(pos.y / (tileSize.y * scale));
+        if (ti == i && tj == j)
+            return true;
+    }
+    return false;
+}

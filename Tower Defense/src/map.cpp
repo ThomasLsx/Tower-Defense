@@ -19,7 +19,7 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 
     
     m_TowerIndex = 0;   // Type de tour sélectionné (0 = Basic, 1 = Sniper, etc.)
-    m_TowerOptions = 3; // Nombre de types de tours (Basic, Sniper, Speed)
+    m_TowerOptions = 4; // Nombre de types de tours (Basic, Sniper, Speed, slow)
 }
 
 bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
@@ -405,10 +405,10 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     }
 
     // 4.2 Vérifier s'il y a déjà une tour ici
-    // if (towerManager.isTowerAt(i, j)) {
-    //     std::cout << "Une tour existe deja a cet endroit." << std::endl;
-    //     return;
-    // }
+    if (towerManager.isTowerAt(i, j, tileSize, scale)) {
+        std::cout << "Une tour existe déjà à cet endroit." << std::endl;
+        return;
+    }
 
     // 5. Calculer la position CENTRÉE de la tuile pour la tour
     float centeredX = (i * tileSize.x * scale) + (tileSize.x * scale / 2.0f);
@@ -419,8 +419,8 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     towerManager.addTower(towerPosition, m_TowerIndex);
     std::cout << "Tour de type " << m_TowerIndex << " placee sur la tuile (" << i << ", " << j << ")\n";
 
-	// 7. Mettre à jour le niveau des tours
-	m_towerLevel[i + j * width] = 9;
+    // 7. Mettre à jour le niveau des tours
+    m_towerLevel[i + j * width] = 9;
 
     // 8. Stocker la tuile modifiée
     lastModifiedTile = sf::Vector2u(i, j);

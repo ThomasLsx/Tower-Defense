@@ -26,6 +26,7 @@ public:
 	void updateTowers(const std::vector<std::shared_ptr<Minion>>& minions, float deltaTime, ProjectileSystem& projectileSystem);
 	void drawTowers(sf::RenderWindow& window) const;
 	void removeTowerAt(unsigned int i, unsigned int j, sf::Vector2u tileSize, float scale);
+	bool isTowerAt(unsigned int i, unsigned int j, sf::Vector2u tileSize, float scale) const;
 
 	const std::vector<std::unique_ptr<Tower>>& getTowers() const { return towers; }
 
