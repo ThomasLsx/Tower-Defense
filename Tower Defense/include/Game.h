@@ -14,6 +14,15 @@
 #include <iostream>
 #include <utility>
 
+#include "Window.h"
+#include "UI.h"
+#include "map.h"
+#include "wave.h"
+#include "path.h"
+#include "projectileSystem.h"
+#include "tower.h"
+#include "towerManager.h"
+#include "castle.h"
 
 class Window;
 class UI;
@@ -21,7 +30,7 @@ class TileMap;
 class WaveManager;
 class ProjectileSystem;
 class Tower;
-class TowerManager
+class TowerManager;
 class Castle;
 
 /**
@@ -68,5 +77,6 @@ private:
     std::unique_ptr<TileMap> map;
     std::unique_ptr<WaveManager> waveManager;
     std::unique_ptr<ProjectileSystem> m_projectileSystem;
-	  std::unique_ptr<Castle> m_castle;
+    std::vector<std::unique_ptr<Tower>> m_towers;
+    std::unique_ptr<Castle> m_castle;
 };

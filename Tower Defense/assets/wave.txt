@@ -1,5 +1,5 @@
 #wave_id;minion_type;spawn_count
-1;Normal;5
+1;Normal;50
 2;Fast;5
 3;Normal;10
 3;Fast;5

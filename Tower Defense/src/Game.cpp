@@ -1,13 +1,5 @@
 #include "Game.h"
 
-#include "Window.h"
-#include "UI.h"
-#include "map.h"
-#include "wave.h"
-#include "path.h"
-#include "projectileSystem.h"
-#include "tower.h"
-
 /**
  * @brief Constructeur de Game
  */
@@ -29,10 +21,6 @@ Game::Game()
     waveManager = std::make_unique<WaveManager>("assets/wave.txt", map.get(), m_castle.get());
 
     m_projectileSystem = std::make_unique<ProjectileSystem>();
-
-    // initialize towers
-    towerManager.addTower(sf::Vector2f(300.f, 300.f), 0); // 0 correspond à BasicTower (enum)
-    towerManager.addTower(sf::Vector2f(500.f, 400.f), 2); // 2 correspond à SpeedTower
 
     ui = std::make_unique<UI>(window.get(), this);
 }

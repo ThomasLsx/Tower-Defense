@@ -1,10 +1,11 @@
- #ifndef WAVE_H
+#ifndef WAVE_H
 #define WAVE_H
 
 #include "map.h"
 #include <vector>
 #include <memory>
 #include <string>
+#include <queue>
 
 class Minion;
 class TileMap;
@@ -36,10 +37,11 @@ private:
     float spawnDelay;
     size_t minionsSpawned;
     TileMap* map;
-    Castle* castle;
+	Castle* castle;
     std::vector<MinionGroupConfig> minionGroups;
     size_t minionGroupIndex = 0;
     size_t minionInGroupSpawned = 0;
+    std::queue<std::shared_ptr<Minion>> minionPathUpdateQueue;
 
 public:
     explicit Wave(int id, int number, TileMap* map, Castle* castle);
@@ -82,7 +84,7 @@ private:
     int currentWaveIndex;
     std::string waveFile;
     TileMap* map;
-    Castle* castle;
+	Castle* castle;
 
 public:
     WaveManager(std::string waveFile, TileMap* map, Castle* castle);

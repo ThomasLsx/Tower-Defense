@@ -6,7 +6,7 @@ class TileMap;
 
 class Castle {
 private:
-    unsigned int health;
+	unsigned int health;
 	unsigned int maxHealth;
 	TileMap* map;
 
@@ -17,20 +17,20 @@ private:
 	bool destroyed;
 
 public:
-    Castle(TileMap* map = nullptr, unsigned int maxHealth = 100);
+	Castle(TileMap* map = nullptr, unsigned int maxHealth = 100);
 	~Castle() = default;
-    
-    void takeDamage(unsigned int amount);
-    void draw(sf::RenderWindow& window) ;
-    
+
+	void takeDamage(unsigned int amount);
+	void draw(sf::RenderWindow& window);
+
 	inline bool isDefeated() const { return destroyed; }
 
 	inline unsigned int getHealth() const { return health; }
 	inline unsigned int getMaxHealth() const { return maxHealth; }
 
-    void destroy() ;
+	void destroy();
 
 private:
-    void setCastleTile();
+	void setCastleTile();
 
 };

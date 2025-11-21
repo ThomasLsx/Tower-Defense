@@ -59,7 +59,9 @@ void Wave::spwanMinion()
             minions.push_back(std::make_shared<MinionNormal>(minionsSpawned, map, castle));
         }
 
-        minions.back()->setPosition(sf::Vector2f(map->Tile2Position(map->getSpawnTile())));
+        float tile = map->getTileSize().x * map->getScale();
+        sf::Vector2u spawnTile = map->findEdgeTile(0);
+        minions.back()->setPosition(sf::Vector2f(spawnTile.x * tile + tile / 2, spawnTile.y * tile + tile / 2));
         minions.back()->move();
 
         ++minionsSpawned;
@@ -84,14 +86,35 @@ void Wave::update(float dt)
             spawnTimer = 0.0f;
         }
     }
-        
-	// Met à jour chaque Minion 
+
+    // Si la map a changé, ne recalculer que pour les minions concernés
+    if (map->hasMapChanged()) {
+        for (auto& minion : minions) {
+            // Vérifie si la tuile modifiée est sur le chemin du minion
+            for (const auto& pathPos : minion->getTargetPath()) {
+                sf::Vector2u tileCoord = map->getCurentTile(pathPos);
+                if (tileCoord == map->getLastModifiedTile()) {
+                    minionPathUpdateQueue.push(minion);
+                    break;
+                }
+            }
+        }
+        map->setMapChanged(false);
+    }
+
+    // Met à jour un nombre limité de minions par frame
+    int maxUpdatesPerFrame = 2;
+    int updates = 0;
+    while (!minionPathUpdateQueue.empty() && updates < maxUpdatesPerFrame) {
+        auto minion = minionPathUpdateQueue.front();
+        minionPathUpdateQueue.pop();
+        minion->move();
+        updates++;
+    }
+
+    // Met à jour chaque Minion
     for (auto& minion : minions) {
         minion->update(dt);
-        if (map->hasMapChanged()) {
-            minion->move();
-            map->setMapChanged(false);
-        }
     }
 
     // Nettoyage des minions morts
