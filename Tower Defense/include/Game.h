@@ -1,13 +1,5 @@
 // Game.h
 #pragma once
-#include "Window.h"
-#include "UI.h"
-#include "map.h"
-#include "wave.h"
-#include "path.h"
-#include "projectileSystem.h"
-#include "tower.h"
-#include "castle.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <memory>
@@ -23,6 +15,7 @@
 #include "tower.h"
 #include "towerManager.h"
 #include "castle.h"
+#include "economySystem.h"
 
 class Window;
 class UI;
@@ -32,6 +25,7 @@ class ProjectileSystem;
 class Tower;
 class TowerManager;
 class Castle;
+class EconomySystem;
 
 /**
  * @brief Classe principale du jeu : fenêtre, UI et boucle de jeu.
@@ -65,6 +59,11 @@ public:
     /** Drapeau pour l'auto-d�marrage des vagues (utilis� par l'UI) */
     bool m_bAutoStartWaves = false;
 
+    /* Getters Resources */
+	int getCopper() const;
+	int getSilver() const;
+	int getGold() const;
+
 private:
     void Render();
     void HandleInput(const std::vector<sf::Event>& events);
@@ -79,4 +78,5 @@ private:
     std::unique_ptr<ProjectileSystem> m_projectileSystem;
     std::vector<std::unique_ptr<Tower>> m_towers;
     std::unique_ptr<Castle> m_castle;
+	std::unique_ptr<EconomySystem> m_economySystem;
 };

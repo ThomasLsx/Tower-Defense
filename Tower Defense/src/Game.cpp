@@ -1,3 +1,5 @@
+// Game.cpp
+
 #include "Game.h"
 
 /**
@@ -16,11 +18,14 @@ Game::Game()
     map->loadLevel("assets/map1.txt");
     map->loadTile("assets/TileMap.png", map->getLevel().data());
 
-	m_castle = std::make_unique<Castle>(map.get(), 100);
+    m_economySystem = std::make_unique<EconomySystem>(this);
+
+    m_castle = std::make_unique<Castle>(map.get(), m_economySystem.get(), 100);
 
     waveManager = std::make_unique<WaveManager>("assets/wave.txt", map.get(), m_castle.get());
 
     m_projectileSystem = std::make_unique<ProjectileSystem>();
+    
 
     ui = std::make_unique<UI>(window.get(), this);
 }
@@ -172,4 +177,32 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
 
     else if (m_eGameMode == Play)
         map->HandleTowerInput(events, towerManager);
+}
+
+
+/* Getters resources */
+
+/**
+ * @brief Retourne la quantité de cuivre actuelle.
+ */
+int Game::getCopper() const
+{
+    return m_economySystem->getCopper();
+}
+
+/**
+ * @brief Retourne la quantité d'argent actuelle.
+ */
+int Game::getSilver() const
+{
+    return m_economySystem->getSilver();
+}
+
+/**
+ * @brief Retourne la quantité d'or actuelle.
+ */
+
+int Game::getGold() const
+{
+    return m_economySystem->getGold();
 }

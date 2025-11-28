@@ -1,14 +1,17 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "map.h"
+#include "economySystem.h"
 
 class TileMap;
+class EconomySystem;
 
 class Castle {
 private:
 	unsigned int health;
 	unsigned int maxHealth;
 	TileMap* map;
+	EconomySystem* economySystem;
 
 	sf::RectangleShape healthBar;
 	sf::RectangleShape healthBarBack;
@@ -17,7 +20,7 @@ private:
 	bool destroyed;
 
 public:
-	Castle(TileMap* map = nullptr, unsigned int maxHealth = 100);
+	Castle(TileMap* map = nullptr, EconomySystem* economySystem = nullptr, unsigned int maxHealth = 100);
 	~Castle() = default;
 
 	void takeDamage(unsigned int amount);
@@ -29,6 +32,9 @@ public:
 	inline unsigned int getMaxHealth() const { return maxHealth; }
 
 	void destroy();
+
+	/* Add rececourse */
+	void addResource(int copper, int silver, int gold);
 
 private:
 	void setCastleTile();
