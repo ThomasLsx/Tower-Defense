@@ -57,6 +57,18 @@ void UI::updateUILayout()
         if (waveLabel) {
             waveLabel->setTextSize(waveLabel->getTextSize()* scaleX);
         }
+		auto copperLabel = playUI->get<tgui::Label>("CopperLabel");
+		if (copperLabel) {
+			copperLabel->setTextSize(copperLabel->getTextSize() * scaleX);
+		}
+		auto silverLabel = playUI->get<tgui::Label>("SilverLabel");
+		if (silverLabel) {
+			silverLabel->setTextSize(silverLabel->getTextSize() * scaleX);
+		}
+		auto goldLabel = playUI->get<tgui::Label>("GoldLabel");
+		if (goldLabel) {
+			goldLabel->setTextSize(goldLabel->getTextSize() * scaleX);
+		}
         auto startWaveButton = playUI->get<tgui::Button>("StartWaveButton");
         auto pauseButton = playUI->get<tgui::Button>("PauseButton");
         auto autoStartButton = playUI->get<tgui::Button>("AutoStartButton");
@@ -148,6 +160,31 @@ void UI::initPlayUI()
     centerWidget(waveLabel, 20.f);
     playUI->add(waveLabel);
 
+	// Label Resources Info
+	// Copper
+	auto copperLabel = tgui::Label::create("Copper: 0");
+	copperLabel->setWidgetName("CopperLabel");
+	copperLabel->setTextSize(20);
+	copperLabel->getRenderer()->setTextColor(tgui::Color::White);
+	centerWidget(copperLabel, 60.f);
+	playUI->add(copperLabel);
+	// Silver
+	auto silverLabel = tgui::Label::create("Silver: 0");
+	silverLabel->setWidgetName("SilverLabel");
+	silverLabel->setTextSize(20);
+	silverLabel->getRenderer()->setTextColor(tgui::Color::White);
+	centerWidget(silverLabel, 90.f);
+	playUI->add(silverLabel);
+	// Gold
+	auto goldLabel = tgui::Label::create("Gold: 0");
+	goldLabel->setWidgetName("GoldLabel");
+	goldLabel->setTextSize(20);
+	goldLabel->getRenderer()->setTextColor(tgui::Color::White);
+	centerWidget(goldLabel, 120.f);
+	playUI->add(goldLabel);
+    
+
+	// Boutons
     float buttonMargin = 10.f;
     float spacing = 10.f;
     float startY = 20.f;
@@ -210,6 +247,27 @@ void UI::initPlayUI()
     gui.add(playUI);
 }
 
+void UI::updatePlayUI() {
+    if (playUI) {
+        auto waveLabel = playUI->get<tgui::Label>("WaveLabel");
+        if (waveLabel) {
+            waveLabel->setText("Wave: " + std::to_string(game->getCurrentWaveId()));
+        }
+		auto copperLabel = playUI->get<tgui::Label>("CopperLabel");
+        if (copperLabel) {
+            copperLabel->setText("Copper: " + std::to_string(game->getCopper()));
+        }
+		auto silverLabel = playUI->get<tgui::Label>("SilverLabel");
+        if (silverLabel) {
+            silverLabel->setText("Silver: " + std::to_string(game->getSilver()));
+		}
+        auto goldLabel = playUI->get<tgui::Label>("GoldLabel");
+        if (goldLabel) {
+            goldLabel->setText("Gold: " + std::to_string(game->getGold()));
+        }
+    }
+}
+
 void UI::showPlayUI()
 {
     menuUI->setVisible(false);
@@ -264,13 +322,6 @@ void UI::placeButtonsStacked(const std::vector<tgui::Button::Ptr>& buttons, floa
     }
 }
 
-void UI::updatePlayUI() {
-    if (playUI) {
-        auto waveLabel = playUI->get<tgui::Label>("WaveLabel");
-        if (waveLabel) {
-            waveLabel->setText("Wave: " + std::to_string(game->getCurrentWaveId()));
-        }
-    }
-}
+
 
 

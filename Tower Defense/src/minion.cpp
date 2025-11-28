@@ -5,7 +5,7 @@
 #include <cmath> 
 
 Minion::Minion(int id, TileMap* map, Castle* castle, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-	: Entity(id), map(map), castle(castle), health(health), rewardOnDeath(reward), speed(speed), currentTargetIndex(0), maxHealth(health)
+	: Entity(id), map(map), castle(castle), health(health), copper(10), silver(10), gold(10), speed(speed), currentTargetIndex(0), maxHealth(health)
 {
 }
 
@@ -127,6 +127,7 @@ void Minion::takeDamage(int amount) {
     if ((unsigned int)amount >= health) {
         health = 0;
         std::cout << "Minion " << _id << " est mort." << std::endl;
+		castle->addResource(copper, silver, gold);
         this->onDestroy();
     }
     else {

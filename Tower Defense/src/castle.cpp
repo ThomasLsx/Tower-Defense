@@ -6,8 +6,8 @@
  *
  * Initialise le château avec une position et des points de vie.
  */
-Castle::Castle(TileMap* map, unsigned int maxHealth)
-	:map(map), health(maxHealth), maxHealth(maxHealth), destroyed(false)
+Castle::Castle(TileMap* map, EconomySystem* economySystem, unsigned int maxHealth)
+	:map(map), economySystem(economySystem), health(maxHealth), maxHealth(maxHealth), destroyed(false)
 {
 	setCastleTile();
 }
@@ -56,6 +56,16 @@ void Castle::destroy()
 {
 	destroyed = true;
 	std::cout << "GAME OVER" << std::endl;
+}
+
+void Castle::addResource(int copper, int silver, int gold)
+{
+	if (economySystem)
+	{
+		economySystem->addCopper(copper);
+		economySystem->addSilver(silver);
+		economySystem->addGold(gold);
+	}
 }
 
 void Castle::setCastleTile()

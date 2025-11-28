@@ -19,12 +19,13 @@ private:
     unsigned int health;          ///< Points de vie actuels du minion.
     float speed;        ///< Vitesse de déplacement du minion (pixels par seconde).
     size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
-    unsigned int rewardOnDeath;   ///< Récompense accordée à la mort du minion.
+    unsigned int copper;   ///< Copper accordée à la mort du minion.
+	unsigned int silver;   ///< Silver accordée à la mort du minion.
+	unsigned int gold;     ///< Gold accordée à la mort du minion.
     std::vector<sf::Vector2f> targetPath; ///< Chemin en coordonnées du monde (pixels).
 	unsigned int maxHealth; 		///< Points de vie maximum du minion.
 	sf::RectangleShape healthBarBack;   ///< Arrière-plan de la barre de vie.
 	sf::RectangleShape healthBar;       ///< Barre de vie.
-
 
 
 public:
@@ -79,12 +80,6 @@ public:
      * @return Points de vie restants.
      */
     int getHealth(void) const { return health; }
-
-    /**
-     * @brief Retourne la récompense accordée à la mort du minion.
-     * @return Récompense en points ou monnaie.
-     */
-    int getRewardOnDeath(void) const { return rewardOnDeath; }
 
     /**
      * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).
