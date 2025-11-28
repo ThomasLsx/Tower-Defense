@@ -27,6 +27,8 @@ private:
 	sf::RectangleShape healthBarBack;   ///< Arrière-plan de la barre de vie.
 	sf::RectangleShape healthBar;       ///< Barre de vie.
 
+	float specialStateTimer; ///< Minuteur pour les états spéciaux (ex: ralentissement).
+
 
 public:
     /**
@@ -115,6 +117,10 @@ public:
     * @return Référence constante vers le vecteur de positions cibles.
     */
     const std::vector<sf::Vector2f>& getTargetPath() const { return targetPath; }
+
+    float getSpecialStateTimer() const { return specialStateTimer; }
+
+	void setSpecialStateTimer(float time) { specialStateTimer = time; }
 };
 
 

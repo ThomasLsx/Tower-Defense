@@ -30,9 +30,7 @@ void Tower::tryFire(ProjectileSystem& projectileSystem) {
             //std::cout << "Tower " << Entity::getId() << " fires at minion " << targetPtr->getId() << std::endl;
             fireCooldown = fireRate; // Réinitialise le timer
             
-			attackSpecialEffect(*it); // Applique l'effet spécial de la tour (si défini)
-
-            break;
+            attackSpecialEffect(*it); // Applique l'effet spécial de la tour
         }
         else
         {
@@ -182,11 +180,21 @@ void SlowTower::upgrade()
 void SlowTower::attackSpecialEffect(std::weak_ptr<Minion> target)
 {
     if (auto targetPtr = target.lock())
-    {
-        // Appliquer l'effet de ralentissement au minion
-        float originalSpeed = targetPtr->getSpeed();
-        float newSpeed = originalSpeed * (1.0f - slowEffect);
-        targetPtr->setSpeed(newSpeed);
+    {        
+        if (targetPtr->getSpecialStateTimer() <= 0.0f) 
+        {
+            // Appliquer l'effet de ralentissement au minion
+            float originalSpeed = targetPtr->getSpeed();
+            float newSpeed = originalSpeed * (1.0f - slowEffect);
+
+            targetPtr->setSpeed(newSpeed);
+            targetPtr->setSpecialStateTimer(5.0f); // Ralentissement pendant 5 secondes
+        }
+        else
+        {
+			// Si le minion est déjà ralenti, on réinitialise juste le timer
+			targetPtr->setSpecialStateTimer(5.0f); // Ralentissement pendant 5 secondes
+        }
         std::cout << "SlowTower " << Entity::getId() << " slows minion " << targetPtr->getId() << " to speed " << newSpeed << std::endl;
     }
 }

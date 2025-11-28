@@ -53,6 +53,13 @@ void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
 void Minion::update(float dt) {
     if (health > 0) {
         followPath(dt);
+
+        if (specialStateTimer > 0.0f) {
+            specialStateTimer -= dt;
+            if (specialStateTimer < 0.0f) {
+                specialStateTimer = 0.0f;
+            }
+		}
     }
 }
 
