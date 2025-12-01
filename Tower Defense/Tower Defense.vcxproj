@@ -47,6 +47,7 @@
     <ClInclude Include="include\player.h" />
     <ClInclude Include="include\projectile.h" />
     <ClInclude Include="include\projectileSystem.h" />
+    <ClInclude Include="include\threadPool.h" />
     <ClInclude Include="include\tower.h" />
     <ClInclude Include="include\map.h" />
     <ClInclude Include="include\Game.h" />
