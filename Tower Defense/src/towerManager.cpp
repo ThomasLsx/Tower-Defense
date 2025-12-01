@@ -1,3 +1,4 @@
+#include <iostream>
 #include "towerManager.h"
 
 #include "tower.h"
@@ -62,4 +63,19 @@ bool TowerManager::isTowerAt(unsigned int i, unsigned int j, sf::Vector2u tileSi
             return true;
     }
     return false;
+}
+
+Tower* TowerManager::getTowerAtPosition(const sf::Vector2f& position, sf::Vector2u tileSize, float scale) const
+{
+    unsigned int i = static_cast<unsigned int>(position.x / (tileSize.x * scale));
+    unsigned int j = static_cast<unsigned int>(position.y / (tileSize.y * scale));
+    for (const auto& tower : towers) {
+        sf::Vector2f pos = tower->getPosition();
+        unsigned int ti = static_cast<unsigned int>(pos.x / (tileSize.x * scale));
+        unsigned int tj = static_cast<unsigned int>(pos.y / (tileSize.y * scale));
+        if (ti == i && tj == j) {
+            return tower.get();
+        }
+    }
+    return nullptr;
 }

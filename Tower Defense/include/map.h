@@ -64,6 +64,10 @@ public:
     void DrawMouseHover();
     void HandleLevelEditorInput(const std::vector<sf::Event>& events);
 
+
+	// Tower placement methods
+	inline const int& GetTowerIndex() const { return m_TowerIndex; }
+	inline int& SetTowerIndex() { return m_TowerIndex; }
     void HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager);
     void PlaceTower(const sf::Vector2f& position, TowerManager& towerManager);
     void RemoveTower(const sf::Vector2f& position, TowerManager& towerManager);
