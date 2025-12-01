@@ -182,11 +182,20 @@ void SlowTower::upgrade()
 void SlowTower::attackSpecialEffect(std::weak_ptr<Minion> target)
 {
     if (auto targetPtr = target.lock())
-    {
-        // Appliquer l'effet de ralentissement au minion
-        float originalSpeed = targetPtr->getSpeed();
-        float newSpeed = originalSpeed * (1.0f - slowEffect);
-        targetPtr->setSpeed(newSpeed);
-        std::cout << "SlowTower " << Entity::getId() << " slows minion " << targetPtr->getId() << " to speed " << newSpeed << std::endl;
+    {        
+        if (targetPtr->getSpecialStateTimer() <= 0.0f) 
+        {
+            // Appliquer l'effet de ralentissement au minion
+            float originalSpeed = targetPtr->getSpeed();
+            float newSpeed = originalSpeed * (1.0f - slowEffect);
+
+            targetPtr->setSpeed(newSpeed);
+            targetPtr->setSpecialStateTimer(5.0f); // Ralentissement pendant 5 secondes
+        }
+        else
+        {
+			// Si le minion est déjà ralenti, on réinitialise juste le timer
+			targetPtr->setSpecialStateTimer(5.0f); // Ralentissement pendant 5 secondes
+        }
     }
 }

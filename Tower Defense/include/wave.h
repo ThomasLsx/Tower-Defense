@@ -6,10 +6,18 @@
 #include <memory>
 #include <string>
 #include <queue>
+#include <future> 
+#include "threadPool.h"
 
 class Minion;
 class TileMap;
 class Castle;
+struct Position;
+
+struct PathUpdateResult {
+    unsigned int minionID;
+    std::optional<std::vector<Position>> newPath;
+};
 
 /**
  * @brief Représente une vague d'ennemis.
@@ -24,6 +32,9 @@ private:
         std::string type;
         int count;
     };
+
+    ThreadPool m_threadPool;
+	std::vector<std::future<PathUpdateResult>> m_pendingUpdates;
 
     int id;
     int nb_enemies;

@@ -3,6 +3,7 @@
 #include "towerManager.h"
 #include "Window.h"
 #include "UI.h"
+#include "path.h"
 #include <sstream> 
 
 TileMap::TileMap(sf::RenderWindow& window) : window(window)
@@ -410,20 +411,35 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
         return;
     }
 
-    // 5. Calculer la position CENTRÉE de la tuile pour la tour
+	// 6. Tester le chemin entre le château et la sortie avec la tour placée
+    m_towerLevel[i + j * width] = 9;
+
+    Pathfinding pf(getTowerLevel2D());
+    sf::Vector2u pos = getCastleTile();
+    Position start = { pos.y, pos.x };
+    sf::Vector2u endTile = getSpawnTile();
+    Position goal = { endTile.y, endTile.x };
+    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+
+    if (!pathOpt.has_value() || pathOpt->empty()) {
+
+        m_towerLevel[i + j * width] = m_level[i + j * width];
+		std::cout << "[Debug] Placement de la tour bloque le chemin entre le château et la sortie. Annulation du placement.\n";
+        return;
+    }
+
+    // 7. Stocker la tuile modifiée
+    lastModifiedTile = sf::Vector2u(i, j);
+
+    // 8. Calculer la position CENTRÉE de la tuile pour la tour
     float centeredX = (i * tileSize.x * scale) + (tileSize.x * scale / 2.0f);
     float centeredY = (j * tileSize.y * scale) + (tileSize.y * scale / 2.0f);
     sf::Vector2f towerPosition(centeredX, centeredY);
 
-    // 6. Ajouter la tour en utilisant le Manager
+	// 9. Ajouter la tour au TowerManager
     towerManager.addTower(towerPosition, m_TowerIndex);
     std::cout << "Tour de type " << m_TowerIndex << " placee sur la tuile (" << i << ", " << j << ")\n";
 
-    // 7. Mettre à jour le niveau des tours
-    m_towerLevel[i + j * width] = 9;
-
-    // 8. Stocker la tuile modifiée
-    lastModifiedTile = sf::Vector2u(i, j);
     mapChanged = true;
 }
 

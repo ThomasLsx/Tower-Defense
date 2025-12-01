@@ -1,9 +1,11 @@
 #include "Wave.h"
 #include "Minion.h"
+#include "path.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+
 
 /**
  * @brief Constructeur de Wave
@@ -12,7 +14,7 @@
  */
 Wave::Wave(int id, int nb_enemies, TileMap* map, Castle* castle)
     : id(id), nb_enemies(nb_enemies), started(false), finished(false),
-      spawnTimer(0.0f), spawnDelay(1.0f), minionsSpawned(0), map(map), castle(castle), minionGroupIndex(0), minionInGroupSpawned(0)
+      spawnTimer(0.0f), spawnDelay(1.0f), minionsSpawned(0), map(map), castle(castle), minionGroupIndex(0), minionInGroupSpawned(0), m_threadPool(1)
 {
 }
 
@@ -87,30 +89,77 @@ void Wave::update(float dt)
         }
     }
 
-    // Si la map a changé, ne recalculer que pour les minions concernés
+    // 1. Détection des changements (Reste sur le Main Thread)
     if (map->hasMapChanged()) {
         for (auto& minion : minions) {
-            // Vérifie si la tuile modifiée est sur le chemin du minion
+            bool needsUpdate = false;
             for (const auto& pathPos : minion->getTargetPath()) {
-                sf::Vector2u tileCoord = map->getCurentTile(pathPos);
-                if (tileCoord == map->getLastModifiedTile()) {
-                    minionPathUpdateQueue.push(minion);
+                if (map->getCurentTile(pathPos) == map->getLastModifiedTile()) {
+                    needsUpdate = true;
                     break;
                 }
             }
+
+            if (needsUpdate) {
+                sf::Vector2u pos = map->getCurentTile(minion->getPosition());
+                Position startPos = { pos.y, pos.x };
+
+                // Trouver la position de fin 
+                sf::Vector2u endTile = map->findEdgeTile(3);
+                Position targetPos = { endTile.y, endTile.x };
+
+                auto towerLevel2D = map->getTowerLevel2D();
+                auto tilesize = map->getTileSize().x * map->getScale();
+
+                unsigned int minionID = minion->getId();
+
+                // 2. Envoi des tâches de recalcul (Main Thread)
+                m_pendingUpdates.push_back(
+                    m_threadPool.enqueue([towerLevel2D, startPos, targetPos, tilesize, minionID]() -> PathUpdateResult {
+                        // Ici on fait le calcul A*.
+						// Note : On ne modifie pas l'objet dans le thread, on retourne juste le résultat.
+                        Pathfinding pf(towerLevel2D);
+
+                        std::optional<std::vector<Position>> pathOpt = pf.findPath(startPos, targetPos);
+
+                        return { minionID, pathOpt };
+
+                        })
+                );
+            }
         }
+
         map->setMapChanged(false);
     }
 
-    // Met à jour un nombre limité de minions par frame
-    int maxUpdatesPerFrame = 2;
-    int updates = 0;
-    while (!minionPathUpdateQueue.empty() && updates < maxUpdatesPerFrame) {
-        auto minion = minionPathUpdateQueue.front();
-        minionPathUpdateQueue.pop();
-        minion->move();
-        updates++;
+    // 3. Récupération des résultats (À chaque frame)
+    // On parcourt la liste des futures pour voir si certains ont fini.
+    auto it = m_pendingUpdates.begin();
+    while (it != m_pendingUpdates.end()) {
+        if (it->wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+            // Le calcul est fini !
+            PathUpdateResult result = it->get(); // Récupère le résultat
+
+            // On trouve le minion correspondant et on applique le chemin
+            auto minionIt = std::find_if(minions.begin(), minions.end(),
+                [id = result.minionID](auto& m) { return m->getId() == id; });
+
+            if (minionIt != minions.end()) {
+                if (result.newPath.has_value() && !result.newPath->empty()) {
+                    static_cast<Minion*>(minionIt->get())->setPath(*result.newPath, map->getTileSize().x * map->getScale());
+                }
+                else {
+                    std::cout << "Aucun chemin valide trouve !" << std::endl;
+                }
+            }
+
+            it = m_pendingUpdates.erase(it); // On retire la tâche finie
+        }
+        else {
+            ++it;
+        }
     }
+
 
     // Met à jour chaque Minion
     for (auto& minion : minions) {

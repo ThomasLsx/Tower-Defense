@@ -18,10 +18,9 @@ void Minion::move()
     sf::Vector2u pos = map->getCurentTile(this->getPosition());
     Position start = { pos.y, pos.x };
 
-    // Trouver la position de fin 
-    sf::Vector2u endTile = map->findEdgeTile(3);
+    // Trouver la position de fin
+    sf::Vector2u endTile = map->getCastleTile();
     Position goal = { endTile.y, endTile.x };
-
     // 3. Trouver le chemin
     std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
 
