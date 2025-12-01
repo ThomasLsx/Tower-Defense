@@ -27,6 +27,7 @@ public:
 	void drawTowers(sf::RenderWindow& window) const;
 	void removeTowerAt(unsigned int i, unsigned int j, sf::Vector2u tileSize, float scale);
 	bool isTowerAt(unsigned int i, unsigned int j, sf::Vector2u tileSize, float scale) const;
+	Tower* getTowerAtPosition(const sf::Vector2f& position, sf::Vector2u tileSize, float scale) const;
 
 	const std::vector<std::unique_ptr<Tower>>& getTowers() const { return towers; }
 

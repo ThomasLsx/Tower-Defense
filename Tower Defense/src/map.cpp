@@ -5,6 +5,7 @@
 #include "UI.h"
 #include "path.h"
 #include <sstream> 
+#include <SFML/Graphics/View.hpp>
 
 TileMap::TileMap(sf::RenderWindow& window) : window(window)
 {
@@ -18,9 +19,9 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
     m_TileIndex = 0;
     m_TileOptions = 8;
 
-    
-    m_TowerIndex = 0;   // Type de tour sélectionné (0 = Basic, 1 = Sniper, etc.)
+    m_TowerIndex = -1;   // Type de tour sélectionné (aucune sélection au départ)
     m_TowerOptions = 4; // Nombre de types de tours (Basic, Sniper, Speed, slow)
+    // Suppression du système de vue
 }
 
 bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
@@ -140,13 +141,9 @@ void TileMap::updateTile(int x, int y, const int index, sf::Vector2u tileSize)
 
 void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    // apply the transform
+    // Suppression du système de vue
     states.transform *= getTransform();
-
-    // apply the tileset texture
     states.texture = &m_tileset;
-
-    // draw the vertex array
     target.draw(m_vertices, states);
 }
 
@@ -238,7 +235,7 @@ void TileMap::printTiles() const
 }
 
 
-// Level Editor methods
+/// Level Editor methods
 
 void TileMap::DrawMouseHover()
 {
@@ -348,28 +345,7 @@ void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManage
 {
     for (const sf::Event& event : events)
     {
-        // Gestion de la molette de la souris
-        if (event.is<sf::Event::MouseWheelScrolled>())
-        {
-            auto mouseWheel = event.getIf<sf::Event::MouseWheelScrolled>();
-            int delta = static_cast<int>(mouseWheel->delta);
-            m_TowerIndex = (m_TowerIndex - delta + m_TowerOptions) % m_TowerOptions;
-            std::cout << "Tower type selected: " << m_TowerIndex << std::endl;
-        }
-        // Gestion des touches claviers
-        else if (event.is<sf::Event::KeyPressed>())
-        {
-            auto key = event.getIf<sf::Event::KeyPressed>();
-            if (key->code == sf::Keyboard::Key::Up)
-                m_TowerIndex = (m_TowerIndex + 1) % m_TowerOptions;
-            else if (key->code == sf::Keyboard::Key::Down)
-                m_TowerIndex = (m_TowerIndex - 1 + m_TowerOptions) % m_TowerOptions;
-
-            if (key->code == sf::Keyboard::Key::Up || key->code == sf::Keyboard::Key::Down)
-                std::cout << "Tower type selected: " << m_TowerIndex << std::endl;
-        }
-        // Gestion des clics souris
-        else if (event.is<sf::Event::MouseButtonPressed>())
+        if (event.is<sf::Event::MouseButtonPressed>())
         {
             sf::Event::MouseButtonPressed mouse = *event.getIf<sf::Event::MouseButtonPressed>();
             sf::Vector2f vMousePosition(static_cast<float>(mouse.position.x), static_cast<float>(mouse.position.y));
@@ -386,6 +362,12 @@ void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManage
 
 void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManager)
 {
+    // Ne rien faire si aucune tourelle n'est sélectionnée
+    if (m_TowerIndex == -1) {
+        std::cout << "Aucune tourelle sélectionnée, placement impossible.\n";
+        return;
+    }
+
     // 1. Obtenir les coordonnées de la grille (i, j)
     unsigned int i = static_cast<unsigned int>(position.x / (tileSize.x * scale));
     unsigned int j = static_cast<unsigned int>(position.y / (tileSize.y * scale));

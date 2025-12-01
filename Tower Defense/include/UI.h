@@ -6,6 +6,7 @@
 #include <TGUI/Widgets/Button.hpp>
 #include <TGUI/Widgets/Label.hpp>
 #include <TGUI/Widgets/Picture.hpp>
+#include <TGUI/Widgets/Panel.hpp>
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include "Window.h"
@@ -37,12 +38,17 @@ public:
     void initEditorUI();
     void showEditorUI();
 
+    int getSelectedTurretButtonIndex() const;
+    void deselectTurretButtons();
+
 private:
     tgui::Group::Ptr menuUI;
     tgui::Group::Ptr playUI;
     tgui::Group::Ptr editorUI;
 
     bool isPaused = false;
+    int selectedTurretButtonIndex = -1;
+    std::vector<tgui::Button::Ptr> turretButtons;
 
 	float prevWindowWidth;
 	float prevWindowHeight;

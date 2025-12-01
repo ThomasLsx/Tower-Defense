@@ -64,6 +64,16 @@ public:
 	int getSilver() const;
 	int getGold() const;
 
+    /* Tower Placement */
+	int getTowerIndex() const { return map->GetTowerIndex(); }
+	void setTowerIndex(int index) { map->SetTowerIndex() = index; }
+	bool isTowerAt(unsigned int i, unsigned int j) const { return towerManager.isTowerAt(i, j, map->getTileSize(), map->getScale()); }
+   
+    Tower* selectedTower = nullptr; // Tour sélectionnée
+
+    TowerManager& getTowerManager();
+    TileMap* getMap();
+
 private:
     void Render();
     void HandleInput(const std::vector<sf::Event>& events);
@@ -78,5 +88,5 @@ private:
     std::unique_ptr<ProjectileSystem> m_projectileSystem;
     std::vector<std::unique_ptr<Tower>> m_towers;
     std::unique_ptr<Castle> m_castle;
-	std::unique_ptr<EconomySystem> m_economySystem;
+    std::unique_ptr<EconomySystem> m_economySystem;
 };
