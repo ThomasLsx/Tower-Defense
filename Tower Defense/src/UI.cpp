@@ -534,6 +534,7 @@ int UI::getSelectedTurretButtonIndex() const {
 
 void UI::deselectTurretButtons() {
     selectedTurretButtonIndex = -1;
+	game->setTowerIndex(-1);
     for (auto& btn : turretButtons) {
         if (btn)
             btn->getRenderer()->setBackgroundColor(tgui::Color(255, 255, 255));
