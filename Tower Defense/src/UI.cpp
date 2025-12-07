@@ -28,10 +28,8 @@ void UI::handleEvent(const sf::Event& event)
 
 void UI::updateUILayout()
 {
-	int winW = window->getWidth();
-	int winH = window->getHeight();
-    float scaleX = winW / prevWindowWidth;
-    float scaleY = winH / prevWindowHeight;
+    int winW = window->getWidth();
+    int winH = window->getHeight();
 
     // Menu UI
     if (menuUI) {
@@ -41,29 +39,27 @@ void UI::updateUILayout()
         auto boutonPlay = menuUI->get<tgui::Button>("PlayButton");
         auto boutonEditor = menuUI->get<tgui::Button>("EditorButton");
         if (boutonPlay && boutonEditor) {
-            boutonPlay->setSize(boutonPlay->getSize().x * scaleX, boutonPlay->getSize().y * scaleY);
-            boutonPlay->setTextSize(boutonPlay->getTextSize() * scaleX);
-            boutonEditor->setSize(boutonEditor->getSize().x * scaleX, boutonEditor->getSize().y * scaleY);
-            boutonEditor->setTextSize(boutonEditor->getTextSize() * scaleX);
-            float spacing = boutonPlay->getSize().y * scaleY * 0.6f;
-            float startY = winH / 2 - (boutonPlay->getSize().y * scaleY * 2 + spacing) / 2;
-            centerWidget(boutonPlay, startY);
-            centerWidget(boutonEditor, startY + boutonPlay->getSize().y * scaleY + spacing);
+            boutonPlay->setSize(200, 50);
+            boutonPlay->setTextSize(24);
+            boutonPlay->setPosition(winW / 2 - 100, winH / 2 - 50);
+            boutonEditor->setSize(200, 50);
+            boutonEditor->setTextSize(24);
+            boutonEditor->setPosition(winW / 2 - 100, winH / 2 + 50);
         }
     }
     // Play UI
     if (playUI) {
-        // Panel de sélection
         auto selectionPanel = playUI->get<tgui::Panel>("SelectionPanel");
         if (selectionPanel) {
-            selectionPanel->setSize(winW * 0.125f, winH);
-            selectionPanel->setPosition(winW * 0.875f, 0);
             float panelWidth = winW * 0.125f;
-            float buttonWidth = 120.f * scaleX;
-            float buttonHeight = 40.f * scaleY;
-            float buttonSpacing = 15.f * scaleY;
+            float panelHeight = winH;
+            selectionPanel->setSize(panelWidth, panelHeight);
+            selectionPanel->setPosition(winW * 0.875f, 0);
+            float buttonWidth = 120.f;
+            float buttonHeight = 40.f;
+            float buttonSpacing = 15.f;
             float xCenter = panelWidth / 2.f - buttonWidth / 2.f;
-            float y = 40.f * scaleY;
+            float y = 40.f;
             // Boutons d'action
             std::vector<std::string> btnNames = {"StartWaveButton", "PauseButton", "AutoStartButton", "QuitButton"};
             for (size_t idx = 0; idx < btnNames.size(); ++idx) {
@@ -71,11 +67,11 @@ void UI::updateUILayout()
                 if (btn) {
                     btn->setSize(buttonWidth, buttonHeight);
                     btn->setPosition(xCenter, y + idx * (buttonHeight + buttonSpacing));
-                    btn->setTextSize(btn->getTextSize() * scaleX);
+                    btn->setTextSize(18);
                 }
             }
             // Boutons tourelles
-            float turretSpacing = 20.f * scaleY;
+            float turretSpacing = 20.f;
             float turretStartY = y + btnNames.size() * (buttonHeight + buttonSpacing) + buttonSpacing;
             for (int i = 0; i < 4; ++i) {
                 auto turretButton = selectionPanel->get<tgui::Button>("TurretButton" + std::to_string(i + 1));
@@ -84,40 +80,96 @@ void UI::updateUILayout()
                     turretButton->setPosition(xCenter, turretStartY + i * (buttonHeight + turretSpacing));
                 }
             }
+            // Panel d'infos tourelle
+            float infoPanelWidth = panelWidth * 0.9f;
+            float infoPanelHeight = panelHeight / 2.f;
+            float infoPanelX = (panelWidth - infoPanelWidth) / 2.f;
+            float infoPanelY = panelHeight / 2.f;
+            // TurretInfoPanel
+            auto infoPanel = selectionPanel->get<tgui::Panel>("TurretInfoPanel");
+            if (infoPanel) {
+                infoPanel->setSize(infoPanelWidth, infoPanelHeight);
+                infoPanel->setPosition(infoPanelX, infoPanelY);
+                std::vector<std::string> labelNames = {"TurretNameLabel", "TurretRangeLabel", "TurretSpeedLabel", "TurretDamageLabel", "TurretUpgradePriceLabel", "TurretDeleteRefundLabel"};
+                int labelCount = static_cast<int>(labelNames.size());
+                float labelSpacing = 30.f;
+                float startY = 10.f;
+                for (int i = 0; i < labelCount; ++i) {
+                    auto label = infoPanel->get<tgui::Label>(labelNames[i]);
+                    if (label) {
+                        float labelWidth = label->getSize().x;
+                        float labelX = infoPanelWidth / 2.f - labelWidth / 2.f;
+                        float labelY = startY + i * labelSpacing;
+                        label->setPosition(labelX, labelY);
+                    }
+                }
+                // Boutons Upgrade/Delete centrés
+                auto upgradeButton = infoPanel->get<tgui::Button>("UpgradeButton");
+                auto deleteButton = infoPanel->get<tgui::Button>("DeleteButton");
+                if (upgradeButton && deleteButton) {
+                    float totalWidth = upgradeButton->getSize().x + 10.f + deleteButton->getSize().x;
+                    float startX = infoPanelWidth / 2.f - totalWidth / 2.f;
+                    float buttonY = startY + labelCount * labelSpacing;
+                    upgradeButton->setPosition(startX, buttonY);
+                    deleteButton->setPosition(startX + upgradeButton->getSize().x + 10.f, buttonY);
+                }
+            }
+            // TurretPreviewPanel
+            auto previewPanel = selectionPanel->get<tgui::Panel>("TurretPreviewPanel");
+            if (previewPanel) {
+                previewPanel->setSize(infoPanelWidth, infoPanelHeight);
+                previewPanel->setPosition(infoPanelX, infoPanelY);
+                std::vector<std::string> previewLabelNames = {
+                    "PreviewNameLabel", "PreviewRangeLabel", "PreviewSpeedLabel", "PreviewDamageLabel",
+                    "PreviewCopperPriceLabel", "PreviewSilverPriceLabel", "PreviewGoldPriceLabel"
+                };
+                int previewLabelCount = static_cast<int>(previewLabelNames.size());
+                float labelSpacing = 30.f;
+                float startY = 20.f;
+                for (int i = 0; i < previewLabelCount; ++i) {
+                    auto label = previewPanel->get<tgui::Label>(previewLabelNames[i]);
+                    if (label) {
+                        float labelWidth = label->getSize().x;
+                        float labelX = infoPanelWidth / 2.f - labelWidth / 2.f;
+                        float labelY = startY + i * labelSpacing;
+                        label->setPosition(labelX, labelY);
+                    }
+                }
+            }
         }
         // Labels centrés dans la zone de jeu
         auto waveLabel = playUI->get<tgui::Label>("WaveLabel");
         if (waveLabel) {
-            waveLabel->setTextSize(waveLabel->getTextSize() * scaleX);
-            centerWidget(waveLabel, 20.f * scaleY);
+            waveLabel->setTextSize(30);
+            centerWidget(waveLabel, 20.f);
         }
         auto copperLabel = playUI->get<tgui::Label>("CopperLabel");
         if (copperLabel) {
-            copperLabel->setTextSize(copperLabel->getTextSize() * scaleX);
-            centerWidget(copperLabel, 60.f * scaleY);
+            copperLabel->setTextSize(20);
+            centerWidget(copperLabel, 60.f);
         }
         auto silverLabel = playUI->get<tgui::Label>("SilverLabel");
         if (silverLabel) {
-            silverLabel->setTextSize(silverLabel->getTextSize() * scaleX);
-            centerWidget(silverLabel, 90.f * scaleY);
+            silverLabel->setTextSize(20);
+            centerWidget(silverLabel, 90.f);
         }
         auto goldLabel = playUI->get<tgui::Label>("GoldLabel");
         if (goldLabel) {
-            goldLabel->setTextSize(goldLabel->getTextSize() * scaleX);
-            centerWidget(goldLabel, 120.f * scaleY);
+            goldLabel->setTextSize(20);
+            centerWidget(goldLabel, 120.f);
         }
     }
     // Editor UI
     if (editorUI) {
         auto editorLabel = editorUI->get<tgui::Label>("EditorLabel");
         if (editorLabel) {
-            editorLabel->setTextSize(editorLabel->getTextSize() * scaleX + 6);
-            centerWidget(editorLabel, editorLabel->getSize().y);
+            editorLabel->setTextSize(30);
+            tgui::Vector2f editorLabelSize = editorLabel->getSize();
+            editorLabel->setPosition(winW / 2 - editorLabelSize.x, editorLabelSize.y);
         }
     }
-    
-    prevWindowWidth = window->getWidth();
-    prevWindowHeight = window->getHeight();
+    prevWindowWidth = winW;
+    prevWindowHeight = winH;
 }
 
 void UI::draw()
@@ -300,45 +352,88 @@ void UI::initPlayUI()
     rangeLabel->setWidgetName("TurretRangeLabel");
     rangeLabel->setTextSize(18);
     rangeLabel->getRenderer()->setTextColor(tgui::Color::White);
-    rangeLabel->setPosition(infoPanelWidth / 2.f - 60, 40);
+    rangeLabel->setPosition(infoPanelWidth / 2.f - 60, 35);
     turretInfoPanel->add(rangeLabel);
 
     auto speedLabel = tgui::Label::create("Vitesse : -");
     speedLabel->setWidgetName("TurretSpeedLabel");
     speedLabel->setTextSize(18);
     speedLabel->getRenderer()->setTextColor(tgui::Color::White);
-    speedLabel->setPosition(infoPanelWidth / 2.f - 60, 70);
+    speedLabel->setPosition(infoPanelWidth / 2.f - 60, 60);
     turretInfoPanel->add(speedLabel);
 
     auto damageLabel = tgui::Label::create("Dégâts : -");
     damageLabel->setWidgetName("TurretDamageLabel");
     damageLabel->setTextSize(18);
     damageLabel->getRenderer()->setTextColor(tgui::Color::White);
-    damageLabel->setPosition(infoPanelWidth / 2.f - 60, 100);
+    damageLabel->setPosition(infoPanelWidth / 2.f - 60, 85);
     turretInfoPanel->add(damageLabel);
 
-    // Bouton Upgrade
+    // Upgrade labels
+    auto upgradeCopperLabel = tgui::Label::create("Up Cuivre : -");
+    upgradeCopperLabel->setWidgetName("TurretUpgradeCopperLabel");
+    upgradeCopperLabel->setTextSize(18);
+    upgradeCopperLabel->getRenderer()->setTextColor(tgui::Color::White);
+    upgradeCopperLabel->setPosition(infoPanelWidth / 2.f - 60, 110);
+    turretInfoPanel->add(upgradeCopperLabel);
+
+    auto upgradeSilverLabel = tgui::Label::create("Up Argent : -");
+    upgradeSilverLabel->setWidgetName("TurretUpgradeSilverLabel");
+    upgradeSilverLabel->setTextSize(18);
+    upgradeSilverLabel->getRenderer()->setTextColor(tgui::Color::White);
+    upgradeSilverLabel->setPosition(infoPanelWidth / 2.f - 60, 135);
+    turretInfoPanel->add(upgradeSilverLabel);
+
+    auto upgradeGoldLabel = tgui::Label::create("Up Or : -");
+    upgradeGoldLabel->setWidgetName("TurretUpgradeGoldLabel");
+    upgradeGoldLabel->setTextSize(18);
+    upgradeGoldLabel->getRenderer()->setTextColor(tgui::Color::White);
+    upgradeGoldLabel->setPosition(infoPanelWidth / 2.f - 60, 160);
+    turretInfoPanel->add(upgradeGoldLabel);
+
+    // Delete labels
+    auto deleteCopperLabel = tgui::Label::create("Remb Cuivre : -");
+    deleteCopperLabel->setWidgetName("TurretDeleteCopperLabel");
+    deleteCopperLabel->setTextSize(18);
+    deleteCopperLabel->getRenderer()->setTextColor(tgui::Color::White);
+    deleteCopperLabel->setPosition(infoPanelWidth / 2.f - 60, 185);
+    turretInfoPanel->add(deleteCopperLabel);
+
+    auto deleteSilverLabel = tgui::Label::create("Remb Argent : -");
+    deleteSilverLabel->setWidgetName("TurretDeleteSilverLabel");
+    deleteSilverLabel->setTextSize(18);
+    deleteSilverLabel->getRenderer()->setTextColor(tgui::Color::White);
+    deleteSilverLabel->setPosition(infoPanelWidth / 2.f - 60, 210);
+    turretInfoPanel->add(deleteSilverLabel);
+
+    auto deleteGoldLabel = tgui::Label::create("Remb Or : -");
+    deleteGoldLabel->setWidgetName("TurretDeleteGoldLabel");
+    deleteGoldLabel->setTextSize(18);
+    deleteGoldLabel->getRenderer()->setTextColor(tgui::Color::White);
+    deleteGoldLabel->setPosition(infoPanelWidth / 2.f - 60, 235);
+    turretInfoPanel->add(deleteGoldLabel);
+
+    // Boutons Upgrade/Delete centrés
     auto upgradeButton = tgui::Button::create("Upgrade");
     upgradeButton->setWidgetName("UpgradeButton");
     upgradeButton->setSize(90, 32);
-    upgradeButton->setPosition(infoPanelWidth / 2.f - 100, 140);
-    upgradeButton->onPress([this]() {
-        if (game->selectedTower) {
-            game->selectedTower->upgrade();
-            // Mise à jour immédiate de l'UI
-            updatePlayUI();
-        }
-    });
-    turretInfoPanel->add(upgradeButton);
-
-    // Bouton Delete
     auto deleteButton = tgui::Button::create("Delete");
     deleteButton->setWidgetName("DeleteButton");
     deleteButton->setSize(90, 32);
-    deleteButton->setPosition(infoPanelWidth / 2.f + 10, 140);
+    // Positionnement juste après le dernier label
+    float buttonsY = 260; // 235 + 25 (marge)
+    float totalWidth = upgradeButton->getSize().x + 10.f + deleteButton->getSize().x;
+    float startX = infoPanelWidth / 2.f - totalWidth / 2.f;
+    upgradeButton->setPosition(startX, buttonsY);
+    deleteButton->setPosition(startX + upgradeButton->getSize().x + 10.f, buttonsY);
+    upgradeButton->onPress([this]() {
+        if (game->selectedTower) {
+            game->selectedTower->upgrade();
+            updatePlayUI();
+        }
+    });
     deleteButton->onPress([this]() {
         if (game->selectedTower) {
-            // Suppression de la tour via TowerManager
             game->getTowerManager().removeTowerAt(
                 static_cast<unsigned int>(game->selectedTower->getPosition().x / (game->getMap()->getTileSize().x * game->getMap()->getScale())),
                 static_cast<unsigned int>(game->selectedTower->getPosition().y / (game->getMap()->getTileSize().y * game->getMap()->getScale())),
@@ -348,9 +443,40 @@ void UI::initPlayUI()
             updatePlayUI();
         }
     });
+    turretInfoPanel->add(upgradeButton);
     turretInfoPanel->add(deleteButton);
 
     selectionPanel->add(turretInfoPanel);
+
+    // Panel d'aperçu tourelle (preview)
+    auto turretPreviewPanel = tgui::Panel::create({infoPanelWidth, infoPanelHeight});
+    turretPreviewPanel->setPosition(infoPanelX, infoPanelY);
+    turretPreviewPanel->setWidgetName("TurretPreviewPanel");
+    turretPreviewPanel->getRenderer()->setBackgroundColor(tgui::Color(90, 90, 90));
+    // Labels preview alignés verticalement
+    std::vector<std::pair<std::string, std::string>> previewLabels = {
+        {"PreviewNameLabel", "Nom : -"},
+        {"PreviewRangeLabel", "Portée : -"},
+        {"PreviewSpeedLabel", "Vitesse : -"},
+        {"PreviewDamageLabel", "Dégâts : -"},
+        {"PreviewCopperPriceLabel", "Prix Cuivre : -"},
+        {"PreviewSilverPriceLabel", "Prix Argent : -"},
+        {"PreviewGoldPriceLabel", "Prix Or : -"}
+    };
+    float previewLabelSpacing = 30.f;
+    float previewStartY = 20.f;
+    for (int i = 0; i < previewLabels.size(); ++i) {
+        auto label = tgui::Label::create(previewLabels[i].second);
+        label->setWidgetName(previewLabels[i].first);
+        label->setTextSize(18);
+        label->getRenderer()->setTextColor(tgui::Color::White);
+        float labelWidth = label->getSize().x;
+        float labelX = infoPanelWidth / 2.f - labelWidth / 2.f;
+        float labelY = previewStartY + i * previewLabelSpacing;
+        label->setPosition(labelX, labelY);
+        turretPreviewPanel->add(label);
+    }
+    selectionPanel->add(turretPreviewPanel);
 
     // Ajout du panel à la Play UI
     playUI->add(selectionPanel);
@@ -410,64 +536,74 @@ void UI::updatePlayUI() {
         // Mise à jour des infos tourelle sélectionnée
         auto selectionPanel = playUI->get<tgui::Panel>("SelectionPanel");
         if (selectionPanel) {
-            // Panel d'infos tourelle responsive
-            float panelWidth = selectionPanel->getSize().x;
-            float scaleY = window->getHeight() / prevWindowHeight;
             auto infoPanel = selectionPanel->get<tgui::Panel>("TurretInfoPanel");
-            if (infoPanel) {
-                float infoPanelWidth = panelWidth * 0.9f;
-                float infoPanelHeight = window->getHeight() / 2.f;
-                float infoPanelX = (panelWidth - infoPanelWidth) / 2.f;
-                float infoPanelY = window->getHeight() / 2.f;
-                infoPanel->setSize(infoPanelWidth, infoPanelHeight);
-                infoPanel->setPosition(infoPanelX, infoPanelY);
-                // Labels responsive
-                std::vector<std::string> labelNames = {"TurretNameLabel", "TurretRangeLabel", "TurretSpeedLabel", "TurretDamageLabel"};
-                int labelCount = static_cast<int>(labelNames.size());
-                float labelSpacing = infoPanelHeight / (labelCount + 1);
-                std::vector<tgui::Label::Ptr> labels;
-                for (int i = 0; i < labelCount; ++i) {
-                    auto label = infoPanel->get<tgui::Label>(labelNames[i]);
-                    if (label) {
-                        float labelWidth = label->getSize().x;
-                        float labelX = infoPanelWidth / 2.f - labelWidth / 2.f;
-                        float labelY = (i + 1) * labelSpacing - label->getSize().y / 2.f;
-                        label->setPosition(labelX, labelY);
-                        label->setTextSize(18 * scaleY);
-                        label->getRenderer()->setTextColor(tgui::Color::White);
-                        labels.push_back(label);
-                    }
-                }
-                // Mise à jour du texte des labels après le responsive
-                if (labels.size() == 4) {
-                    if (game->selectedTower) {
-                        // Affichage des caractéristiques de la tour sélectionnée sur la map
-                        labels[0]->setText("Nom : Tour " + std::to_string(game->selectedTower->getId()));
-                        labels[1]->setText("Portée : " + std::to_string(static_cast<int>(game->selectedTower->getRange())));
-                        labels[2]->setText("Vitesse : " + std::to_string(game->selectedTower->getFireRate()));
-                        labels[3]->setText("Dégâts : " + std::to_string(game->selectedTower->getDamage()));
-                        // Afficher les boutons Upgrade et Delete
-                        auto upgradeButton = infoPanel->get<tgui::Button>("UpgradeButton");
-                        auto deleteButton = infoPanel->get<tgui::Button>("DeleteButton");
-                        if (upgradeButton) upgradeButton->setVisible(true);
-                        if (deleteButton) deleteButton->setVisible(true);
-                    } else {
-                        // Masquer les boutons si aucune tour sélectionnée
-                        auto upgradeButton = infoPanel->get<tgui::Button>("UpgradeButton");
-                        auto deleteButton = infoPanel->get<tgui::Button>("DeleteButton");
-                        if (upgradeButton) upgradeButton->setVisible(false);
-                        if (deleteButton) deleteButton->setVisible(false);
-                        // Modèle de tour (avant placement)
-                        if (selectedTurretButtonIndex != -1) {
-                            if (selectedTurretButtonIndex == 0) { labels[0]->setText("Nom : Basic"); labels[1]->setText("Portée : 100"); labels[2]->setText("Vitesse : 1.0"); labels[3]->setText("Dégâts : 10"); }
-                            else if (selectedTurretButtonIndex == 1) { labels[0]->setText("Nom : Long"); labels[1]->setText("Portée : 180"); labels[2]->setText("Vitesse : 0.7"); labels[3]->setText("Dégâts : 15"); }
-                            else if (selectedTurretButtonIndex == 2) { labels[0]->setText("Nom : Rapide"); labels[1]->setText("Portée : 80"); labels[2]->setText("Vitesse : 2.0"); labels[3]->setText("Dégâts : 7"); }
-                            else if (selectedTurretButtonIndex == 3) { labels[0]->setText("Nom : Slow"); labels[1]->setText("Portée : 120"); labels[2]->setText("Vitesse : 0.5"); labels[3]->setText("Dégâts : 20"); }
-                        } else {
-                            labels[0]->setText("Nom : -"); labels[1]->setText("Portée : -"); labels[2]->setText("Vitesse : -"); labels[3]->setText("Dégâts : -");
+            auto previewPanel = selectionPanel->get<tgui::Panel>("TurretPreviewPanel");
+            if (game->selectedTower) {
+                // Afficher le panel info, masquer le preview
+                if (infoPanel) infoPanel->setVisible(true);
+                if (previewPanel) previewPanel->setVisible(false);
+                // Labels d'info tourelle
+                std::vector<std::string> labelNames = {
+                    "TurretNameLabel", "TurretRangeLabel", "TurretSpeedLabel", "TurretDamageLabel"
+                };
+                if (infoPanel) {
+                    for (int i = 0; i < labelNames.size(); ++i) {
+                        auto label = infoPanel->get<tgui::Label>(labelNames[i]);
+                        if (label) {
+                            if (i == 0) label->setText("Nom : Tour " + std::to_string(game->selectedTower->getId()));
+                            if (i == 1) label->setText("Portée : " + std::to_string(static_cast<int>(game->selectedTower->getRange())));
+                            if (i == 2) label->setText("Vitesse : " + std::to_string(game->selectedTower->getFireRate()));
+                            if (i == 3) label->setText("Dégâts : " + std::to_string(game->selectedTower->getDamage()));
                         }
                     }
+                    // Upgrade labels
+                    auto upgradeCopperLabel = infoPanel->get<tgui::Label>("TurretUpgradeCopperLabel");
+                    auto upgradeSilverLabel = infoPanel->get<tgui::Label>("TurretUpgradeSilverLabel");
+                    auto upgradeGoldLabel = infoPanel->get<tgui::Label>("TurretUpgradeGoldLabel");
+                    // Delete labels
+                    auto deleteCopperLabel = infoPanel->get<tgui::Label>("TurretDeleteCopperLabel");
+                    auto deleteSilverLabel = infoPanel->get<tgui::Label>("TurretDeleteSilverLabel");
+                    auto deleteGoldLabel = infoPanel->get<tgui::Label>("TurretDeleteGoldLabel");
+                    // Utilisation des getters pour les coûts
+                    if (upgradeCopperLabel) upgradeCopperLabel->setText("Up Cuivre : " + std::to_string(game->selectedTower->getUpgradeCopperPrice()));
+                    if (upgradeSilverLabel) upgradeSilverLabel->setText("Up Argent : " + std::to_string(game->selectedTower->getUpgradeSilverPrice()));
+                    if (upgradeGoldLabel) upgradeGoldLabel->setText("Up Or : " + std::to_string(game->selectedTower->getUpgradeGoldPrice()));
+                    if (deleteCopperLabel) deleteCopperLabel->setText("Remb Cuivre : " + std::to_string(game->selectedTower->getRefundCopper()));
+                    if (deleteSilverLabel) deleteSilverLabel->setText("Remb Argent : " + std::to_string(game->selectedTower->getRefundSilver()));
+                    if (deleteGoldLabel) deleteGoldLabel->setText("Remb Or : " + std::to_string(game->selectedTower->getRefundGold()));
                 }
+            } else if (selectedTurretButtonIndex != -1) {
+                // Afficher le panel preview, masquer le info
+                if (infoPanel) infoPanel->setVisible(false);
+                if (previewPanel) previewPanel->setVisible(true);
+                // Mise à jour des labels preview selon le bouton sélectionné
+                auto nameLabel = previewPanel->get<tgui::Label>("PreviewNameLabel");
+                auto rangeLabel = previewPanel->get<tgui::Label>("PreviewRangeLabel");
+                auto speedLabel = previewPanel->get<tgui::Label>("PreviewSpeedLabel");
+                auto damageLabel = previewPanel->get<tgui::Label>("PreviewDamageLabel");
+                auto copperLabel = previewPanel->get<tgui::Label>("PreviewCopperPriceLabel");
+                auto silverLabel = previewPanel->get<tgui::Label>("PreviewSilverPriceLabel");
+                auto goldLabel = previewPanel->get<tgui::Label>("PreviewGoldPriceLabel");
+                const char* turretNames[4] = {"Basic", "Long", "Rapide", "Slow"};
+                Tower* previewTower = nullptr;
+                if (selectedTurretButtonIndex == 0) previewTower = new BasicTower(-1);
+                else if (selectedTurretButtonIndex == 1) previewTower = new SniperTower(-1);
+                else if (selectedTurretButtonIndex == 2) previewTower = new SpeedTower(-1);
+                else if (selectedTurretButtonIndex == 3) previewTower = new SlowTower(-1);
+                if (previewTower) {
+                    if (nameLabel) nameLabel->setText("Nom : " + std::string(turretNames[selectedTurretButtonIndex]));
+                    if (rangeLabel) rangeLabel->setText("Portée : " + std::to_string(static_cast<int>(previewTower->getRange())));
+                    if (speedLabel) speedLabel->setText("Vitesse : " + std::to_string(previewTower->getFireRate()));
+                    if (damageLabel) damageLabel->setText("Dégâts : " + std::to_string(previewTower->getDamage()));
+                    if (copperLabel) copperLabel->setText("Prix Cuivre : " + std::to_string(previewTower->getCostCopper()));
+                    if (silverLabel) silverLabel->setText("Prix Argent : " + std::to_string(previewTower->getCostSilver()));
+                    if (goldLabel) goldLabel->setText("Prix Or : " + std::to_string(previewTower->getCostGold()));
+                    delete previewTower;
+                }
+            } else {
+                // Rien sélectionné, masquer les deux panels
+                if (infoPanel) infoPanel->setVisible(false);
+                if (previewPanel) previewPanel->setVisible(false);
             }
         }
     }

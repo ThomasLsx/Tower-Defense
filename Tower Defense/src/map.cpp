@@ -21,7 +21,7 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
 
     m_TowerIndex = -1;   // Type de tour sélectionné (aucune sélection au départ)
     m_TowerOptions = 4; // Nombre de types de tours (Basic, Sniper, Speed, slow)
-    // Suppression du système de vue
+
 }
 
 bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
@@ -89,9 +89,8 @@ bool TileMap::loadLevel(const std::filesystem::path& levelFilePath)
     }
     setLevel(level);
 
-    loadTile("assets/TileMap.png", m_level.data());
     m_towerLevel = m_level;
-
+    drawPath();
 
     return true;
 }
@@ -145,6 +144,53 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
     states.transform *= getTransform();
     states.texture = &m_tileset;
     target.draw(m_vertices, states);
+}
+
+void TileMap::drawPath()
+{    
+    // Chargement des tiles
+    loadTile("assets/TileMap.png", getLevel().data());
+
+    // Recuperration du chemin
+    Pathfinding pf(getTowerLevel2D());
+    sf::Vector2u pos = getSpawnTile();
+    Position start = { pos.y, pos.x };
+    sf::Vector2u endTile = getCastleTile();
+    Position goal = { endTile.y, endTile.x };
+    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+
+    if (!pathOpt.has_value() || pathOpt->empty()) {
+
+        std::cout << "[DEBUG] drawPath imposible" << std::endl;
+        return;
+    }
+
+    // Affichage du chemin
+    for (Position& tile : pathOpt.value())
+    {
+        // x et y sont inversé
+        int x = tile.y;
+        int y = tile.x;
+        if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height)
+            && m_towerLevel[x + y * width] != 3 && m_towerLevel[x + y * width] != 0)
+        {
+            // find its position in the tileset texture
+            const int tu = 4 % (m_tileset.getSize().x / tileSize.x);
+            const int tv = 4 / (m_tileset.getSize().x / tileSize.x);
+
+            // get a pointer to the triangles' vertices of the current tile
+            sf::Vertex* triangles = &m_vertices[(x + y * width) * 6];
+
+            // define the 6 matching texture coordinates
+            triangles[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
+            triangles[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+            triangles[2].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+            triangles[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+            triangles[4].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+            triangles[5].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
+
+        }
+    }
 }
 
 sf::Vector2f TileMap::Tile2Position(const sf::Vector2u& tile) const
@@ -221,7 +267,7 @@ void TileMap::printTiles() const
 {
     std::cout << "Contenu de m_level :\n";
 
-    const int* level = getLevel().data();
+    const int* level = getTowerLevel().data();
     for (unsigned int j = 0; j < height; ++j)
     {
         for (unsigned int i = 0; i < width; ++i)
@@ -393,7 +439,42 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
         return;
     }
 
-	// 6. Tester le chemin entre le château et la sortie avec la tour placée
+    // --- NOUVEAU : Vérification des ressources ---
+    Game* game = nullptr;
+    // Recherche du Game* via le TowerManager (si exposé), sinon singleton ou global
+    // Ici, on suppose que TowerManager n'a pas accès à Game, donc on utilise le singleton UI->game ou autre méthode
+    // On va utiliser la fenêtre pour retrouver le Game via UI (si besoin, à adapter selon votre archi)
+    extern Game* g_game_instance; // À définir dans Game.cpp (ou passer Game* en paramètre)
+    if (!g_game_instance) {
+        std::cout << "[ERREUR] Game* non accessible pour vérifier l'économie." << std::endl;
+        return;
+    }
+    EconomySystem* eco = g_game_instance->getEconomySystem();
+    if (!eco) {
+        std::cout << "[ERREUR] EconomySystem non accessible." << std::endl;
+        return;
+    }
+
+    // Déterminer le coût selon le type de tour
+    unsigned int costCopper = 0, costSilver = 0, costGold = 0;
+    switch (m_TowerIndex) {
+        case 0: costCopper = 30; costSilver = 0; costGold = 0; break; // Basic
+        case 1: costCopper = 10; costSilver = 10; costGold = 0; break; // Sniper
+        case 2: costCopper = 20; costSilver = 5; costGold = 0; break; // Speed
+        case 3: costCopper = 10; costSilver = 0; costGold = 2; break; // Slow
+        default: costCopper = 30; break;
+    }
+    // Vérification des ressources
+    if (eco->getCopper() < (int)costCopper || eco->getSilver() < (int)costSilver || eco->getGold() < (int)costGold) {
+        std::cout << "Pas assez de ressources pour placer cette tour !\n";
+        return;
+    }
+    // Dépense des ressources
+    eco->spendCopper(costCopper);
+    eco->spendSilver(costSilver);
+    eco->spendGold(costGold);
+
+    // 6. Tester le chemin entre le château et la sortie avec la tour placée
     m_towerLevel[i + j * width] = 9;
 
     Pathfinding pf(getTowerLevel2D());
@@ -404,9 +485,12 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
 
     if (!pathOpt.has_value() || pathOpt->empty()) {
-
         m_towerLevel[i + j * width] = m_level[i + j * width];
-		std::cout << "[Debug] Placement de la tour bloque le chemin entre le château et la sortie. Annulation du placement.\n";
+        std::cout << "[Debug] Placement de la tour bloque le chemin entre le château et la sortie. Annulation du placement.\n";
+        // Remboursement si besoin (optionnel)
+        eco->addCopper(costCopper);
+        eco->addSilver(costSilver);
+        eco->addGold(costGold);
         return;
     }
 
@@ -418,10 +502,11 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     float centeredY = (j * tileSize.y * scale) + (tileSize.y * scale / 2.0f);
     sf::Vector2f towerPosition(centeredX, centeredY);
 
-	// 9. Ajouter la tour au TowerManager
+    // 9. Ajouter la tour au TowerManager
     towerManager.addTower(towerPosition, m_TowerIndex);
     std::cout << "Tour de type " << m_TowerIndex << " placee sur la tuile (" << i << ", " << j << ")\n";
 
+    drawPath();
     mapChanged = true;
 }
 
@@ -439,6 +524,7 @@ void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManag
 
         // 3. Stocker la tuile modifiée et déclencher le recalcul
         lastModifiedTile = sf::Vector2u(i, j);
+        drawPath();
         mapChanged = true;
 
         std::cout << "Tour supprimée à (" << i << ", " << j << ")\n";
