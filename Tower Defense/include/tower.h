@@ -23,19 +23,30 @@ protected:
     unsigned int level;              ///< Niveau actuel de la tour
     unsigned int damage;  ///< Dégâts infligés par projectile
 
+    // --- Ajout des coûts de la tour ---
+    unsigned int costCopper; ///< Coût en copper pour placer/upgrader
+    unsigned int costSilver; ///< Coût en silver pour placer/upgrader
+    unsigned int costGold;   ///< Coût en gold pour placer/upgrader
+
     std::vector<std::weak_ptr<Minion>> targets;
 
 public:
     /**
      * @brief Constructeur de Tower.
      * @param id Identifiant unique de la tour.
-     * @param pos Position initiale de la tour.
      * @param range Portée de la tour.
      * @param fireRate Fréquence de tir en tirs par seconde.
-     * @param damage Dégâts infligés par projectile.
      * @param level Niveau initial de la tour (par défaut 1).
+     * @param damage Dégâts infligés par projectile.
+     * @param costCopper Coût en copper
+     * @param costSilver Coût en silver
+     * @param costGold Coût en gold
+     * @param pos Position initiale de la tour.
+     * @param color Couleur de la tour.
      */
-    Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), sf::Color color = sf::Color::White);
+    Tower(unsigned int id, float range = 5, float fireRate = 10, unsigned int level = 1, unsigned int damage = 10, 
+          unsigned int costCopper = 10, unsigned int costSilver = 0, unsigned int costGold = 0,
+          sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), sf::Color color = sf::Color::White);
 
     void update(float dt) override;
 
@@ -72,6 +83,21 @@ public:
     float getFireRate() const { return fireRate; }
     int getLevel() const { return level; }
     int getDamage() const { return damage; }
+
+    // Getters pour les coûts
+    unsigned int getCostCopper() const { return costCopper; }
+    unsigned int getCostSilver() const { return costSilver; }
+    unsigned int getCostGold() const { return costGold; }
+
+    // Getters pour les coûts d'upgrade
+    unsigned int getUpgradeCopperPrice() const { return static_cast<unsigned int>(costCopper * 1.5f); }
+    unsigned int getUpgradeSilverPrice() const { return static_cast<unsigned int>(costSilver * 1.5f); }
+    unsigned int getUpgradeGoldPrice() const { return static_cast<unsigned int>(costGold * 1.5f); }
+
+    // Getters pour le remboursement
+    unsigned int getRefundCopper() const { return static_cast<unsigned int>((costCopper + getUpgradeCopperPrice() * (level - 1)) * 0.7f); }
+    unsigned int getRefundSilver() const { return static_cast<unsigned int>((costSilver + getUpgradeSilverPrice() * (level - 1)) * 0.7f); }
+    unsigned int getRefundGold() const { return static_cast<unsigned int>((costGold + getUpgradeGoldPrice() * (level - 1)) * 0.7f); }
 
     const std::vector<std::weak_ptr<Minion>>& getTargets() const { return targets; }
 };

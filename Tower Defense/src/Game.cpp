@@ -2,6 +2,9 @@
 
 #include "Game.h"
 
+// Définition du pointeur global
+Game* g_game_instance = nullptr;
+
 /**
  * @brief Constructeur de Game
  */
@@ -10,15 +13,15 @@ Game::Game()
       m_bRequestStartWave(false),
       m_bAutoStartWaves(false)
 {
+    g_game_instance = this;
     window = std::make_unique<Window>();
     window->create();
     window->getRenderWindow().setFramerateLimit(60);
 
     map = std::make_unique<TileMap>(window->getRenderWindow());
     map->loadLevel("assets/map1.txt");
-    map->loadTile("assets/TileMap.png", map->getLevel().data());
 
-    m_economySystem = std::make_unique<EconomySystem>(this);
+    m_economySystem = std::make_unique<EconomySystem>(g_game_instance);
 
     m_castle = std::make_unique<Castle>(map.get(), m_economySystem.get(), 100);
 
@@ -27,7 +30,7 @@ Game::Game()
     m_projectileSystem = std::make_unique<ProjectileSystem>();
     
 
-    ui = std::make_unique<UI>(window.get(), this);
+    ui = std::make_unique<UI>(window.get(), g_game_instance);
 }
 
 Game::~Game()
