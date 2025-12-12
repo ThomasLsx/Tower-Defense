@@ -1,20 +1,27 @@
 #include "tower.h"
 #include "projectilesystem.h"
 #include "minion.h"
+#include "Game.h"
+extern Game* g_game_instance;
 #include <iostream>
 #include <memory>
 #include <cmath>
 
-Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage, sf::Vector2f pos, sf::Color color)
+Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage,
+             unsigned int costCopper, unsigned int costSilver, unsigned int costGold,
+             sf::Vector2f pos, sf::Color color)
     : Entity(id),
-    range(range),
-    fireRate(fireRate),
-    fireCooldown(0.0f),
-    level(level),
-    damage(damage)
+      range(range),
+      fireRate(fireRate),
+      fireCooldown(0.0f),
+      level(level),
+      damage(damage),
+      costCopper(costCopper),
+      costSilver(costSilver),
+      costGold(costGold)
 {
-    Entity::init(20, 20,color);
-    Entity::setPosition(pos);
+    this->init(20, 20, color);
+    this->setPosition(pos);
 }
 
 void Tower::update(float dt)
@@ -43,6 +50,20 @@ void Tower::tryFire(ProjectileSystem& projectileSystem) {
 }
 
 void Tower::upgrade() {
+    if (!g_game_instance) return;
+    EconomySystem* eco = g_game_instance->getEconomySystem();
+    // Prix d'upgrade = 1.5x le prix de base, arrondi
+    unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
+    unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
+    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+        std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
+        return;
+    }
+    eco->spendCopper(upgradeCopper);
+    eco->spendSilver(upgradeSilver);
+    eco->spendGold(upgradeGold);
+    // Appliquer l'upgrade
     level++;
     range *= 1.1f;
     damage = static_cast<unsigned int>(damage * 1.2f);
@@ -96,18 +117,27 @@ void Tower::SearchTargets(const std::vector<std::shared_ptr<Minion>>& allMinions
 // ==========================================================
 
 BasicTower::BasicTower(unsigned int id, sf::Vector2f pos)
-// Initialisation : Portée moyenne, cadence moyenne, dégâts moyens, couleur neutre
-    : Tower(id, 250.0f, 1.0f, 1, 15, pos, sf::Color(100, 100, 100))
+    : Tower(id, 250.0f, 1.0f, 1, 15, 30, 0, 0, pos, sf::Color(100, 100, 100))
 {
 }
 
-void BasicTower::upgrade()
-{
-    // Amélioration standard : équilibrée
+void BasicTower::upgrade() {
+    if (!g_game_instance) return;
+    EconomySystem* eco = g_game_instance->getEconomySystem();
+    unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
+    unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
+    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+        std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
+        return;
+    }
+    eco->spendCopper(upgradeCopper);
+    eco->spendSilver(upgradeSilver);
+    eco->spendGold(upgradeGold);
     level++;
-    range *= 1.10f; // +10% de portée
-    damage += 10;   // +10 dégâts
-    fireRate *= 1.10f; // +10% de cadence
+    range *= 1.10f;
+    damage += 10;
+    fireRate *= 1.10f;
     std::cout << "BasicTower upgraded to level " << level << std::endl;
 }
 
@@ -117,18 +147,27 @@ void BasicTower::upgrade()
 // ==========================================================
 
 SpeedTower::SpeedTower(unsigned int id, sf::Vector2f pos)
-// Initialisation : Portée courte, cadence ÉLEVÉE, dégâts FAIBLES, couleur verte
-    : Tower(id, 200.0f, 0.1f, 1, 5, pos, sf::Color(0, 200, 0))
+    : Tower(id, 200.0f, 0.1f, 1, 5, 20, 5, 0, pos, sf::Color(0, 200, 0))
 {
 }
 
-void SpeedTower::upgrade()
-{
-    // Amélioration centrée sur la cadence de tir
+void SpeedTower::upgrade() {
+    if (!g_game_instance) return;
+    EconomySystem* eco = g_game_instance->getEconomySystem();
+    unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
+    unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
+    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+        std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
+        return;
+    }
+    eco->spendCopper(upgradeCopper);
+    eco->spendSilver(upgradeSilver);
+    eco->spendGold(upgradeGold);
     level++;
-    range *= 1.05f; // Petite augmentation de portée
-    damage += 3;    // Très petite augmentation de dégâts
-    fireRate *= 1.20f; // Grande augmentation de cadence (+20%)
+    range *= 1.05f;
+    damage += 3;
+    fireRate *= 1.20f;
     std::cout << "SpeedTower upgraded to level " << level << std::endl;
 }
 
@@ -138,18 +177,27 @@ void SpeedTower::upgrade()
 // ==========================================================
 
 SniperTower::SniperTower(unsigned int id, sf::Vector2f pos)
-// Initialisation : Portée TRÈS longue, cadence BASSE, dégâts TRÈS élevés, couleur bleue
-    : Tower(id, 450.0f, 0.4f, 1, 50, pos, sf::Color(0, 0, 255))
+    : Tower(id, 450.0f, 0.4f, 1, 50, 10, 10, 0, pos, sf::Color(0, 0, 255))
 {
 }
 
-void SniperTower::upgrade()
-{
-    // Amélioration centrée sur la portée et les dégâts
+void SniperTower::upgrade() {
+    if (!g_game_instance) return;
+    EconomySystem* eco = g_game_instance->getEconomySystem();
+    unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
+    unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
+    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+        std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
+        return;
+    }
+    eco->spendCopper(upgradeCopper);
+    eco->spendSilver(upgradeSilver);
+    eco->spendGold(upgradeGold);
     level++;
-    range += 75.0f; // Grosse augmentation de portée
-    damage += 35;   // Grosse augmentation de dégâts
-    fireRate *= 1.05f; // Très petite augmentation de cadence
+    range += 75.0f;
+    damage += 35;
+    fireRate *= 1.05f;
     std::cout << "SniperTower upgraded to level " << level << std::endl;
 }
 
@@ -159,23 +207,27 @@ void SniperTower::upgrade()
 // ==========================================================
 
 SlowTower::SlowTower(unsigned int id, sf::Vector2f pos)
-// Initialisation : Portée moyenne, cadence moyenne/faible, dégâts TRÈS faibles, couleur cyan
-	: Tower(id, 220.0f, 0.7f, 1, 2, pos, sf::Color(0, 255, 255)), slowEffect(0.3f)
+    : Tower(id, 220.0f, 0.7f, 1, 2, 10, 0, 2, pos, sf::Color(0, 255, 255)), slowEffect(0.3f)
 {
 }
 
-void SlowTower::upgrade()
-{
-    // Amélioration centrée sur la fréquence de ralentissement (cadence de tir)
-    // et la zone d'effet (portée).
+void SlowTower::upgrade() {
+    if (!g_game_instance) return;
+    EconomySystem* eco = g_game_instance->getEconomySystem();
+    unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
+    unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
+    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+        std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
+        return;
+    }
+    eco->spendCopper(upgradeCopper);
+    eco->spendSilver(upgradeSilver);
+    eco->spendGold(upgradeGold);
     level++;
-    range *= 1.15f; // Augmentation significative de portée
-    damage += 1;    // Le dégât reste négligeable
-    fireRate *= 1.15f; // Augmentation significative de cadence
-
-    // Note: L'effet de ralentissement lui-même devrait être amélioré ici,
-    // mais cela dépend de votre implémentation de l'effet dans ProjectileSystem/Minion.
-
+    range *= 1.15f;
+    damage += 1;
+    fireRate *= 1.15f;
     std::cout << "SlowTower upgraded to level " << level << std::endl;
 }
 

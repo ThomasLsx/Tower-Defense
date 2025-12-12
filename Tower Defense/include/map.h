@@ -28,6 +28,7 @@ public:
     inline bool hasMapChanged() const { return mapChanged; }
 
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void drawPath();
     sf::Vector2f Tile2Position(const sf::Vector2u& tile) const;
 
 

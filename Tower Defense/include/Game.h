@@ -73,6 +73,7 @@ public:
 
     TowerManager& getTowerManager();
     TileMap* getMap();
+    EconomySystem* getEconomySystem() { return m_economySystem.get(); }
 
 private:
     void Render();
