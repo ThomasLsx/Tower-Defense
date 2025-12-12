@@ -120,7 +120,11 @@ public:
     }
 
 protected:
-    sf::Shape* _shape = nullptr;    ///< Forme graphique (allouée dynamiquement)
+
+    /**
+     * @brief Forme graphique gérée par un pointeur intelligent.
+     */
+    std::unique_ptr<sf::Shape> _shape;
     sf::Vector2f _position;         ///< Position
     unsigned int _squaredRadius;    ///< Rayon au carré pour tests rapides
 

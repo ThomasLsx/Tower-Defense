@@ -437,7 +437,8 @@ void UI::initPlayUI()
             game->getTowerManager().removeTowerAt(
                 static_cast<unsigned int>(game->selectedTower->getPosition().x / (game->getMap()->getTileSize().x * game->getMap()->getScale())),
                 static_cast<unsigned int>(game->selectedTower->getPosition().y / (game->getMap()->getTileSize().y * game->getMap()->getScale())),
-                game->getMap()->getTileSize(), game->getMap()->getScale()
+                game->getMap()->getTileSize(), game->getMap()->getScale(),
+				*game->getEconomySystem()
             );
             game->selectedTower = nullptr;
             updatePlayUI();

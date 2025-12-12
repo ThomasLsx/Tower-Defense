@@ -264,7 +264,7 @@ void Game::HandleInput(const std::vector<sf::Event>& events)
     if (m_eGameMode == Editor)
         map->HandleLevelEditorInput(events);
     else if (m_eGameMode == Play) 
-        map->HandleTowerInput(events, towerManager);
+        map->HandleTowerInput(events, towerManager, *m_economySystem);
 }
 
 

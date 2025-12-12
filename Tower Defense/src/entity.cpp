@@ -16,7 +16,7 @@ Entity::Entity(unsigned int id, sf::Vector2f position)
  */
 void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, int thickness)
 {
-    _shape = new sf::CircleShape(radius);
+    _shape = std::make_unique<sf::CircleShape>(radius);
     _shape->setPosition(_position);
     _shape->setFillColor(color);
     _shape->setOutlineColor(outline);
@@ -30,7 +30,7 @@ void Entity::init(int radius, const sf::Color& color, const sf::Color& outline, 
  */
 void Entity::init(int l, int L, const sf::Color& color, const sf::Color& outline, int thickness)
 {
-    _shape = new sf::RectangleShape(sf::Vector2f(l,L));
+    _shape = std::make_unique<sf::RectangleShape>(sf::Vector2f(l,L));
     _shape->setFillColor(color);
     _shape->setOutlineColor(outline);
     _shape->setOutlineThickness(thickness);

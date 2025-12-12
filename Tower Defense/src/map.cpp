@@ -387,7 +387,7 @@ void TileMap::DeleteTileAtPosition(const sf::Vector2f& position)
 
 
 /// Placement des tours
-void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager)
+void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager, EconomySystem& economySystem)
 {
     for (const sf::Event& event : events)
     {
@@ -397,16 +397,16 @@ void TileMap::HandleTowerInput(const std::vector<sf::Event>& events, TowerManage
             sf::Vector2f vMousePosition(static_cast<float>(mouse.position.x), static_cast<float>(mouse.position.y));
             vMousePosition = window.mapPixelToCoords(mouse.position);
             if (mouse.button == sf::Mouse::Button::Left)
-                PlaceTower(vMousePosition, towerManager);
+                PlaceTower(vMousePosition, towerManager, economySystem);
             if (mouse.button == sf::Mouse::Button::Right)
-                RemoveTower(vMousePosition, towerManager);
+                RemoveTower(vMousePosition, towerManager, economySystem);
 
             std::cout << "Tower Mode Click at (" << vMousePosition.x << ", " << vMousePosition.y << ")\n";
         }
     }
 }
 
-void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManager)
+void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManager, EconomySystem& economySystem)
 {
     // Ne rien faire si aucune tourelle n'est sélectionnée
     if (m_TowerIndex == -1) {
@@ -439,22 +439,6 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
         return;
     }
 
-    // --- NOUVEAU : Vérification des ressources ---
-    Game* game = nullptr;
-    // Recherche du Game* via le TowerManager (si exposé), sinon singleton ou global
-    // Ici, on suppose que TowerManager n'a pas accès à Game, donc on utilise le singleton UI->game ou autre méthode
-    // On va utiliser la fenêtre pour retrouver le Game via UI (si besoin, à adapter selon votre archi)
-    extern Game* g_game_instance; // À définir dans Game.cpp (ou passer Game* en paramètre)
-    if (!g_game_instance) {
-        std::cout << "[ERREUR] Game* non accessible pour vérifier l'économie." << std::endl;
-        return;
-    }
-    EconomySystem* eco = g_game_instance->getEconomySystem();
-    if (!eco) {
-        std::cout << "[ERREUR] EconomySystem non accessible." << std::endl;
-        return;
-    }
-
     // Déterminer le coût selon le type de tour
     unsigned int costCopper = 0, costSilver = 0, costGold = 0;
     switch (m_TowerIndex) {
@@ -465,14 +449,14 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
         default: costCopper = 30; break;
     }
     // Vérification des ressources
-    if (eco->getCopper() < (int)costCopper || eco->getSilver() < (int)costSilver || eco->getGold() < (int)costGold) {
+    if (economySystem.getCopper() < (int)costCopper || economySystem.getSilver() < (int)costSilver || economySystem.getGold() < (int)costGold) {
         std::cout << "Pas assez de ressources pour placer cette tour !\n";
         return;
     }
     // Dépense des ressources
-    eco->spendCopper(costCopper);
-    eco->spendSilver(costSilver);
-    eco->spendGold(costGold);
+    economySystem.spendCopper(costCopper);
+    economySystem.spendSilver(costSilver);
+    economySystem.spendGold(costGold);
 
     // 6. Tester le chemin entre le château et la sortie avec la tour placée
     m_towerLevel[i + j * width] = 9;
@@ -488,9 +472,9 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
         m_towerLevel[i + j * width] = m_level[i + j * width];
         std::cout << "[Debug] Placement de la tour bloque le chemin entre le château et la sortie. Annulation du placement.\n";
         // Remboursement si besoin (optionnel)
-        eco->addCopper(costCopper);
-        eco->addSilver(costSilver);
-        eco->addGold(costGold);
+        economySystem.addCopper(costCopper);
+        economySystem.addSilver(costSilver);
+        economySystem. addGold(costGold);
         return;
     }
 
@@ -510,14 +494,14 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     mapChanged = true;
 }
 
-void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManager)
+void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManager, EconomySystem& economySystem)
 {
     unsigned int i = static_cast<unsigned int>(position.x / (getTileSize().x * getScale()));
     unsigned int j = static_cast<unsigned int>(position.y / (getTileSize().y * getScale()));
 
     if (i < getWidth() && j < getHeight()) {
         // 1. Supprimer la tour du TowerManager
-        towerManager.removeTowerAt(i, j, getTileSize(), getScale());
+        towerManager.removeTowerAt(i, j, getTileSize(), getScale(), economySystem);
 
         // 2. Remettre la tuile à sa valeur d'origine
         m_towerLevel[i + j * width] = m_level[i + j * width];

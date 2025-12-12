@@ -6,11 +6,12 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <filesystem> // Ajout pour std::filesystem::path
+#include <filesystem>
 
 class TowerManager;
 class Window;
 class UI;
+class EconomySystem;
 
 /**
  * @brief TileMap gère la grille, le chargement des niveaux et l'édition de niveau.
@@ -69,9 +70,9 @@ public:
 	// Tower placement methods
 	inline const int& GetTowerIndex() const { return m_TowerIndex; }
 	inline int& SetTowerIndex() { return m_TowerIndex; }
-    void HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager);
-    void PlaceTower(const sf::Vector2f& position, TowerManager& towerManager);
-    void RemoveTower(const sf::Vector2f& position, TowerManager& towerManager);
+    void HandleTowerInput(const std::vector<sf::Event>& events, TowerManager& towerManager, EconomySystem& economySystem);
+    void PlaceTower(const sf::Vector2f& position, TowerManager& towerManager, EconomySystem& economySystem);
+    void RemoveTower(const sf::Vector2f& position, TowerManager& towerManager, EconomySystem& economySystem);
 
 public:
     int m_TowerIndex; // Index de la tour sélectionnée (Basic, Sniper, etc.)
