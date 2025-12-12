@@ -90,21 +90,25 @@ void Wave::update(float dt)
     }
 
     // 1. Détection des changements (Reste sur le Main Thread)
-    if (map->hasMapChanged()) {
-        for (auto& minion : minions) {
+    if (map->hasMapChanged()) 
+    {
+        for (auto& minion : minions) 
+        {
             bool needsUpdate = false;
-            for (const auto& pathPos : minion->getTargetPath()) {
-                if (map->getCurentTile(pathPos) == map->getLastModifiedTile()) {
-                    needsUpdate = true;
+            for (const auto& pathPos : minion->getTargetPath()) 
+            {
+                if (map->getCurentTile(pathPos) == map->getLastModifiedTile()) 
+                {
+					needsUpdate = true;
                     break;
                 }
             }
 
-            if (needsUpdate) {
+            if (needsUpdate) 
+            {
                 sf::Vector2u pos = map->getCurentTile(minion->getPosition());
                 Position startPos = { pos.y, pos.x };
 
-                // Trouver la position de fin 
                 sf::Vector2u endTile = map->findEdgeTile(3);
                 Position targetPos = { endTile.y, endTile.x };
 
@@ -113,11 +117,9 @@ void Wave::update(float dt)
 
                 unsigned int minionID = minion->getId();
 
-                // 2. Envoi des tâches de recalcul (Main Thread)
                 m_pendingUpdates.push_back(
                     m_threadPool.enqueue([towerLevel2D, startPos, targetPos, tilesize, minionID]() -> PathUpdateResult {
-                        // Ici on fait le calcul A*.
-						// Note : On ne modifie pas l'objet dans le thread, on retourne juste le résultat.
+                        // Note : On ne modifie pas l'objet dans le thread, on retourne juste le résultat.
                         Pathfinding pf(towerLevel2D);
 
                         std::optional<std::vector<Position>> pathOpt = pf.findPath(startPos, targetPos);
@@ -133,26 +135,24 @@ void Wave::update(float dt)
     }
 
     // 3. Récupération des résultats (À chaque frame)
-    // On parcourt la liste des futures pour voir si certains ont fini.
     auto it = m_pendingUpdates.begin();
     while (it != m_pendingUpdates.end()) {
         if (it->wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
             // Le calcul est fini !
             PathUpdateResult result = it->get(); // Récupère le résultat
 
-            // On trouve le minion correspondant et on applique le chemin
             auto minionIt = std::find_if(minions.begin(), minions.end(),
                 [id = result.minionID](auto& m) { return m->getId() == id; });
 
             if (minionIt != minions.end()) {
                 if (result.newPath.has_value() && !result.newPath->empty()) {
-                    static_cast<Minion*>(minionIt->get())->setPath(*result.newPath, map->getTileSize().x * map->getScale());
+                    minionIt->get()->savePath(*result.newPath, map->getTileSize().x * map->getScale());
                 }
                 else {
                     std::cout << "Aucun chemin valide trouve !" << std::endl;
                 }
+                minionIt->get()->setNeedPathUpdate(true);
             }
-
             it = m_pendingUpdates.erase(it); // On retire la tâche finie
         }
         else {

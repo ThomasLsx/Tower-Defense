@@ -5,7 +5,7 @@
 #include <cmath> 
 
 Minion::Minion(int id, TileMap* map, Castle* castle, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-	: Entity(id), map(map), castle(castle), health(health), copper(10), silver(10), gold(10), speed(speed), currentTargetIndex(0), maxHealth(health)
+	: Entity(id), map(map), castle(castle), health(health), copper(10), silver(10), gold(10), speed(speed), currentTargetIndex(0), maxHealth(health), specialStateTimer(0.0f)
 {
 }
 
@@ -46,6 +46,34 @@ void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
     if (!targetPath.empty()) {
         _position = targetPath[0]; 
         if (_shape) _shape->setPosition(_position);
+    }
+}
+
+void Minion::savePath(const std::vector<Position>& gridPath, float tileSize)
+{
+    savedPath.clear();
+
+    for (const Position& p : gridPath) {
+        // ATTENTION: p.x est la LIGNE (Y), p.y est la COLONNE (X)
+        float worldX = (p.y * tileSize) + (tileSize / 2.0f);
+        float worldY = (p.x * tileSize) + (tileSize / 2.0f);
+        savedPath.push_back(sf::Vector2f(worldX, worldY));
+    }
+}
+
+void Minion::setPath() {
+    if (savedPath.empty()) return;
+
+    targetPath = savedPath;
+
+    sf::Vector2u minionGridPos = map->getCurentTile(_position);
+
+    for (const auto& pathPos : getTargetPath())
+    {
+        if (map->getCurentTile(pathPos) == minionGridPos)
+        {
+			currentTargetIndex = &pathPos - &targetPath[0];
+        }
     }
 }
 
@@ -95,6 +123,14 @@ void Minion::followPath(float dt) {
         _position = target;
         if (_shape) _shape->setPosition(_position);
         currentTargetIndex++;
+
+        if (needPathUpdate)
+        {
+            needPathUpdate = false;
+            setPath();
+            //savedPath.clear();
+            return; 
+		}
 
         if (currentTargetIndex >= targetPath.size()) {
             std::cout << "Minion " << _id << " a atteint la base!" << std::endl;

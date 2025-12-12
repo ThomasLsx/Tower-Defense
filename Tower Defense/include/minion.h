@@ -2,6 +2,7 @@
 #include "entity.h"
 #include "map.h"
 #include "castle.h"
+#include "threadPool.h"
 #include <memory>
 #include <vector> 
 
@@ -23,12 +24,13 @@ private:
 	unsigned int silver;   ///< Silver accordée à la mort du minion.
 	unsigned int gold;     ///< Gold accordée à la mort du minion.
     std::vector<sf::Vector2f> targetPath; ///< Chemin en coordonnées du monde (pixels).
+	std::vector<sf::Vector2f> savedPath;  ///< Chemin sauvegardé en coordonnées du monde (pixels).
 	unsigned int maxHealth; 		///< Points de vie maximum du minion.
 	sf::RectangleShape healthBarBack;   ///< Arrière-plan de la barre de vie.
 	sf::RectangleShape healthBar;       ///< Barre de vie.
 
 	float specialStateTimer;		///< Timer pour les états spéciaux (ex: gelé, enflammé).
-
+	bool needPathUpdate = false; ///< Indique si le minion doit recalculer son chemin.
 
 public:
     /**
@@ -61,6 +63,12 @@ public:
      * @param tileSize La taille (largeur/hauteur) d'une tuile en pixels.
      */
     void setPath(const std::vector<Position>& gridPath, float tileSize);
+
+    void setPath();
+
+	void setNeedPathUpdate(bool needUpdate) { needPathUpdate = needUpdate; }
+
+    void savePath(const std::vector<Position>& gridPath, float tileSize);
 
     /**
      * @brief Inflige des dégâts au minion.
