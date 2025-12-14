@@ -1,44 +1,78 @@
 #pragma once
+
+#include <memory>
+#include <vector>
+
+#include "castle.h"
 #include "entity.h"
 #include "map.h"
-#include "castle.h"
 #include "threadPool.h"
-#include <memory>
-#include <vector> 
 
 struct Position;
+
 /**
  * @class Minion
- * @brief Représente un minion dans un jeu de type Tower Defense.
+ * @brief Représente un minion (ennemi) dans le jeu.
  *
  * Un minion suit un chemin prédéfini, peut subir des dégâts et récompense le joueur à sa mort.
  */
-class Minion : public Entity {
+class Minion : public Entity
+{
 private:
-    TileMap* map;               ///< Pointeur vers la map du jeu.
-	Castle* castle; ///< Pointeur faible vers le château.
-    unsigned int health;          ///< Points de vie actuels du minion.
-    float speed;        ///< Vitesse de déplacement du minion (pixels par seconde).
-    size_t currentTargetIndex; ///< Progression le long du chemin (0.0 à 1.0).
-    unsigned int copper;   ///< Copper accordée à la mort du minion.
-	unsigned int silver;   ///< Silver accordée à la mort du minion.
-	unsigned int gold;     ///< Gold accordée à la mort du minion.
-    std::vector<sf::Vector2f> targetPath; ///< Chemin en coordonnées du monde (pixels).
-	std::vector<sf::Vector2f> savedPath;  ///< Chemin sauvegardé en coordonnées du monde (pixels).
-	unsigned int maxHealth; 		///< Points de vie maximum du minion.
-	sf::RectangleShape healthBarBack;   ///< Arrière-plan de la barre de vie.
-	sf::RectangleShape healthBar;       ///< Barre de vie.
+    /** @brief Pointeur vers la carte du jeu. */
+    TileMap* map;
 
-	float specialStateTimer;		///< Timer pour les états spéciaux (ex: gelé, enflammé).
-	bool needPathUpdate = false; ///< Indique si le minion doit recalculer son chemin.
+    /** @brief Pointeur vers le château (objectif du minion). */
+    Castle* castle;
+
+    /** @brief Points de vie actuels du minion. */
+    unsigned int health;
+
+    /** @brief Vitesse de déplacement du minion (pixels par seconde). */
+    float speed;
+
+    /** @brief Index de la cible actuelle dans le chemin (progression). */
+    size_t currentTargetIndex;
+
+    /** @brief Quantité de cuivre accordée à la mort du minion. */
+    unsigned int copper;
+
+    /** @brief Quantité d'argent accordée à la mort du minion. */
+    unsigned int silver;
+
+    /** @brief Quantité d'or accordée à la mort du minion. */
+    unsigned int gold;
+
+    /** @brief Chemin actuel à suivre en coordonnées du monde (pixels). */
+    std::vector<sf::Vector2f> targetPath;
+
+    /** @brief Chemin sauvegardé en coordonnées du monde (pixels). */
+    std::vector<sf::Vector2f> savedPath;
+
+    /** @brief Points de vie maximum du minion. */
+    unsigned int maxHealth;
+
+    /** @brief Forme graphique de l'arrière-plan de la barre de vie. */
+    sf::RectangleShape healthBarBack;
+
+    /** @brief Forme graphique de la barre de vie. */
+    sf::RectangleShape healthBar;
+
+    /** @brief Timer pour gérer les états spéciaux (ex: ralentissement). */
+    float specialStateTimer;
+
+    /** @brief Indique si le minion nécessite une mise à jour de son chemin. */
+    bool needPathUpdate = false;
 
 public:
     /**
      * @brief Constructeur de Minion.
      * @param id Identifiant unique du minion.
      * @param map Pointeur vers la map du jeu.
+     * @param castle Pointeur vers le château.
      * @param health Points de vie initiaux du minion.
-     * @param reward Récompense accordée à la mort du minion.
+     * @param speed Vitesse de déplacement.
+     * @param reward Récompense de base (non utilisée si copper/silver/gold sont hardcodés).
      * @param pos Position initiale du minion.
      * @param rotation Rotation initiale.
      * @param color Couleur du minion.
@@ -46,8 +80,7 @@ public:
     Minion(int id, TileMap* map = nullptr, Castle* castle = nullptr, unsigned int health = 100, float speed = 50.0f, unsigned int reward = 10, sf::Vector2f pos = sf::Vector2f(0.0f, 0.0f), float rotation = 0.0f, sf::Color color = sf::Color::White);
 
     /**
-     * @brief Déplace le minion en fonction de sa vitesse et du temps écoulé.
-     * @param dt Temps écoulé depuis la dernière frame (en secondes).
+     * @brief Prépare le mouvement du minion (réinitialise le chemin).
      */
     void move();
 
@@ -58,38 +91,62 @@ public:
     void followPath(float dt);
 
     /**
-     * @brief Assigne un nouveau chemin au minion.
-     * @param gridPath Le chemin en coordonnées de GRILLE (venant de Pathfinding).
-     * @param tileSize La taille (largeur/hauteur) d'une tuile en pixels.
+     * @brief Assigne un nouveau chemin au minion depuis le pathfinding.
+     * @param gridPath Le chemin en coordonnées de GRILLE.
+     * @param tileSize La taille d'une tuile en pixels.
      */
     void setPath(const std::vector<Position>& gridPath, float tileSize);
 
+    /**
+     * @brief Recalcule ou définit le chemin par défaut.
+     */
     void setPath();
 
-	void setNeedPathUpdate(bool needUpdate) { needPathUpdate = needUpdate; }
+    /**
+     * @brief Définit si le minion a besoin d'une mise à jour de chemin.
+     * @param needUpdate true pour demander une mise à jour.
+     */
+    void setNeedPathUpdate(bool needUpdate)
+    {
+        needPathUpdate = needUpdate;
+    }
 
+    /**
+     * @brief Sauvegarde le chemin actuel.
+     * @param gridPath Chemin en coordonnées de grille.
+     * @param tileSize Taille d'une tuile.
+     */
     void savePath(const std::vector<Position>& gridPath, float tileSize);
 
     /**
-     * @brief Inflige des dégâts au minion.
+     * @brief Inflige des dégâts au minion (gestion mort et récompenses).
      * @param amount Montant des dégâts infligés.
-     * @param sourceId ID de l'entité source des dégâts (ex: ID de la tour).
      */
     void takeDamage(int amount);
 
+    /**
+     * @brief Applique des dégâts (alias ou logique alternative).
+     * @param amount Montant des dégâts.
+     */
     void makeDamage(int amount);
 
     /**
      * @brief Retourne la progression du minion le long de son chemin.
-     * @return Valeur entre 0.0 et 1.0 représentant la progression.
+     * @return L'index de la cible actuelle dans le vecteur chemin.
      */
-    size_t getPathProgress(void) const { return currentTargetIndex; }
+    size_t getPathProgress(void) const
+    {
+        return currentTargetIndex;
+    }
 
     /**
      * @brief Retourne les points de vie actuels du minion.
      * @return Points de vie restants.
      */
-    int getHealth(void) const { return health; }
+    int getHealth(void) const
+    {
+        return health;
+    }
 
     /**
      * @brief Appelé quand le minion est détruit (mort ou arrivée à destination).
@@ -103,84 +160,148 @@ public:
     void update(float dt) override;
 
     /**
-	* @brief Dessine le minion.
-	* @param window Fenêtre de rendu.
-    */
-	void draw(sf::RenderWindow& window) override;
+     * @brief Surcharge de update avec contexte de carte explicite.
+     * @param dt Temps écoulé.
+     * @param map Pointeur vers la carte.
+     */
+    void update(float dt, TileMap* map);
 
     /**
-    * @brief Définit la vitesse de déplacement du minion.
-    * @param newSpeed Nouvelle vitesse en pixels par seconde.
-    */
-    void setSpeed(float newSpeed) { speed = newSpeed; }
+     * @brief Dessine le minion et sa barre de vie.
+     * @param window Fenêtre de rendu.
+     */
+    void draw(sf::RenderWindow& window) override;
 
     /**
-    * @brief Récupère la vitesse actuelle du minion.
-    * @return Vitesse en pixels par seconde.
-    */
-    float getSpeed() const { return speed; }
+     * @brief Définit la vitesse de déplacement du minion.
+     * @param newSpeed Nouvelle vitesse en pixels par seconde.
+     */
+    void setSpeed(float newSpeed)
+    {
+        speed = newSpeed;
+    }
 
     /**
-    * @brief Retourne le chemin cible actuel du minion.
-    * @return Référence constante vers le vecteur de positions cibles.
-    */
-    const std::vector<sf::Vector2f>& getTargetPath() const { return targetPath; }
+     * @brief Récupère la vitesse actuelle du minion.
+     * @return Vitesse en pixels par seconde.
+     */
+    float getSpeed() const
+    {
+        return speed;
+    }
 
-    float getSpecialStateTimer() const { return specialStateTimer; }
+    /**
+     * @brief Retourne le chemin cible actuel du minion.
+     * @return Référence constante vers le vecteur de positions cibles.
+     */
+    const std::vector<sf::Vector2f>& getTargetPath() const
+    {
+        return targetPath;
+    }
 
-	void setSpecialStateTimer(float time) { specialStateTimer = time; }
+    /**
+     * @brief Récupère le temps restant pour l'état spécial.
+     * @return Temps en secondes.
+     */
+    float getSpecialStateTimer() const
+    {
+        return specialStateTimer;
+    }
 
-    TileMap* getMap() const { return map; }
+    /**
+     * @brief Définit le timer d'état spécial (ex: durée de ralentissement).
+     * @param time Temps en secondes.
+     */
+    void setSpecialStateTimer(float time)
+    {
+        specialStateTimer = time;
+    }
+
+    /**
+     * @brief Récupère la carte associée au minion.
+     * @return Pointeur vers TileMap.
+     */
+    TileMap* getMap() const
+    {
+        return map;
+    }
 };
 
-
 /**
-* @Class MinionNormal
-* @brief Représente un minion de type normal.
-*/
-class MinionNormal : public Minion {
+ * @Class MinionNormal
+ * @brief Représente un minion de type normal (équilibré).
+ */
+class MinionNormal : public Minion
+{
 public:
+    /**
+     * @brief Constructeur de MinionNormal.
+     * @param id Identifiant.
+     * @param map Pointeur carte.
+     * @param castle Pointeur château.
+     */
     MinionNormal(int id, TileMap* map = nullptr, Castle* castle = nullptr)
-        : Minion(id, map, castle, 100, 50.0f, 10) // health=100, speed=50, reward=10
+        : Minion(id, map, castle, 100, 50.0f, 10)
     {
         Entity::init(15, sf::Color::Green, sf::Color::Black, 2);
     }
 };
 
 /**
-* @Class MinionFast
-* @brief Représente un minion de type rapide.
-*/
-class MinionFast : public Minion {
+ * @Class MinionFast
+ * @brief Représente un minion de type rapide mais fragile.
+ */
+class MinionFast : public Minion
+{
 public:
+    /**
+     * @brief Constructeur de MinionFast.
+     * @param id Identifiant.
+     * @param map Pointeur carte.
+     * @param castle Pointeur château.
+     */
     MinionFast(int id, TileMap* map = nullptr, Castle* castle = nullptr)
-        : Minion(id, map, castle, 75, 100.0f, 15) // health=75, speed=100, reward=15
+        : Minion(id, map, castle, 75, 100.0f, 15)
     {
         Entity::init(15, sf::Color::Blue, sf::Color::Black, 2);
     }
 };
 
 /**
-* @Class MinionTank
-* @brief Représente un minion de type tank.
-*/
-class MinionTank : public Minion {
+ * @Class MinionTank
+ * @brief Représente un minion de type tank (lent et résistant).
+ */
+class MinionTank : public Minion
+{
 public:
+    /**
+     * @brief Constructeur de MinionTank.
+     * @param id Identifiant.
+     * @param map Pointeur carte.
+     * @param castle Pointeur château.
+     */
     MinionTank(int id, TileMap* map = nullptr, Castle* castle = nullptr)
-        : Minion(id, map, castle, 200, 30.0f, 25) // health=200, speed=30, reward=25
+        : Minion(id, map, castle, 200, 30.0f, 25)
     {
         Entity::init(20, sf::Color::Red, sf::Color::Black, 2);
     }
 };
 
 /**
-* @Class MinionBoss
-* @brief Représente un minion de type boss.
-*/
-class MinionBoss : public Minion {
+ * @Class MinionBoss
+ * @brief Représente un minion de type boss (très résistant).
+ */
+class MinionBoss : public Minion
+{
 public:
+    /**
+     * @brief Constructeur de MinionBoss.
+     * @param id Identifiant.
+     * @param map Pointeur carte.
+     * @param castle Pointeur château.
+     */
     MinionBoss(int id, TileMap* map = nullptr, Castle* castle = nullptr)
-        : Minion(id, map, castle, 500, 20.0f, 100) // health=500, speed=20, reward=100
+        : Minion(id, map, castle, 500, 20.0f, 100)
     {
         Entity::init(25, sf::Color::Magenta, sf::Color::Black, 2);
     }

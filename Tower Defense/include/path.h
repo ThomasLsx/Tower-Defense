@@ -1,88 +1,128 @@
 #pragma once
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/astar_search.hpp>
-#include <boost/property_map/property_map.hpp>
+#include <map>
+#include <optional>
+#include <set>
+#include <utility>
 #include <vector>
-#include <limits>
-#include <optional> // Pour un retour propre en C++ moderne
 
-// --- Définitions Boost et Types de base ---
+#include <SFML/System/Vector2.hpp>
 
-// Définir un tag pour la propriété de position
-namespace boost {
-    enum vertex_position_t { vertex_position };
-    BOOST_INSTALL_PROPERTY(vertex, position);
-}
+/**
+ * @brief Représente les coordonnées d'une tuile sur la grille.
+ */
+struct Position
+{
+    /** Coordonnée X de la tuile. */
+    int x;
+    /** Coordonnée Y de la tuile. */
+    int y;
 
-// Structure pour les coordonnées
-struct Position {
-    int x, y;
-    // Opérateur de comparaison pour les tests (optionnel mais utile)
-    bool operator==(const Position& other) const {
+    // Opérateurs pour la comparaison (nécessaire pour std::map/std::set)
+    bool operator==(const Position& other) const
+    {
         return x == other.x && y == other.y;
     }
-};
 
-// Définitions du graphe
-typedef boost::adjacency_list<
-    boost::vecS,
-    boost::vecS,
-    boost::undirectedS,
-    boost::property<boost::vertex_position_t, Position>,
-    boost::property<boost::edge_weight_t, int>
-> Graph;
-
-typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
-typedef boost::property_map<Graph, boost::vertex_position_t>::type PositionMap;
-typedef boost::graph_traits<Graph>::edge_descriptor Edge;
-
-struct ManhattanHeuristic : public boost::astar_heuristic<Graph, int> {
-    ManhattanHeuristic(Vertex goal, PositionMap positions)
-        : m_goal(goal), m_positions(positions) {
+    bool operator!=(const Position& other) const
+    {
+        return !(*this == other);
     }
 
-    int operator()(Vertex u) {
-        Position p_u = boost::get(m_positions, u);
-        Position p_goal = boost::get(m_positions, m_goal);
-        return abs(p_u.x - p_goal.x) + abs(p_u.y - p_goal.y);
-    }
-private:
-    Vertex m_goal;
-    PositionMap m_positions;
-};
-
-
-// --- Classe Pathfinding ---
-
-class Pathfinding {
-public:
     /**
-     * @brief Construit le graphe de pathfinding à partir d'une grille.
-     * @param grid Matrice 2D où 0 = passable, 1 (ou autre) = mur.
+     * @brief Opérateur de comparaison strict.
+     * @return true si cette position est strictement inférieure à 'other'.
      */
+    bool operator<(const Position& other) const
+    {
+        if (x != other.x)
+        {
+            return x < other.x;
+        }
+
+        return y < other.y;
+    }
+};
+
+/**
+ * @brief Implémente la logique de Flow Field basée sur Dijkstra Inversé.
+ * * Permet de générer un champ de flux indiquant la direction vers une cible (Château)
+ * pour toutes les tuiles atteignables de la carte.
+ */
+class Pathfinding
+{
+public:
+    Pathfinding() = default;
     Pathfinding(const std::vector<std::vector<int>>& grid);
 
     /**
-     * @brief Trouve le chemin le plus court entre deux positions.
-     * @param startPos Position de départ {x, y}.
-     * @param goalPos Position d'arrivée {x, y}.
-     * @return Un std::vector de Positions représentant le chemin,
-     * ou std::nullopt si aucun chemin n'est trouvé.
+     * @brief Génère le Flow Field à l'aide de l'algorithme de Dijkstra Inversé.
+     * * Le Flow Field est rempli de vecteurs normalisés pointant vers la cible.
+     * * @param targetPos La position de la cible (ex: le Château).
      */
-    std::optional<std::vector<Position>> findPath(Position startPos, Position goalPos);
+    void generateFlowField(Position targetPos);
+
+    /**
+     * @brief Récupère le vecteur de direction pour un index de tuile donné.
+     * * @param tileIndex L'index de la tuile dans la grille 1D.
+     * @return Un std::pair optionnel (dx, dy) représentant la direction.
+     */
+    std::optional<std::pair<int, int>> getVector(unsigned int tileIndex) const;
+
+    /**
+     * @brief Récupère la position de la prochaine tuile à atteindre depuis la position courante.
+     * * @param currentPos La position de départ.
+     * @return La position optionnelle de la prochaine tuile.
+     */
+    std::optional<Position> getNextMove(Position currentPos) const;
+
+    /**
+     * @brief Vérifie si le chemin vers la cible est bloqué.
+     * @return true si le chemin est inaccessible.
+     */
+    bool isPathBlocked() const
+    {
+        return m_isPathBlocked;
+    }
+
+    /**
+     * @brief Cherche la case valide la plus proche (celle qui a un chemin vers la cible).
+     * @param startPos La position de départ (la case bloquée).
+     * @param maxRadius Le rayon de recherche maximum (pour éviter de scanner toute la carte).
+     * @return La position de la case valide la plus proche, ou std::nullopt.
+     */
+    std::optional<Position> getNearestValidPosition(Position startPos, int maxRadius = 5) const;
 
 private:
-    /**
-     * @brief Obtient le descripteur de sommet pour une position donnée.
-     * @return Le Vertex correspondant, ou std::nullopt si la position
-     * est hors limites ou est un mur.
-     */
-    std::optional<Vertex> getVertex(Position pos) const;
+    /** Largeur de la grille. */
+    int m_width = 0;
+    /** Hauteur de la grille. */
+    int m_height = 0;
 
-    Graph m_graph;
-    PositionMap m_positionMap;
-    std::vector<std::vector<Vertex>> m_gridToVertex; // Mappe les (x,y) aux sommets
-    int m_height;
-    int m_width;
+    /** Grille de référence (Murs/Tours). */
+    std::vector<std::vector<int>> m_grid;
+
+    /** Contient les vecteurs de direction : <Index Tuile, Vecteur(dx, dy)>. */
+    std::map<unsigned int, std::pair<int, int>> m_vectorMap;
+
+    /** Map des distances de Dijkstra (accessible par index 1D). */
+    std::vector<int> m_distanceMap;
+
+    /** État indiquant si la cible est inaccessible. */
+    bool m_isPathBlocked = false;
+
+    /**
+     * @brief Vérifie si les coordonnées (x, y) sont à l'intérieur de la grille.
+     */
+    bool isValid(int x, int y) const;
+
+    /**
+     * @brief Vérifie si la tuile aux coordonnées (x, y) est praticable.
+     */
+    bool isWalkable(int x, int y) const;
+
+    /**
+     * @brief Convertit les coordonnées 2D (x, y) en un index 1D.
+     */
+    unsigned int getIndex(int x, int y) const;
 };

@@ -1,21 +1,32 @@
 // projectile.cpp
 #include "projectile.h"
+
+#include <cmath>
 #include <iostream>
-#include <cmath> 
 
 Projectile::Projectile(unsigned int id, unsigned int sourceTowerId, std::shared_ptr<Minion> target, sf::Vector2f velocity, unsigned int damage, float lifetime, sf::Vector2f pos, float rotation, sf::Color color)
-    :Entity(id), velocity(velocity), damage(damage), lifetime(lifetime), sourceTowerId(sourceTowerId),
+    : Entity(id),
+    velocity(velocity),
+    damage(damage),
+    lifetime(lifetime),
+    sourceTowerId(sourceTowerId),
     target(target)
 {
     Entity::init(5, sf::Color::Yellow);
     Entity::setPosition(pos);
 }
 
-void Projectile::update(float dt) {
-    if (!_isAlive) return;
+void Projectile::update(float dt)
+{
+    if (!_isAlive)
+    {
+        return;
+    }
 
     lifetime -= dt;
-    if (lifetime <= 0.0f) {
+
+    if (lifetime <= 0.0f)
+    {
         onDestroy();
         return;
     }
@@ -37,7 +48,11 @@ void Projectile::update(float dt) {
         {
             direction /= distance;
             _position += direction * moveAmount;
-            if (_shape) _shape->setPosition(_position);
+
+            if (_shape)
+            {
+                _shape->setPosition(_position);
+            }
         }
     }
     else
@@ -54,11 +69,13 @@ void Projectile::onHit()
         {
             targetPtr->takeDamage(damage);
         }
+
         onDestroy();
     }
 }
 
-void Projectile::onDestroy() {
+void Projectile::onDestroy()
+{
     if (_isAlive)
     {
         Entity::setIsAlive(false);

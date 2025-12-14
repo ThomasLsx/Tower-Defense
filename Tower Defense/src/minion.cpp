@@ -1,171 +1,181 @@
-// minion.cpp
 #include "minion.h"
-#include "path.h"
+
+#include <cmath>
 #include <iostream>
-#include <cmath> 
+
+namespace
+{
+    float length(const sf::Vector2f& v)
+    {
+        return std::sqrt(v.x * v.x + v.y * v.y);
+    }
+
+    sf::Vector2f normalize(const sf::Vector2f& v)
+    {
+        float l = length(v);
+        if (l != 0)
+        {
+            return v / l;
+        }
+        return v;
+    }
+}
 
 Minion::Minion(int id, TileMap* map, Castle* castle, unsigned int health, float speed, unsigned int reward, sf::Vector2f pos, float rotation, sf::Color color)
-	: Entity(id), map(map), castle(castle), health(health), copper(10), silver(10), gold(10), speed(speed), currentTargetIndex(0), maxHealth(health), specialStateTimer(0.0f)
+    : Entity(id), map(map), castle(castle), health(health),
+    copper(10), silver(10), gold(10),
+    speed(speed), currentTargetIndex(0), maxHealth(health), specialStateTimer(0.0f)
 {
 }
 
 void Minion::move()
 {
-    // 1. Initialiser le système de pathfinding avec la grille
-    Pathfinding pf(map->getTowerLevel2D());
-
-    // 2. Définir le départ et l'arrivée
-    sf::Vector2u pos = map->getCurentTile(this->getPosition());
-    Position start = { pos.y, pos.x };
-
-    // Trouver la position de fin
-    sf::Vector2u endTile = map->getCastleTile();
-    Position goal = { endTile.y, endTile.x };
-    // 3. Trouver le chemin
-    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
-
-    if (pathOpt.has_value() && !pathOpt->empty()) {
-        static_cast<Minion*>(this)->setPath(*pathOpt, map->getTileSize().x * map->getScale());
-    }
-    else {
-        std::cout << "Aucun chemin valide trouve !" << std::endl;
-    }
-}
-
-void Minion::setPath(const std::vector<Position>& gridPath, float tileSize) {
     targetPath.clear();
     currentTargetIndex = 0;
-
-    for (const Position& p : gridPath) {
-        // ATTENTION: p.x est la LIGNE (Y), p.y est la COLONNE (X)
-        float worldX = (p.y * tileSize) + (tileSize / 2.0f);
-        float worldY = (p.x * tileSize) + (tileSize / 2.0f);
-        targetPath.push_back(sf::Vector2f(worldX, worldY));
-    }
-
-    if (!targetPath.empty()) {
-        _position = targetPath[0]; 
-        if (_shape) _shape->setPosition(_position);
-    }
 }
 
-void Minion::savePath(const std::vector<Position>& gridPath, float tileSize)
+void Minion::update(float dt)
 {
-    savedPath.clear();
-
-    for (const Position& p : gridPath) {
-        // ATTENTION: p.x est la LIGNE (Y), p.y est la COLONNE (X)
-        float worldX = (p.y * tileSize) + (tileSize / 2.0f);
-        float worldY = (p.x * tileSize) + (tileSize / 2.0f);
-        savedPath.push_back(sf::Vector2f(worldX, worldY));
+    if (health > 0 && getIsAlive())
+    {
+        if (map->hasMapChanged())
+        {
+            move();
+            map->setMapChanged(false);
+        }
+        followPath(dt);
     }
 }
 
-void Minion::setPath() {
-    if (savedPath.empty()) return;
-
-    targetPath = savedPath;
-
-    sf::Vector2u minionGridPos = map->getCurentTile(_position);
-
-    for (const auto& pathPos : getTargetPath())
+void Minion::followPath(float dt)
+{
+    if (!map)
     {
-        if (map->getCurentTile(pathPos) == minionGridPos)
+        return;
+    }
+
+    if (targetPath.empty())
+    {
+        sf::Vector2u myGridPos = map->getCurentTile(getPosition());
+        Position currentPosStruct = { static_cast<int>(myGridPos.x), static_cast<int>(myGridPos.y) };
+
+        auto nextPosOpt = map->getNextDirection(currentPosStruct);
+
+        if (nextPosOpt.has_value())
         {
-			currentTargetIndex = &pathPos - &targetPath[0];
+            Position nextP = nextPosOpt.value();
+
+            sf::Vector2u nextGridPos(nextP.x, nextP.y);
+            sf::Vector2f worldTarget = map->Tile2Position(nextGridPos);
+
+            targetPath.clear();
+            targetPath.push_back(worldTarget);
+        }
+        else
+        {
+            if (myGridPos == map->getCastleTile())
+            {
+                if (castle)
+                {
+                    castle->takeDamage(10);
+                }
+                this->onDestroy();
+            }
+
+            auto rescuePosOpt = map->getNearestAccessibleTile(currentPosStruct);
+
+            if (rescuePosOpt.has_value()) {
+                Position rescuePos = rescuePosOpt.value();
+                sf::Vector2u rescueGridPos(rescuePos.x, rescuePos.y);
+
+                targetPath.clear();
+                targetPath.push_back(map->Tile2Position(rescueGridPos));
+            }
+            else {
+                // std::cout << "[DEBUG] : Le minion" << id << "est vraiment bloqu�" << std::endl;
+                return;
+            }
+        }
+    }
+
+    if (!targetPath.empty())
+    {
+        sf::Vector2f target = targetPath[0];
+        sf::Vector2f direction = target - getPosition();
+        float dist = length(direction);
+        float moveStep = speed * dt;
+
+        if (dist <= moveStep)
+        {
+            setPosition(target);
+            targetPath.clear();
+        }
+        else
+        {
+            setPosition(getPosition() + normalize(direction) * moveStep);
         }
     }
 }
 
-void Minion::update(float dt) {
-    if (health > 0) {
-        followPath(dt);
+void Minion::onDestroy()
+{
+    if (_isAlive)
+    {
+        Entity::setIsAlive(false);
+    }
+}
+
+void Minion::takeDamage(int amount)
+{
+    if (amount <= 0 || health == 0)
+    {
+        return;
+    }
+
+    if ((unsigned int)amount >= health)
+    {
+        health = 0;
+
+        if (castle)
+        {
+            castle->addResource(copper, silver, gold);
+        }
+
+        this->onDestroy();
+    }
+    else
+    {
+        health -= amount;
     }
 }
 
 void Minion::draw(sf::RenderWindow& window)
 {
     if (getIsAlive())
-    { 
-    // Dessiner l'arrière-plan de la barre de vie
-    healthBarBack = sf::RectangleShape(sf::Vector2f(35.f, 10.f));
-    healthBarBack.setFillColor(sf::Color::Transparent);
-    healthBarBack.setOutlineColor(sf::Color::Black);
-    healthBarBack.setOutlineThickness(2.f);
-    healthBarBack.setOrigin(sf::Vector2f(17.5f, 15.f + map->getHeight()));
-    healthBarBack.setPosition(this->getPosition());
-    window.draw(healthBarBack);
+    {
+        // Barre de vie (Fond)
+        healthBarBack.setSize(sf::Vector2f(35.f, 6.f));
+        healthBarBack.setFillColor(sf::Color(50, 50, 50, 200));
+        healthBarBack.setOutlineColor(sf::Color::Black);
+        healthBarBack.setOutlineThickness(1.f);
+        healthBarBack.setOrigin(sf::Vector2f(17.5f, 15.f + 10.0f));
+        healthBarBack.setPosition(this->getPosition());
+        window.draw(healthBarBack);
 
-    // Dessiner la barre de vie
-    healthBar = sf::RectangleShape(sf::Vector2f(35.f, 10.f));
-    healthBar.setFillColor(sf::Color::Red);
-    healthBar.setOrigin(sf::Vector2f(17.5f, 15.f + map->getHeight()));
-    healthBar.setPosition(this->getPosition());
-    float healthPercent = static_cast<float>(health) / static_cast<float>(maxHealth);
-    healthBar.setSize(sf::Vector2f(35.f * healthPercent, 10.f));
-    window.draw(healthBar);
-    
-    window.draw(*_shape);
-    }
-}
+        // Barre de vie (Remplissage)
+        healthBar.setFillColor(sf::Color::Red);
+        healthBar.setOrigin(sf::Vector2f(17.5f, 15.f + 10.0f));
+        healthBar.setPosition(this->getPosition());
 
-void Minion::followPath(float dt) {
-    if (targetPath.empty() || currentTargetIndex >= targetPath.size()) {
-        return;
-    }
-
-    sf::Vector2f target = targetPath[currentTargetIndex];
-    sf::Vector2f direction = target - _position;
-    float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-    float moveAmount = speed * dt;
-
-    if (distance <= moveAmount) {
-        _position = target;
-        if (_shape) _shape->setPosition(_position);
-        currentTargetIndex++;
-
-        if (needPathUpdate)
+        float healthPercent = static_cast<float>(health) / static_cast<float>(maxHealth);
+        if (healthPercent < 0)
         {
-            needPathUpdate = false;
-            setPath();
-            //savedPath.clear();
-            return; 
-		}
-
-        if (currentTargetIndex >= targetPath.size()) {
-            std::cout << "Minion " << _id << " a atteint la base!" << std::endl;
-			castle->takeDamage(10); 
-            this->onDestroy();
+            healthPercent = 0;
         }
-    }
-    else {
-        direction /= distance;
-        _position += direction * moveAmount;
-        if (_shape) _shape->setPosition(_position);
-    }
-}
+        healthBar.setSize(sf::Vector2f(35.f * healthPercent, 6.f));
 
-void Minion::makeDamage(int amount)
-{
-    // TODO
-}
+        window.draw(healthBar);
 
-void Minion::onDestroy() {
-    if (_isAlive) {
-        Entity::setIsAlive(false);
-    }
-}
-
-void Minion::takeDamage(int amount) {
-    if (amount <= 0 || health == 0) return;
-
-    if ((unsigned int)amount >= health) {
-        health = 0;
-        std::cout << "Minion " << _id << " est mort." << std::endl;
-		castle->addResource(copper, silver, gold);
-        this->onDestroy();
-    }
-    else {
-        health -= amount;
+        Entity::draw(window);
     }
 }

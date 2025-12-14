@@ -1,42 +1,112 @@
 #pragma once
+
 #include <SFML/Graphics.hpp>
-#include "map.h"
+
 #include "economySystem.h"
+#include "map.h"
 
 class TileMap;
 class EconomySystem;
 
-class Castle {
+/**
+ * @brief Représente le château (la base) que le joueur doit défendre.
+ */
+class Castle
+{
 private:
-	unsigned int health;
-	unsigned int maxHealth;
-	TileMap* map;
-	EconomySystem* economySystem;
+    /** @brief Points de vie actuels du château. */
+    unsigned int health;
 
-	sf::RectangleShape healthBar;
-	sf::RectangleShape healthBarBack;
-	sf::Vector2u castleTile;
+    /** @brief Points de vie maximum du château. */
+    unsigned int maxHealth;
 
-	bool destroyed;
+    /** @brief Pointeur vers la carte de tuiles. */
+    TileMap* map;
+
+    /** @brief Pointeur vers le système économique pour l'ajout de ressources. */
+    EconomySystem* economySystem;
+
+    /** @brief Forme graphique représentant la barre de vie (remplissage). */
+    sf::RectangleShape healthBar;
+
+    /** @brief Forme graphique représentant l'arrière-plan de la barre de vie. */
+    sf::RectangleShape healthBarBack;
+
+    /** @brief Coordonnées de la tuile sur laquelle se trouve le château. */
+    sf::Vector2u castleTile;
+
+    /** @brief Indique si le château est détruit (Game Over). */
+    bool destroyed;
 
 public:
-	Castle(TileMap* map = nullptr, EconomySystem* economySystem = nullptr, unsigned int maxHealth = 100);
-	~Castle() = default;
+    /**
+     * @brief Constructeur de Castle.
+     * @param map Pointeur vers la carte.
+     * @param economySystem Pointeur vers le système économique.
+     * @param maxHealth Points de vie initiaux et maximums.
+     */
+    Castle(TileMap* map = nullptr, EconomySystem* economySystem = nullptr, unsigned int maxHealth = 100);
 
-	void takeDamage(unsigned int amount);
-	void draw(sf::RenderWindow& window);
+    /**
+     * @brief Destructeur par défaut.
+     */
+    ~Castle() = default;
 
-	inline bool isDefeated() const { return destroyed; }
+    /**
+     * @brief Inflige des dégâts au château.
+     * @param amount Quantité de dégâts à infliger.
+     */
+    void takeDamage(unsigned int amount);
 
-	inline unsigned int getHealth() const { return health; }
-	inline unsigned int getMaxHealth() const { return maxHealth; }
+    /**
+     * @brief Dessine le château (barre de vie) sur la fenêtre.
+     * @param window Fenêtre de rendu SFML.
+     */
+    void draw(sf::RenderWindow& window);
 
-	void destroy();
+    /**
+     * @brief Vérifie si le château est détruit.
+     * @return true si le château est détruit, false sinon.
+     */
+    inline bool isDefeated() const
+    {
+        return destroyed;
+    }
 
-	/* Add rececourse */
-	void addResource(int copper, int silver, int gold);
+    /**
+     * @brief Récupère les points de vie actuels.
+     * @return Les PV actuels.
+     */
+    inline unsigned int getHealth() const
+    {
+        return health;
+    }
+
+    /**
+     * @brief Récupère les points de vie maximums.
+     * @return Les PV max.
+     */
+    inline unsigned int getMaxHealth() const
+    {
+        return maxHealth;
+    }
+
+    /**
+     * @brief Force la destruction du château (déclenche l'état Game Over).
+     */
+    void destroy();
+
+    /**
+     * @brief Ajoute des ressources au joueur (gain passif ou récompense).
+     * @param copper Quantité de cuivre.
+     * @param silver Quantité d'argent.
+     * @param gold Quantité d'or.
+     */
+    void addResource(int copper, int silver, int gold);
 
 private:
-	void setCastleTile();
-
+    /**
+     * @brief Initialise la position de la tuile du château à partir de la carte.
+     */
+    void setCastleTile();
 };

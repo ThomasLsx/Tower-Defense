@@ -1,85 +1,100 @@
 #include "tower.h"
-#include "projectilesystem.h"
-#include "minion.h"
-#include "Game.h"
-extern Game* g_game_instance;
+
+#include <cmath>
 #include <iostream>
 #include <memory>
-#include <cmath>
+
+#include "Game.h"
+#include "minion.h"
+#include "projectilesystem.h"
+
+extern Game* g_game_instance;
 
 Tower::Tower(unsigned int id, float range, float fireRate, unsigned int level, unsigned int damage,
-             unsigned int costCopper, unsigned int costSilver, unsigned int costGold,
-             sf::Vector2f pos, sf::Color color)
+    unsigned int costCopper, unsigned int costSilver, unsigned int costGold,
+    sf::Vector2f pos, sf::Color color)
     : Entity(id),
-      range(range),
-      fireRate(fireRate),
-      fireCooldown(0.0f),
-      level(level),
-      damage(damage),
-      costCopper(costCopper),
-      costSilver(costSilver),
-      costGold(costGold)
+    range(range),
+    fireRate(fireRate),
+    fireCooldown(0.0f),
+    level(level),
+    damage(damage),
+    costCopper(costCopper),
+    costSilver(costSilver),
+    costGold(costGold)
 {
     this->init(20, 20, color);
     this->setPosition(pos);
 }
 
 void Tower::update(float dt)
-{}
+{
+}
 
-void Tower::tryFire(ProjectileSystem& projectileSystem) {
+void Tower::tryFire(ProjectileSystem& projectileSystem)
+{
     for (auto it = targets.begin(); it != targets.end();)
     {
         if (auto targetPtr = it->lock())
         {
-            // SUCCÈS: Le minion (targetPtr) existe toujours
-            projectileSystem.createProjectile(*this, targetPtr, damage, 300.0f); // 300.0f = vitesse projectile
-            //std::cout << "Tower " << Entity::getId() << " fires at minion " << targetPtr->getId() << std::endl;
-            fireCooldown = fireRate; // Réinitialise le timer
-            
-			attackSpecialEffect(*it); // Applique l'effet spécial de la tour (si défini)
+            // Le minion (targetPtr) existe toujours
+            projectileSystem.createProjectile(*this, targetPtr, damage, 300.0f);
+
+            fireCooldown = fireRate;
+
+            attackSpecialEffect(*it);
 
             break;
         }
         else
         {
-            // ÉCHEC: Le minion n'existe plus (mort, etc.)
+            // Le minion n'existe plus (mort, etc.)
             it = targets.erase(it);
         }
     }
 }
 
-void Tower::upgrade() {
-    if (!g_game_instance) return;
+void Tower::upgrade()
+{
+    if (!g_game_instance)
+    {
+        return;
+    }
+
     EconomySystem* eco = g_game_instance->getEconomySystem();
-    // Prix d'upgrade = 1.5x le prix de base, arrondi
+
+    // Prix d'upgrade = 1.5x le prix de base
     unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
     unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
-    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
-    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+    unsigned int upgradeGold = static_cast<unsigned int>(costGold * 1.5f);
+
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold)
+    {
         std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
         return;
     }
+
     eco->spendCopper(upgradeCopper);
     eco->spendSilver(upgradeSilver);
     eco->spendGold(upgradeGold);
-    // Appliquer l'upgrade
+
     level++;
     range *= 1.1f;
     damage = static_cast<unsigned int>(damage * 1.2f);
+
     std::cout << "Tower " << Entity::getId() << " upgraded to level " << level << " (Damage: " << damage << ")" << std::endl;
 }
 
-void Tower::onDestroy() {
+void Tower::onDestroy()
+{
     std::cout << "Tower " << Entity::getId() << " destroyed!" << std::endl;
     Entity::setIsAlive(false);
 }
 
-
 void Tower::update(float dt, const std::vector<std::shared_ptr<Minion>>& minions, ProjectileSystem& projectileSystem)
 {
-    // Met à jour le cooldown
-    if (fireCooldown > 0) {
+    if (fireCooldown > 0)
+    {
         fireCooldown -= dt;
     }
 
@@ -99,7 +114,6 @@ void Tower::SearchTargets(const std::vector<std::shared_ptr<Minion>>& allMinions
 
     for (const auto& minionPtr : allMinions)
     {
-
         sf::Vector2f direction = minionPtr->getPosition() - _position;
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
@@ -108,8 +122,6 @@ void Tower::SearchTargets(const std::vector<std::shared_ptr<Minion>>& allMinions
             targets.push_back(minionPtr);
         }
     }
-
-    // TODO: Trier les cibles (ex: la plus proche, la plus faible, etc.)
 }
 
 // ==========================================================
@@ -121,26 +133,36 @@ BasicTower::BasicTower(unsigned int id, sf::Vector2f pos)
 {
 }
 
-void BasicTower::upgrade() {
-    if (!g_game_instance) return;
+void BasicTower::upgrade()
+{
+    if (!g_game_instance)
+    {
+        return;
+    }
+
     EconomySystem* eco = g_game_instance->getEconomySystem();
+
     unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
     unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
-    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
-    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+    unsigned int upgradeGold = static_cast<unsigned int>(costGold * 1.5f);
+
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold)
+    {
         std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
         return;
     }
+
     eco->spendCopper(upgradeCopper);
     eco->spendSilver(upgradeSilver);
     eco->spendGold(upgradeGold);
+
     level++;
     range *= 1.10f;
     damage += 10;
     fireRate *= 1.10f;
+
     std::cout << "BasicTower upgraded to level " << level << std::endl;
 }
-
 
 // ==========================================================
 // 2. SPEED TOWER (Tour rapide)
@@ -151,26 +173,36 @@ SpeedTower::SpeedTower(unsigned int id, sf::Vector2f pos)
 {
 }
 
-void SpeedTower::upgrade() {
-    if (!g_game_instance) return;
+void SpeedTower::upgrade()
+{
+    if (!g_game_instance)
+    {
+        return;
+    }
+
     EconomySystem* eco = g_game_instance->getEconomySystem();
+
     unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
     unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
-    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
-    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+    unsigned int upgradeGold = static_cast<unsigned int>(costGold * 1.5f);
+
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold)
+    {
         std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
         return;
     }
+
     eco->spendCopper(upgradeCopper);
     eco->spendSilver(upgradeSilver);
     eco->spendGold(upgradeGold);
+
     level++;
     range *= 1.05f;
     damage += 3;
     fireRate *= 1.20f;
+
     std::cout << "SpeedTower upgraded to level " << level << std::endl;
 }
-
 
 // ==========================================================
 // 3. SNIPER TOWER (Tour de précision)
@@ -181,61 +213,83 @@ SniperTower::SniperTower(unsigned int id, sf::Vector2f pos)
 {
 }
 
-void SniperTower::upgrade() {
-    if (!g_game_instance) return;
+void SniperTower::upgrade()
+{
+    if (!g_game_instance)
+    {
+        return;
+    }
+
     EconomySystem* eco = g_game_instance->getEconomySystem();
+
     unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
     unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
-    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
-    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+    unsigned int upgradeGold = static_cast<unsigned int>(costGold * 1.5f);
+
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold)
+    {
         std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
         return;
     }
+
     eco->spendCopper(upgradeCopper);
     eco->spendSilver(upgradeSilver);
     eco->spendGold(upgradeGold);
+
     level++;
     range += 75.0f;
     damage += 35;
     fireRate *= 1.05f;
+
     std::cout << "SniperTower upgraded to level " << level << std::endl;
 }
-
 
 // ==========================================================
 // 4. SLOW TOWER (Tour de ralentissement)
 // ==========================================================
 
 SlowTower::SlowTower(unsigned int id, sf::Vector2f pos)
-    : Tower(id, 220.0f, 0.7f, 1, 2, 10, 0, 2, pos, sf::Color(0, 255, 255)), slowEffect(0.3f)
+    : Tower(id, 220.0f, 0.7f, 1, 2, 10, 0, 2, pos, sf::Color(0, 255, 255)),
+    slowEffect(0.3f)
 {
 }
 
-void SlowTower::upgrade() {
-    if (!g_game_instance) return;
+void SlowTower::upgrade()
+{
+    if (!g_game_instance)
+    {
+        return;
+    }
+
     EconomySystem* eco = g_game_instance->getEconomySystem();
+
     unsigned int upgradeCopper = static_cast<unsigned int>(costCopper * 1.5f);
     unsigned int upgradeSilver = static_cast<unsigned int>(costSilver * 1.5f);
-    unsigned int upgradeGold   = static_cast<unsigned int>(costGold * 1.5f);
-    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold) {
+    unsigned int upgradeGold = static_cast<unsigned int>(costGold * 1.5f);
+
+    if (eco->getCopper() < (int)upgradeCopper || eco->getSilver() < (int)upgradeSilver || eco->getGold() < (int)upgradeGold)
+    {
         std::cout << "Pas assez de ressources pour améliorer cette tour !\n";
         return;
     }
+
     eco->spendCopper(upgradeCopper);
     eco->spendSilver(upgradeSilver);
     eco->spendGold(upgradeGold);
+
     level++;
     range *= 1.15f;
     damage += 1;
     fireRate *= 1.15f;
+
     std::cout << "SlowTower upgraded to level " << level << std::endl;
 }
 
 void SlowTower::attackSpecialEffect(std::weak_ptr<Minion> target)
 {
     if (auto targetPtr = target.lock())
-    {        
-        if (targetPtr->getSpecialStateTimer() <= 0.0f) 
+    {
+        if (targetPtr->getSpecialStateTimer() <= 0.0f)
         {
             // Appliquer l'effet de ralentissement au minion
             float originalSpeed = targetPtr->getSpeed();
@@ -246,8 +300,8 @@ void SlowTower::attackSpecialEffect(std::weak_ptr<Minion> target)
         }
         else
         {
-			// Si le minion est déjà ralenti, on réinitialise juste le timer
-			targetPtr->setSpecialStateTimer(5.0f); // Ralentissement pendant 5 secondes
+            // Si le minion est déjà ralenti, on réinitialise juste le timer
+            targetPtr->setSpecialStateTimer(5.0f);
         }
     }
 }

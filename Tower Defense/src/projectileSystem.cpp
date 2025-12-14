@@ -1,18 +1,21 @@
 // projectileSystem.cpp
 #include "projectilesystem.h"
-#include "projectile.h"
-#include "entity.h"
-#include "tower.h"
-#include "minion.h" 
 
-#include <memory>
 #include <algorithm>
 #include <iostream>
+#include <memory>
+
+#include "entity.h"
+#include "minion.h"
+#include "projectile.h"
+#include "tower.h"
 
 ProjectileSystem::ProjectileSystem() = default;
+
 ProjectileSystem::~ProjectileSystem() = default;
 
-void ProjectileSystem::createProjectile(const Tower& source, std::shared_ptr<Minion> target, int dmg, float speed) {
+void ProjectileSystem::createProjectile(const Tower& source, std::shared_ptr<Minion> target, int dmg, float speed)
+{
     auto proj = std::make_shared<Projectile>(
         static_cast<unsigned int>(projectiles.size()), // ID (simple)
         source.getId(),
@@ -26,13 +29,16 @@ void ProjectileSystem::createProjectile(const Tower& source, std::shared_ptr<Min
     projectiles.emplace_back(proj);
 }
 
-void ProjectileSystem::update(float dt) {
-    for (auto it = projectiles.begin(); it != projectiles.end(); ) {
+void ProjectileSystem::update(float dt)
+{
+    for (auto it = projectiles.begin(); it != projectiles.end(); )
+    {
         Projectile& projectile = **it;
 
         projectile.update(dt);
 
-        if (!projectile.getIsAlive()) {
+        if (!projectile.getIsAlive())
+        {
             it = projectiles.erase(it);
             continue;
         }
@@ -44,7 +50,8 @@ void ProjectileSystem::update(float dt) {
                 projectile.onHit();
                 it = projectiles.erase(it);
             }
-            else {
+            else
+            {
                 ++it;
             }
         }
@@ -63,13 +70,18 @@ void ProjectileSystem::draw(sf::RenderWindow& window)
     }
 }
 
-void ProjectileSystem::removeProjectile(int id) {
+void ProjectileSystem::removeProjectile(int id)
+{
     projectiles.erase(
         std::remove_if(projectiles.begin(), projectiles.end(),
-            [id](const std::shared_ptr<Projectile>& p) { return p->getId() == id; }),
+            [id](const std::shared_ptr<Projectile>& p)
+            {
+                return p->getId() == id;
+            }),
         projectiles.end());
 }
 
-int ProjectileSystem::getActiveCount() const {
+int ProjectileSystem::getActiveCount() const
+{
     return static_cast<int>(projectiles.size());
 }

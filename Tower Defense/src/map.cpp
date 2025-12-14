@@ -3,7 +3,6 @@
 #include "towerManager.h"
 #include "Window.h"
 #include "UI.h"
-#include "path.h"
 #include <sstream> 
 #include <SFML/Graphics/View.hpp>
 
@@ -22,6 +21,27 @@ TileMap::TileMap(sf::RenderWindow& window) : window(window)
     m_TowerIndex = -1;   // Type de tour sélectionné (aucune sélection au départ)
     m_TowerOptions = 4; // Nombre de types de tours (Basic, Sniper, Speed, slow)
 
+    loadLevel("assets/map1.txt");
+
+    m_pathfinding = Pathfinding(getTowerLevel2D());
+    updateFlowField();
+}
+
+void TileMap::updateFlowField()
+{
+    sf::Vector2u castleTile = getCastleTile();
+    // ATTENTION aux X/Y : Dans findEdgeTile, tu renvoies x,y.
+    // Dans Pathfinding, on utilise x=Col, y=Row.
+
+    m_pathfinding = Pathfinding(getTowerLevel2D());
+
+    m_pathfinding.generateFlowField({ (int)castleTile.x, (int)castleTile.y });
+}
+
+// Le wrapper pour les minions
+std::optional<Position> TileMap::getNextDirection(Position currentPos) const
+{
+    return m_pathfinding.getNextMove(currentPos);
 }
 
 bool TileMap::loadTile(const std::filesystem::path& tileset, const int* tiles)
@@ -157,7 +177,7 @@ void TileMap::drawPath()
     Position start = { pos.y, pos.x };
     sf::Vector2u endTile = getCastleTile();
     Position goal = { endTile.y, endTile.x };
-    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+    std::optional<std::vector<Position>> pathOpt = std::nullopt; // pf.findPath(start, goal);
 
     if (!pathOpt.has_value() || pathOpt->empty()) {
 
@@ -247,11 +267,6 @@ const sf::Vector2u TileMap::getCurentTile(sf::Vector2f position) const
     return sf::Vector2u(0, 0); // Retourne (0,0) si les coordonnées sont hors limites
 }
 
-/**
-* @brief Trouve la première case d'une valeur donnée sur le bord de la grille
-* @param value La valeur à chercher
-* @return sf::Vector2u (x, y) de la case trouvée, ou (0,0) si non trouvée
-*/
 sf::Vector2u TileMap::findEdgeTile(int value) const {
     for (unsigned int y = 0; y < height; ++y) {
         for (unsigned int x = 0; x < width; ++x) {
@@ -461,17 +476,13 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     // 6. Tester le chemin entre le château et la sortie avec la tour placée
     m_towerLevel[i + j * width] = 9;
 
-    Pathfinding pf(getTowerLevel2D());
-    sf::Vector2u pos = getCastleTile();
-    Position start = { pos.y, pos.x };
-    sf::Vector2u endTile = getSpawnTile();
-    Position goal = { endTile.y, endTile.x };
-    std::optional<std::vector<Position>> pathOpt = pf.findPath(start, goal);
+    updateFlowField();
 
-    if (!pathOpt.has_value() || pathOpt->empty()) {
+    if (m_pathfinding.isPathBlocked()) {
         m_towerLevel[i + j * width] = m_level[i + j * width];
-        std::cout << "[Debug] Placement de la tour bloque le chemin entre le château et la sortie. Annulation du placement.\n";
-        // Remboursement si besoin (optionnel)
+        // std::cout << "[Debug] Placement de la tour bloque le chemin entre le château et la sortie. Annulation du placement.\n";
+        // Remboursement
+        updateFlowField();
         economySystem.addCopper(costCopper);
         economySystem.addSilver(costSilver);
         economySystem. addGold(costGold);
@@ -490,7 +501,7 @@ void TileMap::PlaceTower(const sf::Vector2f& position, TowerManager& towerManage
     towerManager.addTower(towerPosition, m_TowerIndex);
     std::cout << "Tour de type " << m_TowerIndex << " placee sur la tuile (" << i << ", " << j << ")\n";
 
-    drawPath();
+    // drawPath();
     mapChanged = true;
 }
 
@@ -508,8 +519,9 @@ void TileMap::RemoveTower(const sf::Vector2f& position, TowerManager& towerManag
 
         // 3. Stocker la tuile modifiée et déclencher le recalcul
         lastModifiedTile = sf::Vector2u(i, j);
-        drawPath();
+        // drawPath();
         mapChanged = true;
+        updateFlowField();
 
         std::cout << "Tour supprimée à (" << i << ", " << j << ")\n";
     }

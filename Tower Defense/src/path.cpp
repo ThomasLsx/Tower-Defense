@@ -1,155 +1,196 @@
 #include "path.h"
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
-#include <boost/graph/graph_traits.hpp>
-#include <iostream>
+#include <limits>
+#include <set>
+#include <utility>
+#include <vector>
+
+const std::vector<Position> directions = 
+{
+    {0, 1},
+    {0, -1},
+    {1, 0},
+    {-1, 0}
+};
 
 Pathfinding::Pathfinding(const std::vector<std::vector<int>>& grid)
-    : m_height(grid.size()), m_width(0)
+    : m_grid(grid)
 {
-    if (m_height == 0) return;
+    if (grid.empty())
+    {
+        return;
+    }
+
+    m_height = grid.size();
     m_width = grid[0].size();
-    if (m_width == 0) return;
 
-    // 1. Initialiser la map de position
-    m_positionMap = boost::get(boost::vertex_position, m_graph);
+    m_distanceMap.resize(m_width * m_height, std::numeric_limits<int>::max());
+}
 
-    // 2. Initialiser la grille de mapping avec un sommet "nul"
-    Vertex null_v = boost::graph_traits<Graph>::null_vertex();
-    m_gridToVertex.resize(m_height, std::vector<Vertex>(m_width, null_v));
+unsigned int Pathfinding::getIndex(int x, int y) const
+{
+    return x + y * m_width;
+}
 
-    // --- 3. Ajouter les sommets ---
-    // On ajoute un sommet POUR CHAQUE CASE ACCESSIBLE 
-    for (int i = 0; i < m_height; ++i) {
-        for (int j = 0; j < m_width; ++j) {
-            if (grid[i][j] == 0 || grid[i][j] == 1 || grid[i][j] == 3) { 
-                Vertex v = boost::add_vertex(m_graph);
-                m_gridToVertex[i][j] = v; 
-                m_positionMap[v] = { i, j };
+bool Pathfinding::isValid(int x, int y) const
+{
+    return x >= 0 && x < m_width && y >= 0 && y < m_height;
+}
+
+bool Pathfinding::isWalkable(int x, int y) const
+{
+    // 9 = Tour, 2 = Mur.
+    // 0 = Spawn, 1 = Herbe, 3 = Chateau sont praticables.
+    int tile = m_grid[y][x];
+    return tile != 9 && tile != 2;
+}
+
+void Pathfinding::generateFlowField(Position targetPos)
+{
+    m_vectorMap.clear();
+    std::fill(m_distanceMap.begin(), m_distanceMap.end(), std::numeric_limits<int>::max());
+    m_isPathBlocked = false;
+
+    if (!isValid(targetPos.x, targetPos.y))
+    {
+        m_isPathBlocked = true;
+        return;
+    }
+
+    // Utilisé comme une file de priorité pour Dijkstra: {distance, index}
+    std::set<std::pair<int, unsigned int>> frontier;
+
+    unsigned int startIndex = getIndex(targetPos.x, targetPos.y);
+    m_distanceMap[startIndex] = 0;
+    frontier.insert({ 0, startIndex });
+
+   m_vectorMap[startIndex] = { 0, 0 };
+
+    // Algorithme de Dijkstra Inversé
+    while (!frontier.empty())
+    {
+        auto top = *frontier.begin();
+        frontier.erase(frontier.begin());
+
+        int currentDist = top.first;
+        unsigned int currentIndex = top.second;
+
+        int cx = currentIndex % m_width;
+        int cy = currentIndex / m_width;
+
+        for (const auto& dir : directions)
+        {
+            int nx = cx + dir.x;
+            int ny = cy + dir.y;
+
+            if (isValid(nx, ny) && isWalkable(nx, ny))
+            {
+                int newDist = currentDist + 1;
+                unsigned int nIndex = getIndex(nx, ny);
+
+                if (newDist < m_distanceMap[nIndex])
+                {
+                    // Met à jour la distance
+                    m_distanceMap[nIndex] = newDist;
+                    frontier.insert({ newDist, nIndex });
+
+                    // Met à jour le vecteur de direction (pointe vers la case actuelle)
+                    m_vectorMap[nIndex] = { cx - nx, cy - ny };
+                }
             }
         }
     }
 
-    // Construction des arêtes
-    for (int i = 0; i < m_height; ++i) {
-        for (int j = 0; j < m_width; ++j) {
+    // Vérification de blocage: si une tuile praticable n'est pas atteinte
+    for (int y = 0; y < m_height; ++y)
+    {
+        for (int x = 0; x < m_width; ++x)
+        {
+            if (isWalkable(x, y))
+            {
+                unsigned int idx = getIndex(x, y);
 
-            // On ne crée des arêtes QUE si la case actuelle est accessible
-            if (grid[i][j] == 0 || grid[i][j] == 1 || grid[i][j] == 3) {
-
-                // On récupère le sommet créé à l'étape 3
-                Vertex current_v = m_gridToVertex[i][j];
-
-                // Voisin de droite
-                if (j + 1 < m_width && (grid[i][j + 1] == 0 || grid[i][j + 1] == 1 || grid[i][j + 1] == 3)) {
-                    Vertex neighbor_v = m_gridToVertex[i][j + 1];
-                    if (neighbor_v != null_v && current_v != null_v) {
-                        Edge e; bool inserted;
-                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
-                    }
-                }
-
-                // Voisin de gauche
-                if (j - 1 >= 0 && (grid[i][j - 1] == 0 || grid[i][j - 1] == 1 || grid[i][j - 1] == 3)) {
-                    Vertex neighbor_v = m_gridToVertex[i][j - 1];
-                    if (neighbor_v != null_v && current_v != null_v) {
-                        Edge e; bool inserted;
-                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
-                    }
-                }
-
-                // Voisin du bas
-                if (i + 1 < m_height && (grid[i + 1][j] == 0 || grid[i + 1][j] == 1 || grid[i + 1][j] == 3)) {
-                    Vertex neighbor_v = m_gridToVertex[i + 1][j];
-                    if (neighbor_v != null_v && current_v != null_v) {
-                        Edge e; bool inserted;
-                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
-                    }
-                }
-
-                // Voisin du haut
-                if (i - 1 >= 0 && (grid[i - 1][j] == 0 || grid[i - 1][j] == 1 || grid[i - 1][j] == 3)) {
-                    Vertex neighbor_v = m_gridToVertex[i - 1][j];
-                    if (neighbor_v != null_v && current_v != null_v) {
-                        Edge e; bool inserted;
-                        boost::tie(e, inserted) = boost::add_edge(current_v, neighbor_v, m_graph);
-                        boost::put(boost::edge_weight_t(), m_graph, e, 1);
-                    }
+                if (m_distanceMap[idx] == std::numeric_limits<int>::max())
+                {
+                    m_isPathBlocked = true;
+                    return;
                 }
             }
         }
     }
 }
 
-std::optional<Vertex> Pathfinding::getVertex(Position pos) const {
-    if (pos.x < 0 || pos.x >= m_height || pos.y < 0 || pos.y >= m_width) {
-		std::cout << "Position hors limites: (" << pos.x << ", " << pos.y << ")" << std::endl;
-        return std::nullopt; // Hors limites
+std::optional<Position> Pathfinding::getNearestValidPosition(Position startPos, int maxRadius) const {
+    // 1. Vérification immédiate
+    if (isValid(startPos.x, startPos.y) && isWalkable(startPos.x, startPos.y)) {
+        unsigned int idx = getIndex(startPos.x, startPos.y);
+        if (m_distanceMap[idx] != std::numeric_limits<int>::max()) {
+            return startPos;
+        }
     }
 
-    Vertex v = m_gridToVertex[pos.x][pos.y];
-    if (v == boost::graph_traits<Graph>::null_vertex()) {
-		std::cout << "Position inaccessible (mur): (" << pos.x << ", " << pos.y << ")" << std::endl;
-        return std::nullopt; // C'est un mur
+    // 2. Recherche en couches (Layer-based BFS)
+    std::vector<Position> currentLayer = { startPos };
+    std::set<Position> visited = { startPos };
+
+    for (int r = 0; r < maxRadius; ++r) {
+        std::vector<Position> nextLayer;
+
+        for (const auto& pos : currentLayer) {
+            for (const auto& dir : directions) {
+                Position next = { pos.x + dir.x, pos.y + dir.y };
+
+                // Si déjà visité ou innaccessible, on ignore
+                if (!isValid(next.x, next.y) || visited.count(next)) continue;
+
+                visited.insert(next);
+
+                if (isWalkable(next.x, next.y)) {
+                    unsigned int idx = getIndex(next.x, next.y);
+                    if (m_distanceMap[idx] != std::numeric_limits<int>::max()) {
+                        return next; // TYrouvé
+                    }
+                }
+
+                nextLayer.push_back(next);
+            }
+        }
+        currentLayer = std::move(nextLayer);
+        if (currentLayer.empty()) break; // Plus rien à explorer
     }
 
-    return v;
+    return std::nullopt; // Rien trouvé
 }
 
-std::optional<std::vector<Position>> Pathfinding::findPath(Position startPos, Position goalPos) {
+std::optional<std::pair<int, int>> Pathfinding::getVector(unsigned int tileIndex) const
+{
+    auto it = m_vectorMap.find(tileIndex);
 
-    std::optional<Vertex> startOpt = getVertex(startPos);
-    std::optional<Vertex> goalOpt = getVertex(goalPos);
-
-    // Vérifier si le départ et l'arrivée sont valides (accessibles)
-    if (!startOpt || !goalOpt) {
-        return std::nullopt; // Départ ou arrivée sur un mur/hors grille
+    if (it != m_vectorMap.end())
+    {
+        return it->second;
     }
 
-    Vertex start = *startOpt;
-    Vertex goal = *goalOpt;
+    return std::nullopt;
+}
 
-    // Cartes pour A*
-    std::vector<Vertex> predecessors(boost::num_vertices(m_graph));
-    std::vector<int> distances(boost::num_vertices(m_graph));
-
-    // Exécuter A*
-    try {
-        boost::astar_search(
-            m_graph, start,
-            ManhattanHeuristic(goal, m_positionMap),
-            boost::visitor(boost::default_astar_visitor()).
-            predecessor_map(&predecessors[0]).
-            distance_map(&distances[0]).
-            weight_map(boost::get(boost::edge_weight_t(), m_graph)).
-            distance_compare(std::less<int>()).
-            distance_combine(boost::closed_plus<int>()).
-            distance_inf(std::numeric_limits<int>::max()).
-            distance_zero(0)
-        );
-    }
-    catch (...) {
-        // TODO : Gérer une éventuelle exception de Boost 
+std::optional<Position> Pathfinding::getNextMove(Position currentPos) const
+{
+    if (!isValid(currentPos.x, currentPos.y))
+    {
         return std::nullopt;
     }
 
-    // --- Reconstruire le chemin ---
+    unsigned int idx = getIndex(currentPos.x, currentPos.y);
+    auto vecOpt = getVector(idx);
 
-    // Vérifier si un chemin a été trouvé
-    if (distances[goal] == std::numeric_limits<int>::max()) {
-        return std::nullopt; // Aucun chemin trouvé
+    if (vecOpt.has_value())
+    {
+        return Position{ currentPos.x + vecOpt->first, currentPos.y + vecOpt->second };
     }
 
-    std::vector<Position> path;
-    for (Vertex v = goal; v != start; v = predecessors[v]) {
-        path.push_back(m_positionMap[v]);
-    }
-    path.push_back(m_positionMap[start]); // Ajouter le point de départ
-
-    std::reverse(path.begin(), path.end());
-
-    return path;
+    return std::nullopt;
 }
